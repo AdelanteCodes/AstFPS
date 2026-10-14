@@ -36,7 +36,7 @@ All six top-level reconstructed classes reviewed.
 
 - Compare address bytes, IPv4/IPv6 connection behavior, hostname connections, and resolver time with deliberately slow reverse DNS.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Connection/server-list latency; no direct rendering FPS optimization.
 

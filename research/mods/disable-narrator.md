@@ -35,7 +35,7 @@ All seven reconstructed classes reviewed; Windows native superclass reconstructi
 
 - Check each OS's startup, cleanup, absent native libraries, narrator options/hotkeys, and UI consumers of narrator active state.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Accessibility removal/startup workaround; excluded as a general performance default.
 

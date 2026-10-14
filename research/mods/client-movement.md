@@ -36,7 +36,7 @@ Both reconstructed mixins reviewed.
 
 - Check sprint/pose changes, respawn, spectators, server-imposed movement restrictions, latency, and each targeted metadata ID for the selected game version.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Gameplay synchronization behavior; excluded from unchanged-behavior optimization.
 

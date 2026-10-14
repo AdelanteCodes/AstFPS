@@ -1,4 +1,4 @@
-name: Build experimental Xe-Mod
+name: Build experimental AstFPS
 on:
   workflow_dispatch:
 permissions:
@@ -18,7 +18,7 @@ jobs:
       - run: ./gradlew --no-daemon build
       - uses: actions/upload-artifact@v4
         with:
-          name: xe-mod-original-prototype
+          name: AstFPS-original-prototype
           path: build/libs/*.jar
           if-no-files-found: error
   client-checks:
@@ -40,7 +40,7 @@ jobs:
       - name: Launch Minecraft and verify hooks
         run: xvfb-run -a ./gradlew --no-daemon runClientGameTest
         env:
-          JAVA_TOOL_OPTIONS: '-Dxe.safeMode=${{ matrix.safe-mode }}'
+          JAVA_TOOL_OPTIONS: '-Dastfps.safeMode=${{ matrix.safe-mode }}'
       - uses: actions/upload-artifact@v4
         if: always()
         with:

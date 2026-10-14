@@ -37,7 +37,7 @@ All four reconstructed source files reviewed, including the nested Entry record.
 
 - Test crowded sound sources, relative sounds, dimension/world changes, clock transitions, concurrency, deque growth, and hook application receipts.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Sound suppression for crowded scenes; not unchanged sensory output.
 

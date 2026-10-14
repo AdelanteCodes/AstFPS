@@ -1,4 +1,4 @@
-# Xe-Mod — project log
+# AstFPS — project log
 
 Updated: 14 October 2026, IST. Read this file first when continuing the project. Keep the current-state sections short and append a dated entry for each meaningful change.
 
@@ -7,36 +7,36 @@ Updated: 14 October 2026, IST. Read this file first when continuing the project.
 - Work locally on this PC. Do not upload code or notes to GitHub until requested.
 - No builds, automated tests, cloud Minecraft sessions or laptop setup unless requested. The user will test on their laptop when ready.
 - Preserve vanilla visuals, native resolution and the chosen render distance. No shader/resource packs or visibility/gameplay cuts.
-- Permitted third-party components may be included with their original identities, credits and required notices. Do not relabel their code as original Xe-Mod work.
+- Permitted third-party components may be included with their original identities, credits and required notices. Do not relabel their code as original AstFPS work.
 - Prefer one useful change at a time. Avoid lengthy planning and packaging detours. Keep this log updated.
 - Current focus: lower memory usage and add Chunky-style pregeneration before further FPS/rendering work.
 
 ## Current state
 
-Repository: https://github.com/KyzerGoated/Xe-Mod — **private**, verified in GitHub settings after the user completed email verification.
+Repository: https://github.com/KyzerGoated/AstFPS — **private**, verified in GitHub settings after the user completed email verification.
 
-Local project: `C:\Users\Multiwings\Documents\Codex\2026-10-14\so-x20\outputs\Xe-Mod`.
+Local project: `C:\Users\Multiwings\Documents\Codex\2026-10-14\so-x20\outputs\AstFPS`.
 
 Target: Minecraft Java **26.3**, Fabric Loader **0.19.5+**, matching Fabric API **0.162.0+26.3**, Java **25**.
 
 Local source version: **0.2.0-dev**, with uncommitted changes. This version has not been compiled or run. Last synchronized code commit: `2e68b19650e869680bf668368c8828b3345ddad5`. No current development changes have been pushed.
 
-Released version: **0.1.0-alpha.1**. Its JAR is in `outputs\Xe-Mod-release\xe-mod-0.1.0-alpha.1.jar`. It contains the older visibility experiment and diagnostics; it does not contain the new local additions.
+Released version: **0.1.0-alpha.1**. Its JAR is in `outputs\AstFPS-release\AstFPS-0.1.0-alpha.1.jar`. It contains the older visibility experiment and diagnostics; it does not contain the new local additions.
 
 ## What is currently written
 
 | Change | Location | State |
 |---|---|---|
 | Exact, frame-scoped frustum visibility cache | `VisibilityMemo.java`, `FrustumMemoMixin.java` | In released alpha; off by default; no demonstrated general FPS gain |
-| Frame recorder, FPS/1% low/p99 calculations, local exports | `FrameRecorder.java`, `FrameStats.java`, `XeClient.java` | In released alpha |
-| Startup hook receipts, first-failure diagnostics, safe-mode controls | `HookAudit.java`, `FeatureGate.java`, `XeMixinPlugin.java` | In released alpha; local plugin also covers new hooks |
+| Frame recorder, FPS/1% low/p99 calculations, local exports | `FrameRecorder.java`, `FrameStats.java`, `AstFPSClient.java` | In released alpha |
+| Startup hook receipts, first-failure diagnostics, safe-mode controls | `HookAudit.java`, `FeatureGate.java`, `AstFPSMixinPlugin.java` | In released alpha; local plugin also covers new hooks |
 | FerriteCore 9.0.0, unmodified MIT-licensed memory component | `vendor/ferritecore-9.0.0-fabric.jar`, `build.gradle`, `fabric.mod.json` | Added locally and configured for inclusion; unbuilt/unrun |
-| ModernFix-mVUS 5.27.20-build.2, memory/loading optimizations | `vendor/modernfix-5.27.20-build.2.jar` | Unmodified local component; compatible version declared by upstream; unbuilt/unrun as a combined Xe-Mod |
-| Jasione 1.0.9+26.1.2-fabric, avoids unnecessary enum-array allocation | `vendor/jasione-1.0.9+26.1.2-fabric.jar` | Metadata allows >=26.1, upstream lists 26.3; unbuilt/unrun as a combined Xe-Mod |
+| ModernFix-mVUS 5.27.20-build.2, memory/loading optimizations | `vendor/modernfix-5.27.20-build.2.jar` | Unmodified local component; compatible version declared by upstream; unbuilt/unrun as a combined AstFPS |
+| Jasione 1.0.9+26.1.2-fabric, avoids unnecessary enum-array allocation | `vendor/jasione-1.0.9+26.1.2-fabric.jar` | Metadata allows >=26.1, upstream lists 26.3; unbuilt/unrun as a combined AstFPS |
 | Chunky 1.5.3, terrain pregeneration | `vendor/Chunky-Fabric-1.5.3.jar` | Metadata allows >=26.1 / Java 25; no world generation task started |
 | Avoid allocating a new AABB for zero movement when all finite coordinates remain bit-identical | `AabbZeroOffsetMixin.java` | Original code, local only, unbuilt/unrun |
 | Release stale crosshair entity/hit references after disconnect/world teardown, only when no client world remains | `WorldTargetCleanupMixin.java` | Original narrow retention mitigation, local only, unbuilt/unrun |
-| Show component versions and target-cleanup counts | `XeClient.java`, `XeRuntime.java` | Local only |
+| Show component versions and target-cleanup counts | `AstFPSClient.java`, `AstFPSRuntime.java` | Local only |
 | Make CI workflows manual-only | `.github/workflows/` | Local changes; remote workflow files still have their previous triggers |
 
 FerriteCore's MIT notice and the added modules' LGPL/GPL notices are retained locally. Lithium and ImmediatelyFast were briefly staged as dependencies, then removed for the user's focused single-component request. Their source archives/notices remain local reference material; they are **not active dependencies**. `third-party/components.json` now records the active four-component selection, metadata constraints and verified SHA-512 hashes. No copyleft component has been publicly redistributed in this update; corresponding sources and notices must accompany any future distribution.
@@ -48,21 +48,21 @@ FerriteCore's MIT notice and the added modules' LGPL/GPL notices are retained lo
 3. Published an earlier research snapshot containing 39 behavioral reviews plus labelled inventories for all 481 projects. Later local notes were not published.
 4. Wrote the original visibility-cache experiment, frame recording, diagnostic commands and failure handling. Earlier Java 25 CI build/client checks passed for the alpha, including 12,000 visibility comparisons and safe-mode startup. Those checks do not validate the new local code.
 5. Published GitHub prerelease 0.1.0-alpha.1. Fixed a publication permission problem by tagging the release commit while retaining the previously checked artifact. Downloaded its runtime JAR locally and matched its SHA-256.
-6. Created a separate normal-game comparison harness. Corrected a mixin-package mistake and integer teleport centering. The cloud comparison workflow eventually completed successfully. The first pair measured about 8.19 FPS without Xe-Mod versus 8.15 FPS with the visibility cache enabled, approximately -0.6%; this preliminary pair does not establish a gain or meaningful regression. Full repeat results/logs have not been analyzed here. Software-renderer results are not laptop/home-PC FPS.
+6. Created a separate normal-game comparison harness. Corrected a mixin-package mistake and integer teleport centering. The cloud comparison workflow eventually completed successfully. The first pair measured about 8.19 FPS without AstFPS versus 8.15 FPS with the visibility cache enabled, approximately -0.6%; this preliminary pair does not establish a gain or meaningful regression. Full repeat results/logs have not been analyzed here. Software-renderer results are not laptop/home-PC FPS.
 7. User stopped cloud testing, builds and laptop planning. Started code-only changes: staged three optimization components and added the two original hooks listed above, with local diagnostic updates.
 8. User requested a simpler local-only addition. Kept FerriteCore as the sole included third-party component, copied its existing verified JAR into the project, retained its MIT notice and removed Lithium/ImmediatelyFast dependency declarations. No new binary was built and no code was uploaded.
 9. Changed GitHub repository visibility to private. GitHub required email re-verification; the user completed it. Settings now explicitly report the repository as private.
 10. Created this compact master log to preserve state and prevent repeated setup or misleading progress claims.
-11. User prioritized memory optimizations and Chunky. Filtered the downloaded collection, retained FerriteCore and added ModernFix-mVUS, Jasione and Chunky as unmodified local JAR dependencies. Checked each archived fabric.mod.json and hash against its recorded download. Updated /xe status component reporting and current component inventory. Prepared a standalone JAR folder under `outputs/Xe-Mod-memory-mods` for the same four modules. No game installation directory was supplied, so this folder is a prepared local set, not a claim of installation into an active Minecraft profile. No build, runtime test, GitHub push, chunk-forcing or pregeneration task was run. Kept the alpha NotEnoughPalette, unverified texture-residency Optis, and broad PAPI cache-clearing patches out of this initial memory selection.
+11. User prioritized memory optimizations and Chunky. Filtered the downloaded collection, retained FerriteCore and added ModernFix-mVUS, Jasione and Chunky as unmodified local JAR dependencies. Checked each archived fabric.mod.json and hash against its recorded download. Updated /astfps status component reporting and current component inventory. Prepared a standalone JAR folder under `outputs/AstFPS-memory-mods` for the same four modules. No game installation directory was supplied, so this folder is a prepared local set, not a claim of installation into an active Minecraft profile. No build, runtime test, GitHub push, chunk-forcing or pregeneration task was run. Kept the alpha NotEnoughPalette, unverified texture-residency Optis, and broad PAPI cache-clearing patches out of this initial memory selection.
 
-Chunky generates terrain onto disk before exploration, reducing future generation work. It does not permanently keep all those chunks in RAM. Pregeneration itself uses CPU/RAM/disk while running. The task remains opt-in; use its own commands when the user is ready. Multiplayer pregeneration runs on the server, not by adding a client-only Xe-Mod JAR to someone else's server.
+Chunky generates terrain onto disk before exploration, reducing future generation work. It does not permanently keep all those chunks in RAM. Pregeneration itself uses CPU/RAM/disk while running. The task remains opt-in; use its own commands when the user is ready. Multiplayer pregeneration runs on the server, not by adding a client-only AstFPS JAR to someone else's server.
 
 ## Memory research to retain
 
 - FerriteCore reduces memory use; it is not a universal leak fix. [Project](https://modrinth.com/mod/ferrite-core).
 - Original Memory Leak Fix lists support through 1.20.4 and says its previously fixed vanilla leaks were addressed in 1.20.5+. Do not install that old binary into 26.3. [Project](https://modrinth.com/mod/memoryleakfix).
 - Mem Leak Fix GPU lists NeoForge 1.21.1 support and stale GPU-target cleanup; it is not the matching Fabric 26.3 component. [Project](https://modrinth.com/mod/memleakfixgpu).
-- Put A Plug In it has a 26.3 artifact. Catalogue MIT metadata disagrees with the downloaded artifact/upstream LGPL declaration. It includes reflective model-cache cleanup and optional mod fixes. Not included. The stale-target idea was followed up against vanilla teardown bytecode, and Xe-Mod's own hook was written independently. [Project](https://modrinth.com/mod/put-a-plug-in-it!).
+- Put A Plug In it has a 26.3 artifact. Catalogue MIT metadata disagrees with the downloaded artifact/upstream LGPL declaration. It includes reflective model-cache cleanup and optional mod fixes. Not included. The stale-target idea was followed up against vanilla teardown bytecode, and AstFPS's own hook was written independently. [Project](https://modrinth.com/mod/put-a-plug-in-it!).
 - Sodium 0.9.2 notes a specific F3 resource-recreation leak fix. Sodium was not bundled. [Release](https://github.com/CaffeineMC/sodium/releases/tag/mc26.3-0.9.2).
 - A [Reddit report](https://www.reddit.com/r/MinecraftMod/comments/1ukbb4z/i_need_help_fixing_freezing_or_memory_leaking_in/) says graphics-driver updates resolved apparent memory trouble. Another [report](https://www.reddit.com/r/Minecraft/comments/1td6ux0/memory_bug_causing_lag_spikes_no_idea_how_to_fix/) describes RAM rising then dropping during freezes. These are anecdotes, not proof of a specific leak in the user's game.
 - Retained Java objects, heavy allocations/GC, native memory and VRAM leaks require different diagnoses. [Oracle guide](https://docs.oracle.com/en/java/javase/26/troubleshoot/troubleshooting-memory-leaks.html).
@@ -81,8 +81,8 @@ Read PROJECT_LOG.md and the actual local source before making changes. Continue 
 ## Single-JAR memory bundle (latest local change)
 
 
-The local single-JAR artifact is `artifacts/xe-mod-memory-bundle-0.2.0-dev.jar`.
-It contains the unmodified compiled Xe-Mod 0.1.0-alpha.1 core, FerriteCore 9.0.0,
+The local single-JAR artifact is `artifacts/AstFPS-memory-bundle-0.2.0-dev.jar`.
+It contains the unmodified compiled AstFPS 0.1.0-alpha.1 core, FerriteCore 9.0.0,
 ModernFix-mVUS 5.27.20-build.2, Jasione 1.0.9+26.1.2-fabric, and Chunky 1.5.3.
 Fabric loads the independent nested modules from this one container.
 
@@ -109,7 +109,7 @@ the current artifact uses the existing compiled core to avoid claiming new code
 was compiled. Recreate it with `python scripts/package_memory_bundle.py`.
 
 Module identities and notices are preserved. See `third-party/components.json`,
-`META-INF/xe-mod` notices, and `artifacts/package-manifest.json` for provenance.
+`META-INF/AstFPS` notices, and `artifacts/package-manifest.json` for provenance.
 Keep exact corresponding upstream sources with any future copyleft distribution.
 All changes and artifacts are saved in the local Git repository. Nothing was
 uploaded to GitHub during this integration. Read PROJECT_LOG.md to continue.
@@ -127,8 +127,21 @@ Publication: user-authorized private GitHub update includes the compiled 0.3.0-r
 
 ## 0.4.0-dev.1: original terrain submission stage
 
-User clarified: build our own terrain-rendering code with no Sodium dependency, and keep coding while they perform captures later. Added XeTerrainBatcher and TerrainBatchMixin: identity-based per-layer buffer grouping, empty-layer lookup avoidance, ordered transparent submission and indirect commands via portable Minecraft API. No Sodium code/binary was imported. Vanilla meshing/visibility/shaders/GPU allocation remain in use. Opt-in hook, known-renderer bypass and runtime failure gate preserve a vanilla fallback. Added terrain toggle, diagnostics, per-capture context/frame counts, and user-capture comparison script. Compilation succeeded without Minecraft execution or tests. Full engine and 5x target are unfinished.
+User clarified: build our own terrain-rendering code with no Sodium dependency, and keep coding while they perform captures later. Added AstFPSTerrainBatcher and TerrainBatchMixin: identity-based per-layer buffer grouping, empty-layer lookup avoidance, ordered transparent submission and indirect commands via portable Minecraft API. No Sodium code/binary was imported. Vanilla meshing/visibility/shaders/GPU allocation remain in use. Opt-in hook, known-renderer bypass and runtime failure gate preserve a vanilla fallback. Added terrain toggle, diagnostics, per-capture context/frame counts, and user-capture comparison script. Compilation succeeded without Minecraft execution or tests. Full engine and 5x target are unfinished.
 
 ## 0.4.0-dev.2: direct submission and bounded CPU command reuse
 
 Added original direct submission alongside indirect submission, selected by the vanilla renderer capability path. Added renderer-owned scratch and exact immutable command record reuse; all five command integers must match. GPU identities and offsets remain fresh per frame. GPU/world references are cleared after preparation; pooled primitive records and arrays have retention limits/high-water trimming; workspace discarded on close/failure. Added allocated/reused command and direct/indirect frame counters. Inspected vanilla synchronous command serialization before allowing scratch reuse. No runtime tests or measurements. 5x remains unproven.
+
+## AstFPS branding
+
+Renamed public branding, Fabric mod ID, package/class names, commands, JVM properties, build artifact names, resources, documentation and changelogs to AstFPS/astfps. Historical compiled packages were archived outside the active repository without changing their bytes; Git history preserves provenance. Chat and GitHub repository are AstFPS. The user requested public visibility. New commands use /astfps and JVM properties use astfps.*. Current config is astfps.json; remove old mod packages before updating. No Minecraft tests were run.
+
+## 0.4.0-dev.3 continuation and publication
+
+Added opt-in section worker helper reuse with worker-local weak references, native
+factory delegation, reentrant compilation bypass, and diagnostic counters. Default
+is disabled and runtime verification is pending. Renamed the benchmark harness ID
+and resources too. Retired the old cloud benchmark workflow as requested; the manual
+release workflow now uses the current committed artifacts and checksum manifest.
+Historical binaries remain archived outside the active checkout and in Git history.

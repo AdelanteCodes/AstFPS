@@ -34,7 +34,7 @@ All four reconstructed classes reviewed; two contain initialization/empty exampl
 
 - Compare exits into obstructed areas, oversized entities, portals at borders, and destination collision outcomes.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Removes a gameplay correctness check; not a behavior-preserving optimization.
 

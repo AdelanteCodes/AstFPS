@@ -35,7 +35,7 @@ Both reconstructed classes reviewed.
 
 - Measure interval distributions and CPU use at 60/144/300 FPS, under load and oversleep, with VSync, and after a long stall.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Frame pacing; potential smoothness benefit, not a promised FPS gain.
 

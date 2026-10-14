@@ -34,7 +34,7 @@ Entire one-mixin implementation reviewed.
 
 - Check focused menus, gameplay, minimized/unfocused states, and interaction with other limiters.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Menu FPS limit behavior; does not make rendering faster.
 

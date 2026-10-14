@@ -38,7 +38,7 @@ Top-level implementation reviewed; embedded Fabric resource-loader implementatio
 
 - Exercise overlapping scan requests, close/commit during scanning, cancellation, provider exceptions, hidden packs, and interruption. Verify selection order and repository contents match a synchronous baseline.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Resource-pack menu responsiveness; no direct steady-state playing FPS benefit, especially with no external packs.
 

@@ -35,7 +35,7 @@ All four top-level reconstructed classes reviewed; embedded config library not r
 
 - Test boundary timing, rapid requests, disabled mode, reconnects, wall-clock changes, malformed legacy config, and long-run map size.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Server request-rate protection, not behavior-preserving FPS optimization.
 

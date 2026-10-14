@@ -1,2 +1,0 @@
-12d0a6a4e91b7a31ac3d83ae7ebc6ddfc5cbfb4b2f30a0ad1c01f0a78f362f9c  xe-mod-0.4.0-dev.1.jar
-7e8172fb61af6a6a17ee7fe7b7e0f47d42ba37072912f0a0a4a7920b7a37f2a8  xe-mod-0.4.0-dev.1-sources.jar

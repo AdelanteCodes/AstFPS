@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 1, "id": "xe_benchmark", "version": "1.0.0",
-  "name": "Xe-Mod comparison harness", "environment": "client",
-  "entrypoints": {"client": ["dev.kyzer.xemod.benchmark.BenchmarkClient"]},
-  "mixins": ["xe-benchmark.mixins.json"],
+  "schemaVersion": 1, "id": "astfps_benchmark", "version": "1.0.0",
+  "name": "AstFPS comparison harness", "environment": "client",
+  "entrypoints": {"client": ["dev.kyzer.astfps.benchmark.BenchmarkClient"]},
+  "mixins": ["astfps-benchmark.mixins.json"],
   "depends": {"fabricloader": ">=0.19.5", "minecraft": "~26.3", "java": ">=25", "fabric-api": "*"}
 }

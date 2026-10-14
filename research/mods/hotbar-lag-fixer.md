@@ -35,7 +35,7 @@ Both reconstructed classes reviewed.
 
 - Edit while saving, request multiple saves, exit immediately after save, inject I/O failure, and verify the last intended state survives restart.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Creative saved-hotbar stutter; useful problem domain, but the observed concurrency pattern needs stronger guarantees.
 

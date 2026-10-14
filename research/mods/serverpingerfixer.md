@@ -35,7 +35,7 @@ Entire one-mixin implementation reviewed.
 
 - Test many slow/unreachable servers, cancellation when leaving the screen, thread expiry, repeat screen openings, and bounded resource use.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Multiplayer-list responsiveness, not in-world FPS.
 

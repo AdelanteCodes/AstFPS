@@ -34,7 +34,7 @@ Both reconstructed classes reviewed.
 
 - Check local third-person rendering, other players, spectator/camera states, labels, toggling, and reconnect.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Visibility removal; excluded from unchanged visuals.
 

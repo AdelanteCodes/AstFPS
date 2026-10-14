@@ -21349,7 +21349,7 @@
       "id": "purescale",
       "version": "1.2",
       "name": "Purescale",
-      "description": "Upscaler & frame-generation suite for Minecraft. Renders the world at a lower (or higher, for SSAA) internal resolution and reconstructs native resolution with FSR1/XAIS/XeSS techniques, frame generation and motion-clarity post for higher FPS.",
+      "description": "Upscaler & frame-generation suite for Minecraft. Renders the world at a lower (or higher, for SSAA) internal resolution and reconstructs native resolution with FSR1/XAIS/AstFPSSS techniques, frame generation and motion-clarity post for higher FPS.",
       "authors": [
         "xsoras"
       ],

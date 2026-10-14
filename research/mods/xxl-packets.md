@@ -35,7 +35,7 @@ All four reconstructed mixin classes reviewed.
 
 - Verify oversized valid and malformed input behavior, bounded memory use, compression expansion, NBT nesting limits, and peer compatibility.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Large-payload compatibility; not an FPS optimization and unsuitable as a general performance default.
 

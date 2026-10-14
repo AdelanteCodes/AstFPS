@@ -38,7 +38,7 @@ All eight reconstructed Java classes reviewed; resource model appearance still r
 
 - Check opening/closing, double chests, copper variants, seasonal textures, category toggles, resource reload, and chunk rebuilds.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Reduces dynamic-rendering work through static visual replacement; excluded from unchanged visuals.
 

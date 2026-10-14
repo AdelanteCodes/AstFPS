@@ -35,7 +35,7 @@ All four reconstructed classes reviewed.
 
 - Round-trip default/custom namespaces and malformed IDs through both encoding paths, connect to ordinary clients/servers, and measure actual encoded bytes.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Small network payload reduction; not a general rendering FPS improvement.
 

@@ -27,7 +27,7 @@ The interface and symbol map below identify where the implementation attaches. T
 - Establish cache keys, ownership, invalidation, reload, world-change, and shutdown behavior where applicable.
 - Distinguish saved work from removed visual/gameplay behavior, scheduling changes, or configuration presets.
 - Check exceptions, fallback, thread handoffs, and interactions with other hooks.
-- Compare complete output/state with the original behavior before using an idea in Xe-Mod.
+- Compare complete output/state with the original behavior before using an idea in AstFPS.
 
 ## Loader interface
 

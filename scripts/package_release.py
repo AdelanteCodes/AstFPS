@@ -11,12 +11,12 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     properties = dict(line.split('=', 1) for line in (ROOT / 'gradle.properties').read_text().splitlines() if '=' in line)
     version = properties['version']
-    source = ROOT / f'build/libs/xe-mod-{version}.jar'
+    source = ROOT / f'build/libs/AstFPS-{version}.jar'
     components = json.loads((ROOT / 'third-party/components.json').read_text())
     with zipfile.ZipFile(source) as jar:
         assert jar.testzip() is None
         meta = json.loads(jar.read('fabric.mod.json'))
-        assert meta['id'] == 'xe_mod' and meta['version'] == version
+        assert meta['id'] == 'astfps' and meta['version'] == version
         expected = {'META-INF/jars/' + Path(c['file']).name for c in components}
         assert {j['file'] for j in meta['jars']} == expected
         for c in components:
@@ -25,16 +25,16 @@ def main():
             assert data == (ROOT / c['file']).read_bytes()
             with zipfile.ZipFile(io.BytesIO(data)) as child:
                 assert child.testzip() is None
-        assert 'META-INF/jars/xe-mod-0.1.0-alpha.1.jar' not in jar.namelist()
-        for name in ['AabbZeroOffsetMixin', 'WorldTargetCleanupMixin', 'XeMixinPlugin', 'MinecraftFrameMixin']:
-            data = jar.read('dev/kyzer/xemod/client/mixin/' + name + '.class')
+        assert 'META-INF/jars/AstFPS-0.1.0-alpha.1.jar' not in jar.namelist()
+        for name in ['AabbZeroOffsetMixin', 'WorldTargetCleanupMixin', 'AstFPSMixinPlugin', 'MinecraftFrameMixin']:
+            data = jar.read('dev/kyzer/astfps/client/mixin/' + name + '.class')
             assert int.from_bytes(data[6:8], 'big') == 69, 'Expected Java 25 classes'
         assert meta['custom']['lithium:options']['mixin.world.temperature_cache'] is False
         assert 'useSmallThreadingDetector' in meta['custom']['ferritecore:disabled_options']
     out = ROOT / 'artifacts'
     paths = []
     for suffix in ['', '-sources']:
-        path = ROOT / f'build/libs/xe-mod-{version}{suffix}.jar'
+        path = ROOT / f'build/libs/AstFPS-{version}{suffix}.jar'
         with zipfile.ZipFile(path) as jar: assert jar.testzip() is None
         target = out / path.name
         shutil.copyfile(path, target); paths.append(target)

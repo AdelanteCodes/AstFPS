@@ -35,7 +35,7 @@ All three reconstructed classes reviewed; advertised intent and the observed hoo
 
 - Inspect field writes in bytecode, close the screen with changed/unchanged selection, edit pack files while the screen is open, and check watcher lifecycle.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Avoiding redundant resource reload is useful; this specific observed hook is not evidence of a working optimization.
 

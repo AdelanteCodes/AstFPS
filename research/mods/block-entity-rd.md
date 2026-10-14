@@ -36,7 +36,7 @@ All five reconstructed classes and config defaults reviewed.
 
 - Compare per-type visibility, specialized renderers and beams, invalid/removed config entries, mode switching, and resource/world changes.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Distance cutbacks; incompatible with the requested 16â€“20 chunk scene and unchanged visuals.
 

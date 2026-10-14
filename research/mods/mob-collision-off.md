@@ -34,7 +34,7 @@ All five reconstructed classes reviewed.
 
 - Check player/mob/player pairs in both directions, boats/minecarts, crowd pushing, pickups, and any touch-based entity behavior.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Simulation work reduction through changed gameplay; excluded from unchanged-behavior optimization.
 

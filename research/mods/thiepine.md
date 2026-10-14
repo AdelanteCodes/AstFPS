@@ -36,7 +36,7 @@ All three reconstructed classes reviewed.
 
 - Differentially test movement/collision against vanilla on slabs, stairs, fences, pistons, negative coordinates, exact touching faces, empty shapes, and randomized shapes. Profile allocations and CPU separately.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Promising allocation-reduction principle that can preserve visuals and collision behavior when proven conservative.
 

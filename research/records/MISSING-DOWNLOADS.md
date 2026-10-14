@@ -2,7 +2,7 @@
 
 402 verified downloads; 79 downloads remain unavailable after retries.
 
-These are broad optimization-category search matches, not an installation recommendation. Some are utilities, server mods, content, or unrelated features. For Xe-Mod, prioritize Sodium, Iris, C2ME, VMP, AsyncParticles, Moonrise, Enhanced Block Entities Reloaded and Super Resolution. Select Fabric + Minecraft 26.3, and preserve the original JAR filenames. Exact selected version links are supplied when resolved.
+These are broad optimization-category search matches, not an installation recommendation. Some are utilities, server mods, content, or unrelated features. For AstFPS, prioritize Sodium, Iris, C2ME, VMP, AsyncParticles, Moonrise, Enhanced Block Entities Reloaded and Super Resolution. Select Fabric + Minecraft 26.3, and preserve the original JAR filenames. Exact selected version links are supplied when resolved.
 
 | Project | Selected version | Download page |
 |---|---|---|

@@ -36,7 +36,7 @@ All five reconstructed classes reviewed.
 
 - Compare success values, lifecycle metadata, duplicate-key diagnostics, partial failures, iteration order, and codec invocation counts against the original. Benchmark successful and failing inputs separately.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Serialization/load-time optimization candidate; not a direct per-frame rendering optimization.
 

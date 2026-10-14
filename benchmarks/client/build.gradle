@@ -8,13 +8,13 @@ dependencies {
 java { sourceCompatibility = JavaVersion.VERSION_25; targetCompatibility = JavaVersion.VERSION_25 }
 tasks.withType(JavaCompile).configureEach { options.release = 25 }
 loom {
-    mods { 'xe_benchmark' { sourceSet sourceSets.main } }
+    mods { 'astfps_benchmark' { sourceSet sourceSets.main } }
     runs {
         client {
             client()
             runDir project.findProperty('benchmarkRunDirectory') ?: 'run'
             vmArgs '-Xmx3G'
-            property 'xe.benchmark.mode', project.findProperty('benchmarkMode') ?: 'baseline'
+            property 'astfps.benchmark.mode', project.findProperty('benchmarkMode') ?: 'baseline'
             programArgs '--width', '2560', '--height', '1440'
         }
     }

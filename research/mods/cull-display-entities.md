@@ -36,7 +36,7 @@ All three reconstructed classes reviewed.
 
 - Test text displays with long lines, nonuniform scaling, rotations, interpolation, negative scales, large custom models, and screen-edge movement.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Potentially useful display culling, but unchanged visuals require geometry-aware conservative bounds.
 

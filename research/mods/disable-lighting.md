@@ -34,7 +34,7 @@ All three reconstructed classes reviewed.
 
 - Check day/night, dimension changes, darkness/night vision, toggling, and the actual lightmap producer/consumer paths.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Fullbright/lighting removal; incompatible with unchanged vanilla visuals.
 

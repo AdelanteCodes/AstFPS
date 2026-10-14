@@ -33,7 +33,7 @@ Entire one-class implementation reviewed.
 
 - Static call-path inspection is enough to identify the terminating behavior; no execution needed for this research.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Joke/utility result; excluded from performance research candidates.
 

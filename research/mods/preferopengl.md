@@ -35,7 +35,7 @@ All four reconstructed classes reviewed.
 
 - Test first launch, existing/multiple keys, unsupported keys, write failure, backend selection, and repeat initialization.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Backend preference utility; performance is hardware/driver-dependent, not an independent optimization algorithm.
 

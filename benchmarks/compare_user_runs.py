@@ -12,7 +12,7 @@ def read(path):
     if len(intervals) < 300 or any(value <= 0 for value in intervals): raise ValueError(f'{path}: insufficient/invalid intervals')
     if sum(intervals) < 30e9: raise ValueError(f'{path}: capture at least 30 seconds after warming up')
     if run.get('label') in (None, '', 'unlabelled'): raise ValueError(f'{path}: label the fixed scene/route first')
-    if run.get('mods', {}).get('sodium'): raise ValueError(f'{path}: target is Xe-Mod without Sodium')
+    if run.get('mods', {}).get('sodium'): raise ValueError(f'{path}: target is AstFPS without Sodium')
     context = run['startContext']
     if context['vsync']: raise ValueError(f'{path}: VSync caps the requested uncapped comparison')
     # Lower targets intentionally remain valid; a 5x claim additionally needs enough cap headroom.
@@ -32,7 +32,7 @@ def main():
         if run['startContext'] != first['startContext'] or run['label'] != first['label'] or run['mods'] != first['mods']:
             raise ValueError('PC/settings, labels and loaded mod versions must match across all captures')
     if any(run.get('terrainBatcherEnabled') for run, _ in baseline): raise ValueError('Baseline must use vanilla terrain submission')
-    if not all(run.get('terrainBatcherEnabled') for run, _ in optimized): raise ValueError('Optimized captures must enable Xe terrain submission')
+    if not all(run.get('terrainBatcherEnabled') for run, _ in optimized): raise ValueError('Optimized captures must enable AstFPS terrain submission')
     if not all(run.get('terrainFramesInCapture', 0) > 0 for run, _ in optimized): raise ValueError('No original terrain frames were submitted; check hook status, failures and world rendering')
     old = statistics.median(fps for _, fps in baseline)
     new = statistics.median(fps for _, fps in optimized)

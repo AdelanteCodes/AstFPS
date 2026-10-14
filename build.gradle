@@ -5,7 +5,7 @@ plugins {
 loom {
     splitEnvironmentSourceSets()
     mods {
-        'xe_mod' {
+        'astfps' {
             sourceSet sourceSets.main
             sourceSet sourceSets.client
         }
@@ -24,6 +24,8 @@ dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    // Fabric Loader 0.19.5 supplies the runtime; this only exposes its supported injector API to compilation.
+    compileOnly 'io.github.llamalad7:mixinextras-fabric:0.5.5'
     // Independent, credited modules, kept unmodified and replaceable by Fabric Loader.
     new groovy.json.JsonSlurper().parse(file('third-party/components.json')).each { component ->
         def binary = file(component.file)
@@ -37,7 +39,7 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-base { archivesName = 'xe-mod' }
+base { archivesName = 'AstFPS' }
 java {
     sourceCompatibility = JavaVersion.VERSION_25
     targetCompatibility = JavaVersion.VERSION_25
@@ -70,14 +72,14 @@ tasks.named('sourcesJar') {
 tasks.register('coreChecks', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.kyzer.xemod.CoreChecks'
+    mainClass = 'dev.kyzer.astfps.CoreChecks'
 }
 check.dependsOn coreChecks
 test { useJUnitPlatform() }
 
 fabricApi.configureTests {
     createSourceSet = true
-    modId = 'xe_mod_gametest'
+    modId = 'astfps_gametest'
     enableGameTests = false
     enableClientGameTests = true
 }

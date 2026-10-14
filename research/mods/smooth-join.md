@@ -35,7 +35,7 @@ All four reconstructed classes reviewed.
 
 - Test interrupted joins, quick reconnects, dimension changes, edits during restoration, options availability, and malformed config.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Spreads join work by a temporary distance reduction; excluded from the unchanged-distance requirement.
 

@@ -1,4 +1,4 @@
-# Xe-Mod 0.4.0-dev.2
+# AstFPS 0.4.0-dev.3
 
 A general-purpose Fabric client mod for Minecraft Java 26.3. It uses Java 25,
 Fabric Loader 0.19.5+, and matching Fabric API (0.162.0+26.3). No specific CPU,
@@ -7,10 +7,10 @@ The client package is for single-player and multiplayer clients, not dedicated s
 
 ## Install
 
-Use `artifacts/xe-mod-0.4.0-dev.2.jar` with Fabric API in your mods folder.
-Remove older Xe-Mod/bundle JARs and separate copies of bundled modules.
+Use `artifacts/AstFPS-0.4.0-dev.3.jar` with Fabric API in your mods folder.
+Remove older AstFPS/bundle JARs and separate copies of bundled modules.
 Sodium is not required. Our optional original terrain stage bypasses itself if Sodium or a known renderer replacement is loaded. No shaders/resource packs are bundled.
-Xe-Mod does not change your graphics options, render distance, or resolution.
+AstFPS does not change your graphics options, render distance, or resolution.
 
 ## Included optimizations
 
@@ -27,14 +27,14 @@ their own authors, versions, configuration and notices. See third-party/componen
 Benchmark recording is off by default; its 60,000-entry buffer is allocated only
 when recording starts. The frame epoch updates only while memoization is active.
 Original experimental mixins are excluded at startup unless explicitly enabled:
-`-Dxe.enableVisibilityMemo=true`, `-Dxe.enableZeroOffsetReuse=true`, or
-`-Dxe.enableWorldTargetCleanup=true`. Memoization also requires `/xe memo true`.
-`-Dxe.safeMode=true` disables Xe-Mod optimization hooks, not the bundled modules.
+`-Dastfps.enableVisibilityMemo=true`, `-Dastfps.enableZeroOffsetReuse=true`, or
+`-Dastfps.enableWorldTargetCleanup=true`. Memoization also requires `/astfps memo true`.
+`-Dastfps.safeMode=true` disables AstFPS optimization hooks, not the bundled modules.
 Existing disableZeroOffsetReuse/disableWorldTargetCleanup flags still take precedence.
 
-`/xe status` reports all bundled versions and optional Sodium presence.
-`/xe diagnose` exports hook receipts, module versions and failures locally.
-`/xe benchmark start|stop` remains available only when the player opts in.
+`/astfps status` reports all bundled versions and optional Sodium presence.
+`/astfps diagnose` exports hook receipts, module versions and failures locally.
+`/astfps benchmark start|stop` remains available only when the player opts in.
 
 ## Compatibility review
 
@@ -57,15 +57,21 @@ Compilation and archive checks passed. Minecraft, unit tests and runtime benchma
 were not run, as requested. This is a runtime-unverified release candidate;
 no FPS percentage or broad stability claim is made.
 
-The sources JAR contains Xe-Mod source and the available pinned Lithium and
+The sources JAR contains AstFPS source and the available pinned Lithium and
 ImmediatelyFast source archives. Other upstream source links/notices are retained;
 verify complete corresponding-source coverage before broader redistribution.
 Read PROJECT_LOG.md for history and continuation notes.
 
 ## Original graphics stage
 
-This development build adds original indirect terrain submission code. Opt in with -Dxe.enableTerrainBatcher=true; /xe terrain false|true switches the installed path. The default stays vanilla until user verification. Geometry, visibility, shaders and GPU lifetime management remain owned by Minecraft; this is the first stage, not a completed renderer replacement. See GRAPHICS_ROADMAP.md and benchmarks/USER-CAPTURES.md.
+This development build adds original indirect terrain submission code. Opt in with -Dastfps.enableTerrainBatcher=true; /astfps terrain false|true switches the installed path. The default stays vanilla until user verification. Geometry, visibility, shaders and GPU lifetime management remain owned by Minecraft; this is the first stage, not a completed renderer replacement. See GRAPHICS_ROADMAP.md and benchmarks/USER-CAPTURES.md.
 
 The user will run captures later. 5x remains a target, not a measured result.
 
 The original stage now covers direct and indirect submissions and reuses bounded integer-only command records. GPU resources are not cached across frames.
+
+The optional section worker helper cache is disabled unless enabled at startup with
+`-Dastfps.enableSectionWorkerCache=true`. It reuses native helper objects through
+worker-local weak references and reports allocation/reuse counters. Runtime behavior
+is unverified. The old cloud benchmark workflow was retired; use the PC capture
+instructions in benchmarks/USER-CAPTURES.md.

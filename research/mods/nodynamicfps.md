@@ -34,7 +34,7 @@ All four reconstructed classes reviewed.
 
 - Check active/background/minimized states, menus/overlays, saved options, enum serialization, and interactions with other FPS limit mods.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 FPS throttle policy, not cheaper frame rendering.
 

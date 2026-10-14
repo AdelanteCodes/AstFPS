@@ -35,7 +35,7 @@ All three reconstructed classes reviewed; exception-heavy config code has decomp
 
 - Compare texture magnification/minification and mip transitions, command-driven sampler reset, resource reload, and malformed config handling.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Visual preference/fix; excluded from an unchanged-visuals optimization design.
 

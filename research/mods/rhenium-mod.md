@@ -37,7 +37,7 @@ All nine reconstructed Java classes reviewed.
 
 - Inspect coordinate conventions and cooldown ownership. Test pickup/despawn, hopper throughput/cooldowns, distant particles returning to view, world switches, and malformed config.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Mostly distance cuts and tick throttling with behavior changes; does not meet unchanged-visuals/behavior requirements as observed.
 

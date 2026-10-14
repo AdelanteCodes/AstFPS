@@ -34,7 +34,7 @@ Both reconstructed classes reviewed.
 
 - Inspect the caller branch using the substituted flow and test failed handshakes, status pings, ordinary play errors, and channel closure.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Exception-path workaround, not a steady-state optimization.
 

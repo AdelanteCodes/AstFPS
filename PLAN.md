@@ -1,4 +1,4 @@
-# Xe-Mod implementation plan
+# AstFPS implementation plan
 
 ## Product constraints
 

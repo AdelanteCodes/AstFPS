@@ -8,11 +8,11 @@ runs = {}
 for mode in ('baseline', 'default', 'memo'):
     runs[mode] = [json.loads((directory / f'{mode}-{repetition}.json').read_text()) for repetition in (1, 2, 3)]
     for run in runs[mode]:
-        assert ('xe_mod' in run['loadedMods']) == (mode != 'baseline')
+        assert ('astfps' in run['loadedMods']) == (mode != 'baseline')
         assert (run['width'], run['height'], run['renderDistance'], run['simulationDistance'], run['vsync']) == (2560, 1440, 16, 8, False)
         assert run['samples'] >= 60
         assert run['mode'] == mode
-        assert run['loadedMods'].get('xe_mod', '0.1.0-alpha.1') == '0.1.0-alpha.1'
+        assert run['loadedMods'].get('astfps', '0.1.0-alpha.1') == '0.1.0-alpha.1'
 
 summary = {}
 for mode, measurements in runs.items():
@@ -33,7 +33,7 @@ report = {'settings': 'Minecraft 26.3, 2560x1440, Fancy, 16 chunks, simulation 8
           'limits': 'Software graphics; this synthetic scene is not representative of a home GPU or a full modpack. Repeats quantify variability, not a general FPS guarantee.',
           'summary': summary}
 (directory / 'comparison.json').write_text(json.dumps(report, indent=2))
-lines = ['# Xe-Mod cloud comparison', '', report['settings'], '', report['method'], '',
+lines = ['# AstFPS cloud comparison', '', report['settings'], '', report['method'], '',
          '| Mode | Median FPS | Median 1% low | Median p99 ms | Median paired FPS change |',
          '|---|---:|---:|---:|---:|']
 for mode, result in summary.items():

@@ -6,7 +6,7 @@ and runtime tests remain off in this environment. The active goal is not achieve
 
 ## Current original stage: 0.4.0-dev.2
 
-XeTerrainBatcher independently collects visible section draws, groups opaque
+AstFPSTerrainBatcher independently collects visible section draws, groups opaque
 commands by actual GPU-buffer identity within each terrain layer, and submits
 indirect command lists through Minecraft's portable GPU API. Empty layers skip
 dispatcher buffer lookups; ordered transparency only groups adjacent compatible
@@ -19,15 +19,15 @@ a completed independent terrain engine or a demonstrated Sodium replacement.
 Minecraft 26.3 already has shared terrain buffers and indirect multi-draw; adding
 those names alone is not evidence of a speedup. Our stage could still regress.
 
-Opt in with -Dxe.enableTerrainBatcher=true. The hook is skipped in Xe safe mode
+Opt in with -Dastfps.enableTerrainBatcher=true. The hook is skipped in AstFPS safe mode
 and when Sodium, Iris, Nvidium, VulkanMod, VulkanFlow or Meshelium is loaded.
 Unrecognized renderer mods remain unassessed. On devices where Minecraft chooses
 direct drawing, our stage constructs direct draw descriptors instead of requiring indirect hardware support. The first RuntimeException disables
 our stage, records a stack trace and leaves the vanilla method uncancelled.
 This is a defensive fallback, not proof that every runtime error is recoverable.
 
-Use /xe terrain false|true to switch installed paths between captures. Changing
-the backend or scene label while recording is disallowed. /xe diagnose reports
+Use /astfps terrain false|true to switch installed paths between captures. Changing
+the backend or scene label while recording is disallowed. /astfps diagnose reports
 frames, section draws, GPU batches, fallbacks and startup hook receipts.
 
 ## What 5x means
@@ -35,7 +35,7 @@ frames, section draws, GPU batches, fallbacks and startup hook receipts.
 100 FPS averages 10 ms per frame. 500 FPS averages 2 ms per frame: 400% more FPS
 and 80% less frame time. The monitor's 300 Hz refresh does not prevent uncapped
 rendering of 500 FPS, but it does not display 500 distinct full refreshes/second.
-A VSync/FPS cap can obscure gains. Xe-Mod does not change those options for users.
+A VSync/FPS cap can obscure gains. AstFPS does not change those options for users.
 
 There is no measured percentage for this package. ImmediatelyFast's author reports
 an old entity-heavy benchmark with Sodium going from 21 to 82 FPS (~3.90x), using

@@ -34,7 +34,7 @@ Both reconstructed classes reviewed.
 
 - Track moving/stationary skulls through chunk unload/reload, ticking boundaries, forced chunks, and world save/restart.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Prevents accumulating projectiles by removing them; a server behavior change, not exact optimization.
 

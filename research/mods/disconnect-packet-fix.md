@@ -35,7 +35,7 @@ All three reconstructed classes reviewed.
 
 - Exercise disconnects during login/configuration/play transitions, valid disconnects, unrelated unmapped packets, and connection cleanup.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Protocol robustness, not steady-state FPS.
 

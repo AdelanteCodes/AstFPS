@@ -33,7 +33,7 @@ Both reconstructed classes reviewed.
 
 - Check held maps, item-frame maps, decorations, labels, and other map render integrations.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Content suppression utility, not unchanged-visuals optimization.
 

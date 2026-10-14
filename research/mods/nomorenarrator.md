@@ -34,7 +34,7 @@ All four reconstructed classes reviewed.
 
 - Check toggles, saved options, narration startup cost, and whether interface/default-method interception applies to actual implementations.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Feature disabling rather than equivalent work reduction.
 

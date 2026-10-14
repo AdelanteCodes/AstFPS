@@ -35,7 +35,7 @@ Both reconstructed classes reviewed.
 
 - Test server lists with slow endpoints, screen transitions, repeat refreshes, executor shutdown/expiry, and overlap with other pinger mods.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Server-list UI latency; no gameplay FPS benefit.
 

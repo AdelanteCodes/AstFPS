@@ -35,7 +35,7 @@ Both reconstructed Java source files reviewed, including the anonymous packet-li
 
 - Test first/second/third-attempt success and failure, legacy/status disconnect reasons, screen close before retry, repeated refresh, and retained map/queue entries.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Server-list reliability; not gameplay rendering performance.
 

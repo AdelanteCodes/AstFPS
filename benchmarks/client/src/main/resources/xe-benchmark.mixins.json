@@ -1,4 +1,0 @@
-{
-  "required": true, "package": "dev.kyzer.xemod.benchmark.mixin", "compatibilityLevel": "JAVA_25",
-  "client": ["BenchmarkFrameMixin", "CreateWorldInvoker"], "injectors": {"defaultRequire": 1}
-}

@@ -35,7 +35,7 @@ Both reconstructed classes reviewed.
 
 - Compare deadline drift, p99 interval jitter, CPU use, late-frame recovery, and limiter interactions across Windows/Linux.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Frame pacing, not an increase in uncapped rendering capacity.
 

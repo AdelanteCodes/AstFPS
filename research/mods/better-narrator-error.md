@@ -35,9 +35,9 @@ All three reconstructed source files reviewed, including the nested native-libra
 
 - Test missing native libraries with all property combinations, null/unusual cause messages, and confirm the original narration fallback remains intact.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
-Log presentation utility; Xe-Mod diagnostics should preserve failure evidence instead.
+Log presentation utility; AstFPS diagnostics should preserve failure evidence instead.
 
 Research only. No implementation is being added during this research pass.
 

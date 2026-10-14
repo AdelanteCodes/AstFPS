@@ -1,25 +1,25 @@
 {
   "schemaVersion": 1,
-  "id": "xe_mod",
+  "id": "astfps",
   "version": "${version}",
-  "name": "Xe-Mod",
+  "name": "AstFPS",
   "description": "General-purpose memory, rendering and game-logic optimizations with optional diagnostics and chunk pregeneration.",
   "authors": [
     "KyzerGoated"
   ],
   "contact": {
-    "sources": "https://github.com/KyzerGoated/Xe-Mod"
+    "sources": "https://github.com/KyzerGoated/AstFPS"
   },
   "license": "MIT",
   "environment": "client",
   "entrypoints": {
     "client": [
-      "dev.kyzer.xemod.client.XeClient"
+      "dev.kyzer.astfps.client.AstFPSClient"
     ]
   },
   "mixins": [
     {
-      "config": "xe-mod.client.mixins.json",
+      "config": "astfps.client.mixins.json",
       "environment": "client"
     }
   ],

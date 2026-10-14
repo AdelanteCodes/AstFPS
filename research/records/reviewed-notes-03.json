@@ -36,7 +36,7 @@
     "mechanics": ["Uses JVM properties to select Narrator.EMPTY or control how narrator initialization exceptions are reported.", "Rebuilds the native-library failure cause with shortened resource-path text, optionally empty stack traces, and optionally a replacement cause. Another wrapper clears the throwable stack before logging."],
     "risks": ["Trimming exception evidence makes later diagnosis harder. Assumptions about cause messages and parentheses can fail on different native error formats.", "This affects a failure path and startup noise, not normal per-frame work."],
     "validation": ["Test missing native libraries with all property combinations, null/unusual cause messages, and confirm the original narration fallback remains intact."],
-    "fit": "Log presentation utility; Xe-Mod diagnostics should preserve failure evidence instead.",
+    "fit": "Log presentation utility; AstFPS diagnostics should preserve failure evidence instead.",
     "evidence": ["**/*.java"]
   },
   "window-fix": {

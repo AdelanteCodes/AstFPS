@@ -10,7 +10,6 @@ benchmarks/client/run-*/
 work/
 outputs/
 vendor/*
-!vendor/xe-mod-0.1.0-alpha.1.jar
 !vendor/ferritecore-9.0.0-fabric.jar
 !vendor/modernfix-5.27.20-build.2.jar
 !vendor/jasione-1.0.9+26.1.2-fabric.jar

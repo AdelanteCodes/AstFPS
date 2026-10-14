@@ -1,2 +1,2 @@
 pluginManagement { repositories { maven { url = 'https://maven.fabricmc.net/' }; mavenCentral(); gradlePluginPortal() } }
-rootProject.name = 'xe-client-benchmark'
+rootProject.name = 'astfps-client-benchmark'

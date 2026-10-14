@@ -36,7 +36,7 @@ All three reconstructed classes reviewed.
 
 - Exercise right-click title bar, Alt+Space, drag-resize, minimize/restore, fullscreen transitions, window recreation, both menu modes, and callback failures on supported Windows architectures.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Windows freeze workaround; not a normal-frame throughput optimization.
 

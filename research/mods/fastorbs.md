@@ -36,7 +36,7 @@ Both reconstructed classes reviewed; upstream repository identity checked.
 
 - For many award amounts, assert total spawned/merged XP equals the award. Check mending allocation, pickup cooldown, despawn, direction, large awards, and repeated merging.
 
-## Relevance to Xe-Mod
+## Relevance to AstFPS
 
 Fewer XP entities can save simulation/render work, but this implementation needs conservation and gameplay checks; do not transplant blindly.
 
