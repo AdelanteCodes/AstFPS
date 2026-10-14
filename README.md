@@ -2,6 +2,10 @@
 
 An original Minecraft Java 26.3 performance mod under development.
 
+[Download the first prerelease](https://github.com/KyzerGoated/Xe-Mod/releases/tag/v0.1.0-alpha.1).
+Use the runtime JAR, Fabric Loader 0.19.5+, matching Fabric API 0.162.0+26.3,
+and Java 25. See [installation and release notes](releases/0.1.0-alpha.1.md).
+
 The goal is faster rendering and smoother frame times with unchanged vanilla
 visuals: native resolution, the same render distance, the same visible entities,
 particles, lighting and textures. No shader packs or resource packs are included.
@@ -13,9 +17,10 @@ particles, lighting and textures. No shader packs or resource packs are included
 - A bounded frame-time recorder with average FPS, p99 frame time and 1% low FPS.
 - Local benchmark exports and configurable on/off comparison.
 
-This is a research prototype, not a validated FPS upgrade. Core algorithm tests
-pass; Minecraft compilation, hook validation and visual smoke testing must also
-pass before a release is considered usable. No performance gain is claimed yet.
+This is a prerelease prototype. Compilation, core checks, actual Minecraft client
+startup, visibility comparisons, and safe-mode checks passed in CI. Full-world
+visual parity, arbitrary modpack compatibility, and FPS improvement remain
+unmeasured. No performance gain or bug-free stability is claimed.
 
 ## Build
 

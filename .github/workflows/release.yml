@@ -1,0 +1,60 @@
+name: Publish first Xe-Mod prerelease
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release.yml'
+      - 'releases/0.1.0-alpha.1.md'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: xe-mod-first-release
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Download the already-built artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: xe-mod-original-prototype
+          path: dist
+          run-id: 38528794581
+          github-token: ${{ github.token }}
+      - name: Inspect packaged identity and calculate checksums
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, zipfile
+          files = sorted(pathlib.Path('dist').glob('*.jar'))
+          runtime = [p for p in files if not p.name.endswith('-sources.jar')]
+          assert len(runtime) == 1, 'Expected one runtime JAR'
+          with zipfile.ZipFile(runtime[0]) as jar:
+              metadata = json.loads(jar.read('fabric.mod.json'))
+              assert metadata['id'] == 'xe_mod'
+              assert metadata['version'] == '0.1.0-alpha.1'
+              assert metadata['environment'] == 'client'
+              assert not any(n.endswith('.jar') for n in jar.namelist()), 'Unexpected embedded mod/library'
+          print('Release artifact:', runtime[0].name)
+          PY
+          cd dist
+          sha256sum *.jar > SHA256SUMS.txt
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          if gh release view v0.1.0-alpha.1 >/dev/null 2>&1; then
+            echo 'This release is already published; preserving its assets.'
+            exit 0
+          fi
+          gh release create v0.1.0-alpha.1 dist/*.jar dist/SHA256SUMS.txt \
+            --target 51c39948e557f68a7f8bf0a2c4ae32d48076ab26 \
+            --title 'Xe-Mod 0.1.0-alpha.1 — first working prototype' \
+            --notes-file releases/0.1.0-alpha.1.md \
+            --prerelease

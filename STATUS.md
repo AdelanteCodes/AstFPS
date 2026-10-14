@@ -9,18 +9,19 @@ control, frame recorder, benchmark exports and Gradle/GitHub build configuration
 Verified locally: Java core checks for FPS statistics, recorder limits/lifecycle,
 exact cache queries, changed bounds, epochs, invalidation and thread fallback.
 
-Verified in CI: Java 25 Minecraft/client compilation and the core check runner.
-The first CI build then failed because Gradle's test task had no registered tests;
-JUnit registration has now been added. Failure isolation and startup receipts are
-implemented and their core checks pass locally.
+Verified in CI: Java 25 build and core checks; actual Minecraft 26.3 client startup
+in normal and safe mode; 12,000 generated/expanded visibility comparisons, repeated
+queries, camera/frustum invalidation, hook receipts, and running frame capture.
+Successful run: https://github.com/KyzerGoated/Xe-Mod/actions/runs/38528794581
 
-Not yet verified: actual mixin application, client startup, visual equivalence or
-an FPS improvement. Do not interpret compilation or core-test success as in-game
-validation.
+Not yet verified: full-world visual equivalence, other-mod compatibility, or an
+FPS improvement. The first prerelease publishes the already-built artifact without
+new test runs. Experimental memoization stays off by default.
 
 Research: 481 broad catalogue matches, 410 downloaded artifacts. Archive and
 decompilation inventories are separate from a completed behavioral review.
-Reference research remains local; it is not optimization code in this repo.
+Research documentation is published separately under research/. It is not
+optimization code in this repo. Incomplete behavioral reviews remain labelled.
 
-Next: validate the build and client hooks, then compare cache on/off in controlled
-vanilla scenes. No aggressive visual changes are planned.
+Release: 0.1.0-alpha.1, Minecraft 26.3 / Fabric / Java 25. No visual cutbacks.
+Next: measure cache on/off in controlled vanilla scenes on the target PC.

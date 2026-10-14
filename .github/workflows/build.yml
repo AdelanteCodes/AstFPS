@@ -7,6 +7,7 @@ permissions:
   contents: read
 jobs:
   build:
+    if: ${{ !contains(github.event.head_commit.message, '[release-only]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -23,6 +24,7 @@ jobs:
           path: build/libs/*.jar
           if-no-files-found: error
   client-checks:
+    if: ${{ !contains(github.event.head_commit.message, '[release-only]') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     strategy:
