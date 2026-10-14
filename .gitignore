@@ -7,3 +7,10 @@ logs/
 benchmarks/
 .env
 *.key
+work/
+outputs/
+vendor/
+dist/
+*.zip
+__pycache__/
+xe-benchmarks/

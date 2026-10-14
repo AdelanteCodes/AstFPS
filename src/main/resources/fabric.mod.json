@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "xe_mod",
+  "version": "${version}",
+  "name": "Xe-Mod",
+  "description": "Original performance experiments that preserve vanilla visuals, with frame-time diagnostics.",
+  "authors": ["KyzerGoated"],
+  "contact": {"sources": "https://github.com/KyzerGoated/Xe-Mod"},
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {"client": ["dev.kyzer.xemod.client.XeClient"]},
+  "mixins": [{"config": "xe-mod.client.mixins.json", "environment": "client"}],
+  "depends": {"fabricloader": ">=0.19.5", "minecraft": "~26.3", "java": ">=25", "fabric-api": "*"}
+}

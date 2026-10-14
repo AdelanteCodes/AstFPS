@@ -1,9 +1,21 @@
 # Status
 
-Project documents created; implementation not started.
+Direction: original code, unchanged vanilla visuals, no repackaged performance
+mods and no external shader/resource packs.
 
-GitHub repository verified: KyzerGoated/Xe-Mod, public at the user's request.
+Implemented: original frame-scoped visibility memo, invalidation hooks, on/off
+control, frame recorder, benchmark exports and Gradle/GitHub build configuration.
 
-Broad Modrinth Fabric 26.3 optimization collection is in progress. Downloaded binaries remain local and are not part of the public repository. Static JAR inventories are being generated; comprehensive source/decompilation review and runtime testing are unfinished. No build configured and no performance claims verified.
+Verified locally: Java core checks for FPS statistics, recorder limits/lifecycle,
+exact cache queries, changed bounds, epochs, invalidation and thread fallback.
 
-Next: finish collection and audit; verify Fabric 26.3 tooling and initialize the mod project.
+Not yet verified: Java 25 Minecraft compilation, actual mixin application, client
+startup, visual equivalence, or an FPS improvement. The local Java 25 download
+timed out. Do not interpret core-test success as in-game validation.
+
+Research: 481 broad catalogue matches, 410 downloaded artifacts. Archive and
+decompilation inventories are separate from a completed behavioral review.
+Reference research remains local; it is not optimization code in this repo.
+
+Next: validate the build and client hooks, then compare cache on/off in controlled
+vanilla scenes. No aggressive visual changes are planned.

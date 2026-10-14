@@ -1,16 +1,40 @@
-# Implementation milestones
+# Xe-Mod implementation plan
 
-1. Verify Minecraft 26.3 Fabric tooling, required JDK, and stable versions of each candidate dependency. Record source URLs, versions, hashes and notices. Set up Gradle wrapper and a client-only Fabric project with repeatable build instructions. The current machine has Java 17; do not assume it satisfies the target.
-2. Build a bounded frame-time recorder and benchmark start/stop control. Export frame times plus game/mod versions, resolution, render and simulation distances, shader identity/preset and active profile. Keep benchmark results local; no telemetry.
-3. Add Quality, Balanced, Maximum FPS and Custom controls with persistence and reset. Preserve render distance by default. Quality preserves visuals; any changes to visual quality in other profiles must be visible and reversible. Settings requiring restart must say so. Avoid overriding upstream settings without documented adapters and restoring saved values.
-4. Establish a pinned dependency baseline. Compare each extra optimization against Sodium alone and the full baseline. Keep only compatible modules that help relevant scenes or solve a demonstrated memory/stutter issue. Choose a packaging format after compatibility checks; default to one installation package.
-5. Profile on the gaming PC before developing new rendering patches. Select one demonstrated bottleneck, implement a feature toggle, and compare enabled/disabled behavior. No renderer replacement, arbitrary thread-priority tweaks or heap-size promises in the initial milestone.
-6. Develop optional shader presets after the performance baseline works. Evaluate legally reusable shader sources, then specify one coherent pipeline; do not concatenate shader packs. Keep shader quality separate from performance profiles. No universal FPS guarantees.
+## Product constraints
 
-## Validation
-Build and launch a development client here if hardware/runtime permits. Check menus, world entry/reload, toggles, malformed settings recovery and dependency conflicts. Mark unavailable checks explicitly.
+Implement original optimization code. Preserve vanilla visual output, native
+1440p resolution and the user's chosen 16–20 chunk render distance. Do not remove
+visible entities, particles, shadows or lighting, or alter simulation mechanics.
+No shader/resource packs, optimization-mod embedding or visual-cutback presets.
 
-At home: benchmark standing still and traveling through warmed chunks, terrain, forests, dense entities/block entities and GUI-heavy scenes at 16 and 20 chunks. Compare shaders off/on and 1440p/1080p; repeat fixed routes three times. Record average FPS, p99 frame time and stalls. Compare visual correctness, shadows, transparency, particles and entity visibility. Never claim beating Sodium until repeated measurements support it at equivalent settings.
+## Implementation sequence
 
-## Deliverables
-Source, build instructions, repository handoff notes, version manifest and notices; then a tested mod JAR and installation package. Benchmark evidence is separate from compile success.
+1. Establish a reproducible Java 25 / Fabric 26.3 build and client smoke test.
+2. Validate frame-scoped, exact-input visibility memoization against vanilla
+   results. Keep it off by default until hooks and visual equivalence are tested.
+3. Record cache hit rate and frame times on fixed scenes. Remove or revise the
+   cache if its overhead outweighs saved work.
+4. Profile repeated calculations, allocations and rendering submission work.
+   Add one independent optimization at a time, behind a testable feature toggle.
+5. Investigate more efficient geometry construction, reuse and draw submission
+   only after profiling identifies a material bottleneck. Preserve sorting,
+   translucent surfaces and all visible geometry.
+6. Add more advanced controls for implementation parameters without changing
+   scene appearance. Publish only validated features.
+
+## Acceptance checks
+
+- Build and algorithm tests; actual client startup and world entry.
+- Matching visible output with each feature enabled/disabled.
+- Fast camera rotation, camera teleport, changed frusta, dimension/world reload,
+  transparent blocks, overlapping entities and chunk-boundary geometry.
+- Corrupt config recovery without destructive rewrites; bounded memory use.
+- Three repeated benchmark runs at both 16 and 20 chunks; average FPS, p99 frame
+  time and 1% low FPS. Include dense entities and travel through loaded chunks.
+- Compare native-resolution captures on the gaming PC. Hardware performance is
+  unverified until that machine is available.
+
+## Target machine
+
+Ryzen 5 5600X, RTX 5060 Ti 16GB, 32GB DDR4, 1440p 300Hz monitor.
+The CPU bottleneck remains a hypothesis, not a measured conclusion.

@@ -1,18 +1,41 @@
 # Xe-Mod
 
-Public Minecraft Java optimization research and development project: https://github.com/KyzerGoated/Xe-Mod.
+An original Minecraft Java 26.3 performance mod under development.
 
-## Goal
-One simple installation with customizable Quality, Balanced, Maximum FPS, and Custom profiles. Optional shaders have independent quality and appearance presets. Target Minecraft Java 26.3; verify compatible stable dependencies before pinning versions.
+The goal is faster rendering and smoother frame times with unchanged vanilla
+visuals: native resolution, the same render distance, the same visible entities,
+particles, lighting and textures. No shader packs or resource packs are included.
 
-Target gaming PC: Ryzen 5 5600X, RTX 5060 Ti 16GB, 32GB DDR4, 1440p 300Hz monitor; typical render distance 16–20 chunks. CPU limitation is unconfirmed. No FPS improvement has been measured yet.
+## Current prototype
 
-## Architecture
-Start with our own Fabric client mod plus compatible upstream optimization dependencies. Prefer an installation package over flattening upstream JARs. Investigate supported nested-JAR packaging only after verifying licenses, loader behavior, duplicate detection, and compatibility. Preserve upstream mod IDs and notices. Never load duplicate copies.
+- Original, frame-scoped visibility memoization. It reuses an exact prior result
+  and invalidates on camera/frustum updates. Experimental and off by default.
+- A bounded frame-time recorder with average FPS, p99 frame time and 1% low FPS.
+- Local benchmark exports and configurable on/off comparison.
 
-The first milestone supplies profiling, configurable profiles, and a reproducible baseline. Reuse Sodium for terrain rendering; investigate ImmediatelyFast, EntityCulling, Lithium and memory optimizers individually, with version-specific evidence. Do not enable overlapping optimizations blindly. Iris and existing shaders are optional. A unified custom shader pack is a later milestone requiring an explicit source/license and rendering design review.
+This is a research prototype, not a validated FPS upgrade. Core algorithm tests
+pass; Minecraft compilation, hook validation and visual smoke testing must also
+pass before a release is considered usable. No performance gain is claimed yet.
+
+## Build
+
+Use Java 25 and run `./gradlew build` (Windows: `gradlew.bat build`). The repository
+also has a GitHub Actions build. The mod uses Fabric Loader and Fabric API as
+framework dependencies; it contains no other performance-mod binaries or code.
+
+## Commands
+
+- `/xe status`: feature state, cache hits/misses and recording status.
+- `/xe memo true` / `/xe memo false`: enable/disable the experimental cache.
+- `/xe label <text>`: label a benchmark with resolution, distance and scene.
+- `/xe benchmark start` / `/xe benchmark stop`: record and export locally.
+
+Exports go to `xe-benchmarks/` in the game folder and are not uploaded. Use the
+same world, camera route and settings for comparisons. The FPS measurement
+includes frame pacing; it is not a GPU timer or CPU-only render-cost measurement.
 
 ## Continue on another PC
-Clone the repository, open its folder in Codex, and ask: "Read README.md, PLAN.md, and STATUS.md, then continue the next milestone."
 
-Commit and push before switching computers; pull before starting. Project files carry the context; the chat itself is not included in Git.
+Clone https://github.com/KyzerGoated/Xe-Mod, open the folder in Codex, and ask it to
+read PLAN.md and STATUS.md. Pull before starting and push completed changes before
+switching machines.
