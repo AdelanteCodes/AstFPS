@@ -5,16 +5,16 @@
   "name": "AstFPS",
   "description": "General-purpose memory, rendering and game-logic optimizations with optional diagnostics and chunk pregeneration.",
   "authors": [
-    "KyzerGoated"
+    "AdelanteCodes"
   ],
   "contact": {
-    "sources": "https://github.com/KyzerGoated/AstFPS"
+    "sources": "https://github.com/AdelanteCodes/AstFPS"
   },
   "license": "MIT",
   "environment": "client",
   "entrypoints": {
     "client": [
-      "dev.kyzer.astfps.client.AstFPSClient"
+      "dev.adelantecodes.astfps.client.AstFPSClient"
     ]
   },
   "mixins": [

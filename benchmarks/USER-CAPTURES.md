@@ -3,7 +3,7 @@
 No benchmark was run here. This procedure isolates our terrain submission stage;
 it does not measure the entire package against Minecraft without AstFPS.
 
-Install the 0.4.0-dev.3 JAR with Fabric API, removing old AstFPS/bundle copies and
+Install the 0.4.0-dev.4 JAR with Fabric API, removing old AstFPS/bundle copies and
 separate bundled modules. Leave Sodium and other renderer replacements out.
 Add -Dastfps.enableTerrainBatcher=true to JVM arguments. Keep the same world snapshot,
 PC, Java/heap, GPU backend, drivers, graphics, resolution, render/simulation distance,

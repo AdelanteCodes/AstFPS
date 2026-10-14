@@ -44,3 +44,15 @@ is disabled and runtime verification is pending. Renamed the benchmark harness I
 and resources too. Retired the old cloud benchmark workflow as requested; the manual
 release workflow now uses the current committed artifacts and checksum manifest.
 Historical binaries remain archived outside the active checkout and in Git history.
+
+## 14 October 2026 — AdelanteCodes identity update (0.4.0-dev.4)
+
+The user renamed their GitHub account to AdelanteCodes. Verified the account and
+public AstFPS repository under the new owner. Updated active author metadata,
+copyright attribution, repository links, local Git remote and current project records.
+Refreshed this log's stale current-state summary while preserving dated history.
+The previous development binaries are archived outside the active checkout; Git
+history remains intact. This update changes identity/package metadata, not optimization behavior.
+No Minecraft execution or FPS measurement is part of this update.
+
+Updated owned Java package/group namespace to `dev.adelantecodes.astfps`, including entrypoints, mixin metadata and packaging checks. Mod ID stays `astfps`.

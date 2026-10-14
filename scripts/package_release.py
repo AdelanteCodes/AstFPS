@@ -27,7 +27,7 @@ def main():
                 assert child.testzip() is None
         assert 'META-INF/jars/AstFPS-0.1.0-alpha.1.jar' not in jar.namelist()
         for name in ['AabbZeroOffsetMixin', 'WorldTargetCleanupMixin', 'AstFPSMixinPlugin', 'MinecraftFrameMixin']:
-            data = jar.read('dev/kyzer/astfps/client/mixin/' + name + '.class')
+            data = jar.read('dev/adelantecodes/astfps/client/mixin/' + name + '.class')
             assert int.from_bytes(data[6:8], 'big') == 69, 'Expected Java 25 classes'
         assert meta['custom']['lithium:options']['mixin.world.temperature_cache'] is False
         assert 'useSmallThreadingDetector' in meta['custom']['ferritecore:disabled_options']

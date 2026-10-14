@@ -5,7 +5,7 @@
   "name": "AstFPS client checks",
   "environment": "client",
   "entrypoints": {
-    "fabric-client-gametest": ["dev.kyzer.astfps.gametest.VisibilityGameTest"]
+    "fabric-client-gametest": ["dev.adelantecodes.astfps.gametest.VisibilityGameTest"]
   },
   "depends": {"astfps": "*"}
 }

@@ -72,7 +72,7 @@ tasks.named('sourcesJar') {
 tasks.register('coreChecks', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.kyzer.astfps.CoreChecks'
+    mainClass = 'dev.adelantecodes.astfps.CoreChecks'
 }
 check.dependsOn coreChecks
 test { useJUnitPlatform() }

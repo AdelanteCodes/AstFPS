@@ -1,2 +1,0 @@
-947420f0330895883b9bfbf1817fb273d87d47c24cd05468e12568127b5abcad  AstFPS-0.4.0-dev.3.jar
-9674c5ae5a687f9636ddd2ae97ad816c3811681f6cdccdc45a24dcbb8cfbf45f  AstFPS-0.4.0-dev.3-sources.jar

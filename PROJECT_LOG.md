@@ -1,45 +1,38 @@
 # AstFPS — project log
 
-Updated: 14 October 2026, IST. Read this file first when continuing the project. Keep the current-state sections short and append a dated entry for each meaningful change.
+Updated: 14 October 2026, IST. Read this file first when continuing the project.
 
 ## Current rules
 
-- Work locally on this PC. Do not upload code or notes to GitHub until requested.
-- No builds, automated tests, cloud Minecraft sessions or laptop setup unless requested. The user will test on their laptop when ready.
-- Preserve vanilla visuals, native resolution and the chosen render distance. No shader/resource packs or visibility/gameplay cuts.
-- Permitted third-party components may be included with their original identities, credits and required notices. Do not relabel their code as original AstFPS work.
-- Prefer one useful change at a time. Avoid lengthy planning and packaging detours. Keep this log updated.
-- Current focus: lower memory usage and add Chunky-style pregeneration before further FPS/rendering work.
+- Work locally. GitHub synchronization and public visibility are authorized.
+- Compile and inspect packages when needed; do not launch Minecraft or run runtime tests/benchmarks. The user will capture results on their PC.
+- Preserve vanilla visuals, native resolution and chosen render distance. No shader/resource packs or visibility/gameplay cuts.
+- Preserve independent third-party module identities and notices.
+- Keep changes and records concise. The performance target is 5x in comparable captures, still unmeasured.
 
 ## Current state
 
-Repository: https://github.com/KyzerGoated/AstFPS — **private**, verified in GitHub settings after the user completed email verification.
+Account: **AdelanteCodes**, display name **Adelante**, verified in GitHub account settings.
+Repository: https://github.com/AdelanteCodes/AstFPS — **public**, verified using GitHub.
+Local project: `outputs/AstFPS` in this chat's workspace.
+Target: Minecraft Java **26.3**, Fabric Loader **0.19.5+**, Fabric API **0.162.0+26.3**, Java **25**.
+Current development package: **0.4.0-dev.4**, updating author identity and repository links from dev.3.
+Development JARs are kept under `artifacts/`; packaging and compilation results are recorded there.
+The old alpha tag and Git history are historical evidence, not the current development build.
 
-Local project: `C:\Users\Multiwings\Documents\Codex\2026-10-14\so-x20\outputs\AstFPS`.
+## Current implementation
 
-Target: Minecraft Java **26.3**, Fabric Loader **0.19.5+**, matching Fabric API **0.162.0+26.3**, Java **25**.
+- Six unmodified nested modules: FerriteCore, ModernFix-mVUS, Jasione, Chunky, ImmediatelyFast and Lithium. Hash pins and notices are retained.
+- Original direct/indirect terrain submission and bounded integer command reuse; enabled only with `-Dastfps.enableTerrainBatcher=true`.
+- Optional worker helper reuse through weak references; enabled only with `-Dastfps.enableSectionWorkerCache=true`.
+- Optional visibility memoization, zero-offset allocation reuse and target cleanup; excluded at startup unless enabled explicitly.
+- `/astfps` diagnostics and opt-in capture commands. The recorder buffer is allocated only when recording begins.
+- Compilation/archive checks passed for dev.3; runtime behavior, broad compatibility and FPS gain remain unverified. No completed replacement renderer or measured 5x gain is claimed.
+- CI workflows are manual only. The cloud benchmark workflow has been retired.
 
-Local source version: **0.2.0-dev**, with uncommitted changes. This version has not been compiled or run. Last synchronized code commit: `2e68b19650e869680bf668368c8828b3345ddad5`. No current development changes have been pushed.
+## Historical records
 
-Released version: **0.1.0-alpha.1**. Its JAR is in `outputs\AstFPS-release\AstFPS-0.1.0-alpha.1.jar`. It contains the older visibility experiment and diagnostics; it does not contain the new local additions.
-
-## What is currently written
-
-| Change | Location | State |
-|---|---|---|
-| Exact, frame-scoped frustum visibility cache | `VisibilityMemo.java`, `FrustumMemoMixin.java` | In released alpha; off by default; no demonstrated general FPS gain |
-| Frame recorder, FPS/1% low/p99 calculations, local exports | `FrameRecorder.java`, `FrameStats.java`, `AstFPSClient.java` | In released alpha |
-| Startup hook receipts, first-failure diagnostics, safe-mode controls | `HookAudit.java`, `FeatureGate.java`, `AstFPSMixinPlugin.java` | In released alpha; local plugin also covers new hooks |
-| FerriteCore 9.0.0, unmodified MIT-licensed memory component | `vendor/ferritecore-9.0.0-fabric.jar`, `build.gradle`, `fabric.mod.json` | Added locally and configured for inclusion; unbuilt/unrun |
-| ModernFix-mVUS 5.27.20-build.2, memory/loading optimizations | `vendor/modernfix-5.27.20-build.2.jar` | Unmodified local component; compatible version declared by upstream; unbuilt/unrun as a combined AstFPS |
-| Jasione 1.0.9+26.1.2-fabric, avoids unnecessary enum-array allocation | `vendor/jasione-1.0.9+26.1.2-fabric.jar` | Metadata allows >=26.1, upstream lists 26.3; unbuilt/unrun as a combined AstFPS |
-| Chunky 1.5.3, terrain pregeneration | `vendor/Chunky-Fabric-1.5.3.jar` | Metadata allows >=26.1 / Java 25; no world generation task started |
-| Avoid allocating a new AABB for zero movement when all finite coordinates remain bit-identical | `AabbZeroOffsetMixin.java` | Original code, local only, unbuilt/unrun |
-| Release stale crosshair entity/hit references after disconnect/world teardown, only when no client world remains | `WorldTargetCleanupMixin.java` | Original narrow retention mitigation, local only, unbuilt/unrun |
-| Show component versions and target-cleanup counts | `AstFPSClient.java`, `AstFPSRuntime.java` | Local only |
-| Make CI workflows manual-only | `.github/workflows/` | Local changes; remote workflow files still have their previous triggers |
-
-FerriteCore's MIT notice and the added modules' LGPL/GPL notices are retained locally. Lithium and ImmediatelyFast were briefly staged as dependencies, then removed for the user's focused single-component request. Their source archives/notices remain local reference material; they are **not active dependencies**. `third-party/components.json` now records the active four-component selection, metadata constraints and verified SHA-512 hashes. No copyleft component has been publicly redistributed in this update; corresponding sources and notices must accompany any future distribution.
+The dated entries below record earlier states; later entries supersede their status descriptions.
 
 ## Changelog — 14 October 2026
 
@@ -145,3 +138,15 @@ is disabled and runtime verification is pending. Renamed the benchmark harness I
 and resources too. Retired the old cloud benchmark workflow as requested; the manual
 release workflow now uses the current committed artifacts and checksum manifest.
 Historical binaries remain archived outside the active checkout and in Git history.
+
+## 14 October 2026 — AdelanteCodes identity update (0.4.0-dev.4)
+
+The user renamed their GitHub account to AdelanteCodes. Verified the account and
+public AstFPS repository under the new owner. Updated active author metadata,
+copyright attribution, repository links, local Git remote and current project records.
+Refreshed this log's stale current-state summary while preserving dated history.
+The previous development binaries are archived outside the active checkout; Git
+history remains intact. This update changes identity/package metadata, not optimization behavior.
+No Minecraft execution or FPS measurement is part of this update.
+
+Updated owned Java package/group namespace to `dev.adelantecodes.astfps`, including entrypoints, mixin metadata and packaging checks. Mod ID stays `astfps`.

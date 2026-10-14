@@ -1,4 +1,4 @@
 {
-  "required": true, "package": "dev.kyzer.astfps.benchmark.mixin", "compatibilityLevel": "JAVA_25",
+  "required": true, "package": "dev.adelantecodes.astfps.benchmark.mixin", "compatibilityLevel": "JAVA_25",
   "client": ["BenchmarkFrameMixin", "CreateWorldInvoker"], "injectors": {"defaultRequire": 1}
 }
