@@ -18,6 +18,13 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Confirm release code matches the previously checked build
+        shell: bash
+        run: |
+          git diff --exit-code 51c39948e557f68a7f8bf0a2c4ae32d48076ab26 HEAD -- \
+            src build.gradle settings.gradle gradle.properties gradle gradlew gradlew.bat
       - name: Download the already-built artifact
         uses: actions/download-artifact@v4
         with:
@@ -54,7 +61,7 @@ jobs:
             exit 0
           fi
           gh release create v0.1.0-alpha.1 dist/*.jar dist/SHA256SUMS.txt \
-            --target 51c39948e557f68a7f8bf0a2c4ae32d48076ab26 \
+            --target "$GITHUB_SHA" \
             --title 'Xe-Mod 0.1.0-alpha.1 — first working prototype' \
             --notes-file releases/0.1.0-alpha.1.md \
             --prerelease
