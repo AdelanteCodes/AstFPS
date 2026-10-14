@@ -1,4 +1,5 @@
-package dev.kyzer.xemod.benchmark;
+package dev.kyzer.xemod.benchmark.mixin;
+import dev.kyzer.xemod.benchmark.BenchmarkClient;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

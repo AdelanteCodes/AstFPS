@@ -1,6 +1,7 @@
 package dev.kyzer.xemod.benchmark;
 
 import com.google.gson.GsonBuilder;
+import dev.kyzer.xemod.benchmark.mixin.CreateWorldInvoker;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -125,6 +126,7 @@ public final class BenchmarkClient implements ClientModInitializer {
             Object gate = runtime.getField("VISIBILITY_MEMO").get(null);
             gate.getClass().getMethod("enable", boolean.class).invoke(gate, enabled);
             if (gate.getClass().getMethod("failure").invoke(gate) != null) throw new IllegalStateException("Xe feature failed");
+            if (!gate.getClass().getMethod("enabled").invoke(gate).equals(enabled)) throw new IllegalStateException("Wrong cache state");
         } catch (ReflectiveOperationException error) { throw new IllegalStateException(error); }
     }
 
