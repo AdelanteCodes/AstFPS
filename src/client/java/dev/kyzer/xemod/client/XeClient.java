@@ -27,15 +27,20 @@ public final class XeClient implements ClientModInitializer {
     public static final FrameRecorder RECORDER = new FrameRecorder();
     private static final Logger LOGGER = LoggerFactory.getLogger("Xe-Mod");
     private String label = "unlabelled";
+    private Map<String, Object> benchmarkStartContext;
+    private long benchmarkTerrainFramesStart;
 
     @Override public void onInitializeClient() {
         XeRuntime.VISIBILITY_MEMO.enable(XeRuntime.memoHooksAvailable() && XeConfig.loadMemo());
+        XeRuntime.TERRAIN_BATCHER.enable(XeRuntime.terrainHooksAvailable());
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> {
             var root = ClientCommands.literal("xe").requires(FabricClientCommandSource::attended)
                 .executes(c -> reply(c.getSource(), "Xe-Mod: /xe status, diagnose, memo true|false, label, benchmark start|stop"));
             root.then(ClientCommands.literal("status").executes(c -> {
                 var source = c.getSource();
                 reply(source, "Experimental visibility memo: " + XeRuntime.VISIBILITY_MEMO.enabled() + "; safe mode: " + XeRuntime.safeMode());
+                reply(source, "Original terrain batcher: " + XeRuntime.TERRAIN_BATCHER.enabled() + "; frames/draws/batches: " + XeRuntime.terrainBatchFrames + "/" + XeRuntime.terrainSectionDraws + "/" + XeRuntime.terrainGpuBatches);
+                if (XeRuntime.rendererConflict() != null) reply(source, "Terrain replacement bypassed for renderer: " + XeRuntime.rendererConflict());
                 reply(source, "Safe mode controls Xe-Mod hooks only; bundled modules use their own configuration.");
                 for (String id : new String[]{"ferritecore", "modernfix", "jasione", "chunky", "immediatelyfast", "lithium", "sodium"}) {
                     var component = FabricLoader.getInstance().getModContainer(id);
@@ -48,8 +53,16 @@ public final class XeClient implements ClientModInitializer {
             }));
             root.then(ClientCommands.literal("memo")
                 .then(ClientCommands.argument("enabled", BoolArgumentType.bool()).executes(c -> setMemo(c.getSource(), BoolArgumentType.getBool(c, "enabled")))));
+            root.then(ClientCommands.literal("terrain").then(ClientCommands.argument("enabled", BoolArgumentType.bool()).executes(c -> {
+                boolean enabled = BoolArgumentType.getBool(c, "enabled");
+                if (RECORDER.isRecording()) return reply(c.getSource(), "Stop recording before switching terrain backends.");
+                if (enabled && !XeRuntime.terrainHooksAvailable()) return reply(c.getSource(), "Restart with -Dxe.enableTerrainBatcher=true, safe mode off, and no other terrain renderer to opt in.");
+                if (!XeRuntime.TERRAIN_BATCHER.enable(enabled)) return reply(c.getSource(), "Terrain batcher failed earlier; save /xe diagnose and restart before retrying.");
+                return reply(c.getSource(), "Terrain submission: " + (enabled ? "Xe-Mod experimental" : "vanilla") + ". Graphics settings unchanged.");
+            })));
             root.then(ClientCommands.literal("diagnose").executes(c -> diagnose(c.getSource())));
             root.then(ClientCommands.literal("label").then(ClientCommands.argument("text", StringArgumentType.greedyString()).executes(c -> {
+                if (RECORDER.isRecording()) return reply(c.getSource(), "Stop recording before changing the scene label.");
                 String text = StringArgumentType.getString(c, "text");
                 label = text.substring(0, Math.min(160, text.length()));
                 return reply(c.getSource(), "Benchmark label: " + label);
@@ -57,6 +70,8 @@ public final class XeClient implements ClientModInitializer {
             root.then(ClientCommands.literal("benchmark")
                 .then(ClientCommands.literal("start").executes(c -> {
                     if (RECORDER.isRecording()) return reply(c.getSource(), "A benchmark is already recording; stop it first.");
+                    benchmarkStartContext = BenchmarkContext.capture();
+                    benchmarkTerrainFramesStart = XeRuntime.terrainBatchFrames;
                     RECORDER.start();
                     return reply(c.getSource(), "Recording frame-start intervals, including frame pacing. Run a fixed route, then /xe benchmark stop.");
                 }))
@@ -72,8 +87,17 @@ public final class XeClient implements ClientModInitializer {
         FrameStats stats = FrameStats.calculate(snapshot.intervals());
         var metadata = new LinkedHashMap<String, Object>();
         metadata.put("schemaVersion", 1);
+        var endContext = BenchmarkContext.capture();
+        metadata.put("startContext", benchmarkStartContext);
+        metadata.put("endContext", endContext);
+        metadata.put("contextStable", benchmarkStartContext != null && benchmarkStartContext.equals(endContext));
         metadata.put("label", label);
         metadata.put("visibilityMemoEnabled", XeRuntime.VISIBILITY_MEMO.enabled());
+        metadata.put("terrainBatcherEnabled", XeRuntime.TERRAIN_BATCHER.enabled());
+        metadata.put("terrainBatchFrames", XeRuntime.terrainBatchFrames);
+        metadata.put("terrainFramesInCapture", XeRuntime.terrainBatchFrames - benchmarkTerrainFramesStart);
+        metadata.put("terrainSectionDraws", XeRuntime.terrainSectionDraws);
+        metadata.put("terrainGpuBatches", XeRuntime.terrainGpuBatches);
         metadata.put("visibilityMemoHits", XeRuntime.visibilityHits);
         metadata.put("visibilityMemoMisses", XeRuntime.visibilityMisses);
         metadata.put("sampleCapReached", snapshot.capped());
@@ -128,6 +152,14 @@ public final class XeClient implements ClientModInitializer {
         report.put("safeMode", XeRuntime.safeMode());
         report.put("safeModeScope", "Xe-Mod original hooks only; does not disable bundled upstream modules");
         report.put("memoHooksAvailable", XeRuntime.memoHooksAvailable());
+        report.put("terrainHooksAvailable", XeRuntime.terrainHooksAvailable());
+        report.put("terrainBatcherEnabled", XeRuntime.TERRAIN_BATCHER.enabled());
+        report.put("terrainBatcherFailure", XeRuntime.TERRAIN_BATCHER.failure());
+        report.put("terrainRendererConflict", XeRuntime.rendererConflict());
+        report.put("terrainBatchFrames", XeRuntime.terrainBatchFrames);
+        report.put("terrainSectionDraws", XeRuntime.terrainSectionDraws);
+        report.put("terrainGpuBatches", XeRuntime.terrainGpuBatches);
+        report.put("terrainFallbacks", XeRuntime.terrainFallbacks);
         report.put("hookReceipts", HookAudit.snapshot());
         report.put("visibilityMemoEnabled", XeRuntime.VISIBILITY_MEMO.enabled());
         report.put("visibilityMemoFailure", XeRuntime.VISIBILITY_MEMO.failure());

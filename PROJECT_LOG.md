@@ -124,3 +124,7 @@ Added ImmediatelyFast and Lithium to the single-JAR package. Compiled current co
 Local build initially hit Windows Java Unix-domain selector failure; a TCP-only build-JDK patch outside the repo allowed Gradle to run. Loom local-file include failed; switched to manifest-driven unmodified nested resources. Compilation and packaging then succeeded. No Minecraft launch, tests, or FPS measurement. Previous GitHub synchronization is ff4b56b; future updates use the current remote parent through the connector to avoid overwriting divergent local history.
 
 Publication: user-authorized private GitHub update includes the compiled 0.3.0-rc.1 artifacts, source package, six-module manifest, static review and changelogs. No automatic cloud workflow is triggered; workflows remain manual.
+
+## 0.4.0-dev.1: original terrain submission stage
+
+User clarified: build our own terrain-rendering code with no Sodium dependency, and keep coding while they perform captures later. Added XeTerrainBatcher and TerrainBatchMixin: identity-based per-layer buffer grouping, empty-layer lookup avoidance, ordered transparent submission and indirect commands via portable Minecraft API. No Sodium code/binary was imported. Vanilla meshing/visibility/shaders/GPU allocation remain in use. Opt-in hook, known-renderer bypass and runtime failure gate preserve a vanilla fallback. Added terrain toggle, diagnostics, per-capture context/frame counts, and user-capture comparison script. Compilation succeeded without Minecraft execution or tests. Full engine and 5x target are unfinished.

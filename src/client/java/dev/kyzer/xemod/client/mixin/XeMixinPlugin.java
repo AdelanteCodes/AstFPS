@@ -1,6 +1,7 @@
 package dev.kyzer.xemod.client.mixin;
 
 import dev.kyzer.xemod.HookAudit;
+import dev.kyzer.xemod.client.XeRuntime;
 import java.util.List;
 import java.util.Set;
 import org.objectweb.asm.tree.ClassNode;
@@ -16,8 +17,12 @@ public final class XeMixinPlugin implements IMixinConfigPlugin {
     @Override public String getRefMapperConfig() { return null; }
     @Override public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         boolean optimization = mixinClassName.endsWith("FrustumMemoMixin") || mixinClassName.endsWith("AabbZeroOffsetMixin")
-            || mixinClassName.endsWith("WorldTargetCleanupMixin");
+            || mixinClassName.endsWith("WorldTargetCleanupMixin") || mixinClassName.endsWith("TerrainBatchMixin");
         boolean apply = !(SAFE_MODE && optimization);
+        if (mixinClassName.endsWith("TerrainBatchMixin") && !XeRuntime.terrainHooksAvailable()) {
+            HookAudit.record(mixinClassName, "disabled: requires xe.enableTerrainBatcher=true, safe mode off, and no conflicting renderer");
+            return false;
+        }
         if (mixinClassName.endsWith("FrustumMemoMixin") && !Boolean.getBoolean("xe.enableVisibilityMemo")) {
             HookAudit.record(mixinClassName, "disabled: experimental memo requires xe.enableVisibilityMemo=true");
             return false;

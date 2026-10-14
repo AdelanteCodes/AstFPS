@@ -1,4 +1,4 @@
-# Xe-Mod 0.3.0-rc.1
+# Xe-Mod 0.4.0-dev.1
 
 A general-purpose Fabric client mod for Minecraft Java 26.3. It uses Java 25,
 Fabric Loader 0.19.5+, and matching Fabric API (0.162.0+26.3). No specific CPU,
@@ -7,9 +7,9 @@ The client package is for single-player and multiplayer clients, not dedicated s
 
 ## Install
 
-Use `artifacts/xe-mod-0.3.0-rc.1.jar` with Fabric API in your mods folder.
+Use `artifacts/xe-mod-0.4.0-dev.1.jar` with Fabric API in your mods folder.
 Remove older Xe-Mod/bundle JARs and separate copies of bundled modules.
-Sodium is optional and separately installed. No shaders/resource packs are bundled.
+Sodium is not required. Our optional original terrain stage bypasses itself if Sodium or a known renderer replacement is loaded. No shaders/resource packs are bundled.
 Xe-Mod does not change your graphics options, render distance, or resolution.
 
 ## Included optimizations
@@ -61,3 +61,9 @@ The sources JAR contains Xe-Mod source and the available pinned Lithium and
 ImmediatelyFast source archives. Other upstream source links/notices are retained;
 verify complete corresponding-source coverage before broader redistribution.
 Read PROJECT_LOG.md for history and continuation notes.
+
+## Original graphics stage
+
+This development build adds original indirect terrain submission code. Opt in with -Dxe.enableTerrainBatcher=true; /xe terrain false|true switches the installed path. The default stays vanilla until user verification. Geometry, visibility, shaders and GPU lifetime management remain owned by Minecraft; this is the first stage, not a completed renderer replacement. See GRAPHICS_ROADMAP.md and benchmarks/USER-CAPTURES.md.
+
+The user will run captures later. 5x remains a target, not a measured result.
