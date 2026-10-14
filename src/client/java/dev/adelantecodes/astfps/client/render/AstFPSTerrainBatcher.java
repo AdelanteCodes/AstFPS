@@ -29,12 +29,15 @@ public final class AstFPSTerrainBatcher {
         GpuBuffer index;
         IndexType indexType;
         final ArrayList<DynamicGpuData.IndexedDraw> commands = new ArrayList<>();
+        final List<DynamicGpuData.IndexedDraw> reverseCommands = commands.reversed();
+        Batch nextWithSameVertex;
         int cursor;
         long allocated;
         long reused;
         int commandHighWater;
         void reset(GpuBuffer vertex, GpuBuffer index, IndexType indexType) {
             this.vertex = vertex; this.index = index; this.indexType = indexType;
+            nextWithSameVertex = null;
             cursor = 0; allocated = 0; reused = 0;
         }
         boolean matches(GpuBuffer vertex, GpuBuffer index, IndexType type) {
@@ -58,7 +61,7 @@ public final class AstFPSTerrainBatcher {
 
     private static final class LayerBatches {
         final ArrayList<Batch> ordered = new ArrayList<>();
-        IdentityHashMap<GpuBuffer, List<Batch>> byVertex = new IdentityHashMap<>();
+        IdentityHashMap<GpuBuffer, Batch> byVertex = new IdentityHashMap<>();
         final ArrayList<Batch> pool = new ArrayList<>();
         int used;
         Batch acquire(GpuBuffer vertex, GpuBuffer index, IndexType type) {
@@ -73,17 +76,13 @@ public final class AstFPSTerrainBatcher {
                 Batch batch = acquire(vertex, index, type);
                 ordered.add(batch); return batch;
             }
-            List<Batch> candidates = byVertex.get(vertex);
-            if (candidates != null) {
-                for (int i = 0; i < candidates.size(); i++) {
-                    Batch batch = candidates.get(i);
-                    if (batch.matches(vertex, index, type)) return batch;
-                }
-            } else {
-                candidates = new ArrayList<>(1); byVertex.put(vertex, candidates);
+            Batch head = byVertex.get(vertex);
+            for (Batch candidate = head; candidate != null; candidate = candidate.nextWithSameVertex) {
+                if (candidate.matches(vertex, index, type)) return candidate;
             }
             Batch batch = acquire(vertex, index, type);
-            candidates.add(batch); ordered.add(batch); return batch;
+            batch.nextWithSameVertex = head;
+            byVertex.put(vertex, batch); ordered.add(batch); return batch;
         }
     }
 
@@ -97,16 +96,40 @@ public final class AstFPSTerrainBatcher {
         private final ArrayList<List<DynamicGpuData.IndexedDraw>> commandGroups = new ArrayList<>();
         private final ArrayList<Batch> submissionOrder = new ArrayList<>();
         private final int[] strides = new int[LAYERS.length];
+        private int infoCursor;
+        private long infosAllocated;
+        private long infosReused;
         private boolean busy;
         public Workspace() { for (var layer : LAYERS) layers.put(layer, new LayerBatches()); }
         private void begin() {
             if (Thread.currentThread() != owner || busy) throw new IllegalStateException("Terrain workspace ownership/reentrancy violation");
             busy = true;
+            infoCursor = 0; infosAllocated = 0; infosReused = 0;
             for (var layer : LAYERS) layers.get(layer).used = 0;
+        }
+        private int addInfo(BlockPos origin, float visibility) {
+            int index = infoCursor++;
+            DynamicGpuData.ChunkSectionInfo previous = index < infos.size() ? infos.get(index) : null;
+            // The record is immutable and contains only primitive coordinates/fade, no section/world/GPU object.
+            // Compare raw float bits so signed zero and NaN payloads are never silently changed.
+            if (previous != null && previous.x() == origin.getX() && previous.y() == origin.getY()
+                    && previous.z() == origin.getZ()
+                    && Float.floatToRawIntBits(previous.visibility()) == Float.floatToRawIntBits(visibility)) {
+                infosReused++;
+            } else {
+                var info = new DynamicGpuData.ChunkSectionInfo(origin.getX(), origin.getY(), origin.getZ(), visibility);
+                if (previous == null) infos.add(info); else infos.set(index, info);
+                infosAllocated++;
+            }
+            return index;
+        }
+        private void sealInfos() {
+            if (infoCursor < infos.size()) infos.subList(infoCursor, infos.size()).clear();
         }
         private void finish() {
             int remaining = RETAINED_COMMAND_BUDGET;
-            infos.clear();
+            int retainInfos = Math.min(infoCursor, RETAINED_COMMAND_BUDGET);
+            if (retainInfos < infos.size()) infos.subList(retainInfos, infos.size()).clear();
             if (infosCapacityExceeded) infos.trimToSize();
             infosCapacityExceeded = false;
             boolean largeGroupLists = submissionOrder.size() > 128;
@@ -123,6 +146,7 @@ public final class AstFPSTerrainBatcher {
                 for (int i = 0; i < state.pool.size(); i++) {
                     Batch batch = state.pool.get(i);
                     batch.vertex = null; batch.index = null; batch.indexType = null;
+                    batch.nextWithSameVertex = null;
                     int count = batch.commands.size();
                     if (i >= retain || count > remaining || i >= state.used) {
                         batch.commands.clear(); batch.commands.trimToSize();
@@ -182,8 +206,7 @@ public final class AstFPSTerrainBatcher {
                         if (slice == null || (draw.hasCustomIndexBuffer() && slice.indexBuffer() == null)) continue;
                         if (infoIndex < 0) {
                             BlockPos origin = section.getRenderOrigin();
-                            infoIndex = infos.size();
-                            infos.add(new DynamicGpuData.ChunkSectionInfo(origin.getX(), origin.getY(), origin.getZ(), section.getVisibility(now, fadeMillis)));
+                            infoIndex = workspace.addInfo(origin, section.getVisibility(now, fadeMillis));
                         }
                         GpuBuffer index = draw.hasCustomIndexBuffer() ? slice.indexBuffer() : null;
                         IndexType type = draw.hasCustomIndexBuffer() ? draw.indexType() : null;
@@ -200,6 +223,10 @@ public final class AstFPSTerrainBatcher {
             }
         }
 
+        // GPU writers still serialize every current frame. Never send retained, unused record tails.
+        workspace.sealInfos();
+        AstFPSRuntime.terrainSectionInfosAllocated += workspace.infosAllocated;
+        AstFPSRuntime.terrainSectionInfosReused += workspace.infosReused;
         var commandGroups = workspace.commandGroups;
         var submissionOrder = workspace.submissionOrder;
         for (ChunkSectionLayer layer : LAYERS) {
@@ -209,7 +236,7 @@ public final class AstFPSTerrainBatcher {
                 Batch batch = batches.get(reversed ? batches.size() - 1 - i : i);
                 batch.seal();
                 submissionOrder.add(batch);
-                commandGroups.add(reversed ? batch.commands.reversed() : batch.commands);
+                commandGroups.add(reversed ? batch.reverseCommands : batch.commands);
                 AstFPSRuntime.terrainCommandRecordsAllocated += batch.allocated;
                 AstFPSRuntime.terrainCommandRecordsReused += batch.reused;
             }

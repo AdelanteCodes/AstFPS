@@ -4,7 +4,7 @@ User direction: build original terrain-rendering code, do not depend on Sodium.
 The user will run before/after captures on their PC later. Minecraft execution
 and runtime tests remain off in this environment. The active goal is not achieved.
 
-## Current original stage: 0.4.0-dev.2
+## Current original stage: 0.4.0-dev.5
 
 AstFPSTerrainBatcher independently collects visible section draws, groups opaque
 commands by actual GPU-buffer identity within each terrain layer, and submits
@@ -82,3 +82,16 @@ lists synchronously inside a mapped-view scope and retains only the last immutab
 record; this was checked against the 26.3 client bytecode/decompilation before
 adding CPU scratch reuse. GPU storage and in-flight lifetime management remain
 vanilla. Compilation does not establish visual parity or an FPS gain.
+
+## 0.4.0-dev.5 — terrain preparation allocation reduction
+
+Continued the original graphics stage after the identity update. Reuse immutable
+section origin/fade records only when every primitive field matches exactly,
+including raw float bits. Still recompute visibility every frame and upload current
+data through vanilla storage. Truncate old list tails before every upload; retain
+at most 16,384 primitive-only records per renderer. Remove per-vertex candidate-list
+allocations with pooled batch chains; reuse reverse command-list views. Clear batch
+chains and GPU references in finally. Added section-record allocated/reused counters
+to status, diagnostics and capture exports. See research/renderer-section-record-reuse.md
+for vanilla writer contracts and the bounded-retention tradeoff. The feature remains
+opt-in; no Minecraft execution, FPS gain or visual parity is claimed.

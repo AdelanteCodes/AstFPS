@@ -56,3 +56,16 @@ history remains intact. This update changes identity/package metadata, not optim
 No Minecraft execution or FPS measurement is part of this update.
 
 Updated owned Java package/group namespace to `dev.adelantecodes.astfps`, including entrypoints, mixin metadata and packaging checks. Mod ID stays `astfps`.
+
+## 0.4.0-dev.5 — terrain preparation allocation reduction
+
+Continued the original graphics stage after the identity update. Reuse immutable
+section origin/fade records only when every primitive field matches exactly,
+including raw float bits. Still recompute visibility every frame and upload current
+data through vanilla storage. Truncate old list tails before every upload; retain
+at most 16,384 primitive-only records per renderer. Remove per-vertex candidate-list
+allocations with pooled batch chains; reuse reverse command-list views. Clear batch
+chains and GPU references in finally. Added section-record allocated/reused counters
+to status, diagnostics and capture exports. See research/renderer-section-record-reuse.md
+for vanilla writer contracts and the bounded-retention tradeoff. The feature remains
+opt-in; no Minecraft execution, FPS gain or visual parity is claimed.

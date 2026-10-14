@@ -40,6 +40,8 @@ public final class AstFPSRuntime {
     public static long terrainIndirectFrames;
     public static long terrainCommandRecordsAllocated;
     public static long terrainCommandRecordsReused;
+    public static long terrainSectionInfosAllocated;
+    public static long terrainSectionInfosReused;
     public static long terrainSectionDraws;
     public static long terrainGpuBatches;
     public static long terrainFallbacks;

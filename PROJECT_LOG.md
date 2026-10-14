@@ -16,7 +16,7 @@ Account: **AdelanteCodes**, display name **Adelante**, verified in GitHub accoun
 Repository: https://github.com/AdelanteCodes/AstFPS — **public**, verified using GitHub.
 Local project: `outputs/AstFPS` in this chat's workspace.
 Target: Minecraft Java **26.3**, Fabric Loader **0.19.5+**, Fabric API **0.162.0+26.3**, Java **25**.
-Current development package: **0.4.0-dev.4**, updating author identity and repository links from dev.3.
+Current development package: **0.4.0-dev.5**, adding bounded section record reuse and removing grouping/view allocations from the opt-in terrain stage.
 Development JARs are kept under `artifacts/`; packaging and compilation results are recorded there.
 The old alpha tag and Git history are historical evidence, not the current development build.
 
@@ -27,7 +27,7 @@ The old alpha tag and Git history are historical evidence, not the current devel
 - Optional worker helper reuse through weak references; enabled only with `-Dastfps.enableSectionWorkerCache=true`.
 - Optional visibility memoization, zero-offset allocation reuse and target cleanup; excluded at startup unless enabled explicitly.
 - `/astfps` diagnostics and opt-in capture commands. The recorder buffer is allocated only when recording begins.
-- Compilation/archive checks passed for dev.3; runtime behavior, broad compatibility and FPS gain remain unverified. No completed replacement renderer or measured 5x gain is claimed.
+- Compilation/archive checks passed for dev.5; runtime behavior, broad compatibility and FPS gain remain unverified. No completed replacement renderer or measured 5x gain is claimed.
 - CI workflows are manual only. The cloud benchmark workflow has been retired.
 
 ## Historical records
@@ -150,3 +150,16 @@ history remains intact. This update changes identity/package metadata, not optim
 No Minecraft execution or FPS measurement is part of this update.
 
 Updated owned Java package/group namespace to `dev.adelantecodes.astfps`, including entrypoints, mixin metadata and packaging checks. Mod ID stays `astfps`.
+
+## 0.4.0-dev.5 — terrain preparation allocation reduction
+
+Continued the original graphics stage after the identity update. Reuse immutable
+section origin/fade records only when every primitive field matches exactly,
+including raw float bits. Still recompute visibility every frame and upload current
+data through vanilla storage. Truncate old list tails before every upload; retain
+at most 16,384 primitive-only records per renderer. Remove per-vertex candidate-list
+allocations with pooled batch chains; reuse reverse command-list views. Clear batch
+chains and GPU references in finally. Added section-record allocated/reused counters
+to status, diagnostics and capture exports. See research/renderer-section-record-reuse.md
+for vanilla writer contracts and the bounded-retention tradeoff. The feature remains
+opt-in; no Minecraft execution, FPS gain or visual parity is claimed.

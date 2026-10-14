@@ -1,4 +1,4 @@
-# AstFPS 0.4.0-dev.4
+# AstFPS 0.4.0-dev.5
 
 A general-purpose Fabric client mod for Minecraft Java 26.3. It uses Java 25,
 Fabric Loader 0.19.5+, and matching Fabric API (0.162.0+26.3). No specific CPU,
@@ -7,7 +7,7 @@ The client package is for single-player and multiplayer clients, not dedicated s
 
 ## Install
 
-Use `artifacts/AstFPS-0.4.0-dev.4.jar` with Fabric API in your mods folder.
+Use `artifacts/AstFPS-0.4.0-dev.5.jar` with Fabric API in your mods folder.
 Remove older AstFPS/bundle JARs and separate copies of bundled modules.
 Sodium is not required. Our optional original terrain stage bypasses itself if Sodium or a known renderer replacement is loaded. No shaders/resource packs are bundled.
 AstFPS does not change your graphics options, render distance, or resolution.
@@ -77,3 +77,5 @@ is unverified. The old cloud benchmark workflow was retired; use the PC capture
 instructions in benchmarks/USER-CAPTURES.md.
 
 Maintained by [AdelanteCodes](https://github.com/AdelanteCodes) (Adelante).
+
+The opt-in terrain stage also reuses bounded primitive section origin/fade records when all values match, recomputes fades and uploads every frame, and avoids transient buffer-group candidate lists. Diagnostics report section-record reuse/allocation. No measured FPS gain is available.

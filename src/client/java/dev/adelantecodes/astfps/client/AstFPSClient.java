@@ -42,6 +42,7 @@ public final class AstFPSClient implements ClientModInitializer {
                 reply(source, "Experimental visibility memo: " + AstFPSRuntime.VISIBILITY_MEMO.enabled() + "; safe mode: " + AstFPSRuntime.safeMode());
                 reply(source, "Original terrain batcher: " + AstFPSRuntime.TERRAIN_BATCHER.enabled() + "; frames/draws/batches: " + AstFPSRuntime.terrainBatchFrames + "/" + AstFPSRuntime.terrainSectionDraws + "/" + AstFPSRuntime.terrainGpuBatches);
                 reply(source, "Terrain direct/indirect frames: " + AstFPSRuntime.terrainDirectFrames + "/" + AstFPSRuntime.terrainIndirectFrames + "; command records reused/allocated: " + AstFPSRuntime.terrainCommandRecordsReused + "/" + AstFPSRuntime.terrainCommandRecordsAllocated);
+                reply(source, "Terrain section records reused/allocated: " + AstFPSRuntime.terrainSectionInfosReused + "/" + AstFPSRuntime.terrainSectionInfosAllocated);
                 reply(source, "Section worker cache: " + AstFPSRuntime.SECTION_WORKER_CACHE.enabled() + "; jobs: " + AstFPSRuntime.sectionCacheJobs.sum() + "; model/fluid helpers reused: " + AstFPSRuntime.sectionModelHelpersReused.sum() + "/" + AstFPSRuntime.sectionFluidHelpersReused.sum());
                 if (AstFPSRuntime.rendererConflict() != null) reply(source, "Terrain replacement bypassed for renderer: " + AstFPSRuntime.rendererConflict());
                 reply(source, "Safe mode controls AstFPS hooks only; bundled modules use their own configuration.");
@@ -105,6 +106,8 @@ public final class AstFPSClient implements ClientModInitializer {
         metadata.put("terrainIndirectFrames", AstFPSRuntime.terrainIndirectFrames);
         metadata.put("terrainCommandRecordsReused", AstFPSRuntime.terrainCommandRecordsReused);
         metadata.put("terrainCommandRecordsAllocated", AstFPSRuntime.terrainCommandRecordsAllocated);
+        metadata.put("terrainSectionInfosReused", AstFPSRuntime.terrainSectionInfosReused);
+        metadata.put("terrainSectionInfosAllocated", AstFPSRuntime.terrainSectionInfosAllocated);
         metadata.put("sectionWorkerCacheEnabled", AstFPSRuntime.SECTION_WORKER_CACHE.enabled());
         metadata.put("sectionCacheJobs", AstFPSRuntime.sectionCacheJobs.sum());
         metadata.put("sectionModelHelpersReused", AstFPSRuntime.sectionModelHelpersReused.sum());
@@ -175,6 +178,8 @@ public final class AstFPSClient implements ClientModInitializer {
         report.put("terrainIndirectFrames", AstFPSRuntime.terrainIndirectFrames);
         report.put("terrainCommandRecordsReused", AstFPSRuntime.terrainCommandRecordsReused);
         report.put("terrainCommandRecordsAllocated", AstFPSRuntime.terrainCommandRecordsAllocated);
+        report.put("terrainSectionInfosReused", AstFPSRuntime.terrainSectionInfosReused);
+        report.put("terrainSectionInfosAllocated", AstFPSRuntime.terrainSectionInfosAllocated);
         report.put("sectionWorkerCacheEnabled", AstFPSRuntime.SECTION_WORKER_CACHE.enabled());
         report.put("sectionWorkerCacheFailure", AstFPSRuntime.SECTION_WORKER_CACHE.failure());
         report.put("sectionCacheJobs", AstFPSRuntime.sectionCacheJobs.sum());
