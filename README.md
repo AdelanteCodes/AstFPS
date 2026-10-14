@@ -26,6 +26,7 @@ framework dependencies; it contains no other performance-mod binaries or code.
 ## Commands
 
 - `/xe status`: feature state, cache hits/misses and recording status.
+- `/xe diagnose`: save a local report with hook receipts, feature failures and stack traces.
 - `/xe memo true` / `/xe memo false`: enable/disable the experimental cache.
 - `/xe label <text>`: label a benchmark with resolution, distance and scene.
 - `/xe benchmark start` / `/xe benchmark stop`: record and export locally.
@@ -35,6 +36,11 @@ same world, camera route and settings for comparisons. The FPS measurement
 includes frame pacing; it is not a GPU timer or CPU-only render-cost measurement.
 
 ## Continue on another PC
+
+If an optimization hook prevents startup, add `-Dxe.safeMode=true` to the JVM
+arguments. Diagnostics identify hooks with `XE-HOOK-BEGIN` and `XE-HOOK-OK` log
+markers. A runtime cache failure disables that feature for the rest of the session
+and retains the first failure's stack trace. No automatic retries occur.
 
 Clone https://github.com/KyzerGoated/Xe-Mod, open the folder in Codex, and ask it to
 read PLAN.md and STATUS.md. Pull before starting and push completed changes before

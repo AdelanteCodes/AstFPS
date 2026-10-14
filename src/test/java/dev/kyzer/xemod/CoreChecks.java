@@ -26,6 +26,13 @@ public final class CoreChecks {
         recorder.start();
         if (recorder.count() != 0 || recorder.stop().capped()) fail("Restart state");
         checkMemo();
+        FeatureGate gate = new FeatureGate("test-feature");
+        if (!gate.enable(true) || !gate.enabled()) fail("Feature enable");
+        gate.disableAfterFailure("test-stage", new IllegalStateException("injected test failure"));
+        if (gate.enabled() || gate.enable(true) || !gate.failure().stage().equals("test-stage")) fail("Failure isolation");
+        gate.disableAfterFailure("second-stage", new RuntimeException("second"));
+        if (!gate.failure().stage().equals("test-stage")) fail("First error was overwritten");
+        if (!gate.failure().stackTrace().contains("injected test failure")) fail("Missing error evidence");
         System.out.println("Core checks passed: FPS statistics, recorder lifecycle, memo bounds, epochs, invalidation and thread fallback.");
     }
     private static void close(double actual, double expected) { if (Math.abs(actual - expected) > 0.000001) fail(actual + " != " + expected); }

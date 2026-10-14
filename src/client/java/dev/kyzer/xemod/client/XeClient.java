@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.kyzer.xemod.FrameRecorder;
 import dev.kyzer.xemod.FrameStats;
+import dev.kyzer.xemod.HookAudit;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,18 +29,20 @@ public final class XeClient implements ClientModInitializer {
     private String label = "unlabelled";
 
     @Override public void onInitializeClient() {
-        XeRuntime.visibilityMemoEnabled = XeConfig.loadMemo();
+        XeRuntime.VISIBILITY_MEMO.enable(!XeRuntime.safeMode() && XeConfig.loadMemo());
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> {
             var root = ClientCommands.literal("xe").requires(FabricClientCommandSource::attended)
-                .executes(c -> reply(c.getSource(), "Xe-Mod: /xe status, memo true|false, label, benchmark start|stop"));
+                .executes(c -> reply(c.getSource(), "Xe-Mod: /xe status, diagnose, memo true|false, label, benchmark start|stop"));
             root.then(ClientCommands.literal("status").executes(c -> {
                 var source = c.getSource();
-                reply(source, "Vanilla visuals preserved. Experimental visibility memo: " + XeRuntime.visibilityMemoEnabled);
+                reply(source, "Experimental visibility memo: " + XeRuntime.VISIBILITY_MEMO.enabled() + "; safe mode: " + XeRuntime.safeMode());
                 reply(source, "Memo hits/misses: " + XeRuntime.visibilityHits + "/" + XeRuntime.visibilityMisses + "; benchmark samples: " + RECORDER.count());
+                if (XeRuntime.VISIBILITY_MEMO.failure() != null) reply(source, "Disabled after error in " + XeRuntime.VISIBILITY_MEMO.failure().stage() + "; /xe diagnose for details.");
                 return 1;
             }));
             root.then(ClientCommands.literal("memo")
                 .then(ClientCommands.argument("enabled", BoolArgumentType.bool()).executes(c -> setMemo(c.getSource(), BoolArgumentType.getBool(c, "enabled")))));
+            root.then(ClientCommands.literal("diagnose").executes(c -> diagnose(c.getSource())));
             root.then(ClientCommands.literal("label").then(ClientCommands.argument("text", StringArgumentType.greedyString()).executes(c -> {
                 String text = StringArgumentType.getString(c, "text");
                 label = text.substring(0, Math.min(160, text.length()));
@@ -64,7 +67,7 @@ public final class XeClient implements ClientModInitializer {
         var metadata = new LinkedHashMap<String, Object>();
         metadata.put("schemaVersion", 1);
         metadata.put("label", label);
-        metadata.put("visibilityMemoEnabled", XeRuntime.visibilityMemoEnabled);
+        metadata.put("visibilityMemoEnabled", XeRuntime.VISIBILITY_MEMO.enabled());
         metadata.put("visibilityMemoHits", XeRuntime.visibilityHits);
         metadata.put("visibilityMemoMisses", XeRuntime.visibilityMisses);
         metadata.put("sampleCapReached", snapshot.capped());
@@ -89,9 +92,11 @@ public final class XeClient implements ClientModInitializer {
     }
 
     private int setMemo(FabricClientCommandSource source, boolean enabled) {
+        if (enabled && XeRuntime.safeMode()) return reply(source, "Safe mode disables optimization hooks. Remove -Dxe.safeMode=true and restart to test this feature.");
+        if (enabled && XeRuntime.VISIBILITY_MEMO.failure() != null) return reply(source, "Feature previously failed and remains disabled. Save /xe diagnose and restart before retrying.");
         try {
             XeConfig.saveMemo(enabled);
-            XeRuntime.visibilityMemoEnabled = enabled;
+            XeRuntime.VISIBILITY_MEMO.enable(enabled);
             XeRuntime.frameEpoch++;
             XeRuntime.visibilityHits = 0;
             XeRuntime.visibilityMisses = 0;
@@ -105,6 +110,34 @@ public final class XeClient implements ClientModInitializer {
     private static int reply(FabricClientCommandSource source, String text) {
         source.sendFeedback(Component.literal(text));
         return 1;
+    }
+
+    private int diagnose(FabricClientCommandSource source) {
+        var report = new LinkedHashMap<String, Object>();
+        report.put("schemaVersion", 1);
+        report.put("time", Instant.now().toString());
+        report.put("javaVersion", System.getProperty("java.version"));
+        report.put("os", System.getProperty("os.name"));
+        report.put("safeMode", XeRuntime.safeMode());
+        report.put("hookReceipts", HookAudit.snapshot());
+        report.put("visibilityMemoEnabled", XeRuntime.VISIBILITY_MEMO.enabled());
+        report.put("visibilityMemoFailure", XeRuntime.VISIBILITY_MEMO.failure());
+        report.put("cacheHits", XeRuntime.visibilityHits);
+        report.put("cacheMisses", XeRuntime.visibilityMisses);
+        Map<String, String> versions = new java.util.TreeMap<>();
+        FabricLoader.getInstance().getAllMods().forEach(mod -> versions.put(mod.getMetadata().getId(), mod.getMetadata().getVersion().getFriendlyString()));
+        report.put("loadedVersions", versions);
+        Path destination = FabricLoader.getInstance().getGameDir().resolve("xe-diagnostics")
+            .resolve("diagnostic-" + Instant.now().toString().replace(':', '-') + ".json");
+        try {
+            Files.createDirectories(destination.getParent());
+            Files.writeString(destination, new GsonBuilder().setPrettyPrinting().create().toJson(report));
+            return reply(source, "Local diagnostic saved: " + destination + ". Startup failures: search latest.log for XE-HOOK-BEGIN / XE-HOOK-OK. Fallback launch: -Dxe.safeMode=true");
+        } catch (IOException error) {
+            LOGGER.error("XE-DIAGNOSTIC-WRITE-FAILED {}", destination, error);
+            source.sendError(Component.literal("Diagnostic write failed: " + error.getMessage()));
+            return 0;
+        }
     }
 
 }

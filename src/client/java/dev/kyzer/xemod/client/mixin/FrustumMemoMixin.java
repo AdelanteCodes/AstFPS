@@ -27,15 +27,19 @@ public abstract class FrustumMemoMixin {
 
     @Inject(method = "isVisible(Lnet/minecraft/world/phys/AABB;)Z", at = @At("HEAD"), cancellable = true)
     private void xeLookup(AABB box, CallbackInfoReturnable<Boolean> callback) {
-        if (!XeRuntime.visibilityMemoEnabled) return;
-        int result = xeMemo.probe(XeRuntime.frameEpoch, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
-        if (result >= 0) { XeRuntime.visibilityHits++; callback.setReturnValue(result == 1); }
-        else XeRuntime.visibilityMisses++;
+        if (!XeRuntime.VISIBILITY_MEMO.enabled()) return;
+        try {
+            int result = xeMemo.probe(XeRuntime.frameEpoch, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
+            if (result >= 0) { XeRuntime.visibilityHits++; callback.setReturnValue(result == 1); }
+            else XeRuntime.visibilityMisses++;
+        } catch (RuntimeException error) { XeRuntime.memoFailure("Frustum.isVisible/cache-lookup", error); }
     }
 
     @Inject(method = "isVisible(Lnet/minecraft/world/phys/AABB;)Z", at = @At("RETURN"))
     private void xeRemember(AABB box, CallbackInfoReturnable<Boolean> callback) {
-        if (XeRuntime.visibilityMemoEnabled)
+        if (!XeRuntime.VISIBILITY_MEMO.enabled()) return;
+        try {
             xeMemo.store(XeRuntime.frameEpoch, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, callback.getReturnValueZ());
+        } catch (RuntimeException error) { XeRuntime.memoFailure("Frustum.isVisible/cache-store", error); }
     }
 }

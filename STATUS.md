@@ -9,9 +9,14 @@ control, frame recorder, benchmark exports and Gradle/GitHub build configuration
 Verified locally: Java core checks for FPS statistics, recorder limits/lifecycle,
 exact cache queries, changed bounds, epochs, invalidation and thread fallback.
 
-Not yet verified: Java 25 Minecraft compilation, actual mixin application, client
-startup, visual equivalence, or an FPS improvement. The local Java 25 download
-timed out. Do not interpret core-test success as in-game validation.
+Verified in CI: Java 25 Minecraft/client compilation and the core check runner.
+The first CI build then failed because Gradle's test task had no registered tests;
+JUnit registration has now been added. Failure isolation and startup receipts are
+implemented and their core checks pass locally.
+
+Not yet verified: actual mixin application, client startup, visual equivalence or
+an FPS improvement. Do not interpret compilation or core-test success as in-game
+validation.
 
 Research: 481 broad catalogue matches, 410 downloaded artifacts. Archive and
 decompilation inventories are separate from a completed behavioral review.
