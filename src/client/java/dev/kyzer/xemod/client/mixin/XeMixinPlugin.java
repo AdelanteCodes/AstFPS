@@ -18,6 +18,18 @@ public final class XeMixinPlugin implements IMixinConfigPlugin {
         boolean optimization = mixinClassName.endsWith("FrustumMemoMixin") || mixinClassName.endsWith("AabbZeroOffsetMixin")
             || mixinClassName.endsWith("WorldTargetCleanupMixin");
         boolean apply = !(SAFE_MODE && optimization);
+        if (mixinClassName.endsWith("FrustumMemoMixin") && !Boolean.getBoolean("xe.enableVisibilityMemo")) {
+            HookAudit.record(mixinClassName, "disabled: experimental memo requires xe.enableVisibilityMemo=true");
+            return false;
+        }
+        if (mixinClassName.endsWith("AabbZeroOffsetMixin") && !Boolean.getBoolean("xe.enableZeroOffsetReuse")) {
+            HookAudit.record(mixinClassName, "disabled: experimental reuse requires xe.enableZeroOffsetReuse=true");
+            return false;
+        }
+        if (mixinClassName.endsWith("WorldTargetCleanupMixin") && !Boolean.getBoolean("xe.enableWorldTargetCleanup")) {
+            HookAudit.record(mixinClassName, "disabled: optional cleanup requires xe.enableWorldTargetCleanup=true");
+            return false;
+        }
         if (mixinClassName.endsWith("AabbZeroOffsetMixin") && Boolean.getBoolean("xe.disableZeroOffsetReuse")) {
             HookAudit.record(mixinClassName, "disabled by xe.disableZeroOffsetReuse");
             return false;

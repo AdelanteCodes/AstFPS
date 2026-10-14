@@ -29,14 +29,15 @@ public final class XeClient implements ClientModInitializer {
     private String label = "unlabelled";
 
     @Override public void onInitializeClient() {
-        XeRuntime.VISIBILITY_MEMO.enable(!XeRuntime.safeMode() && XeConfig.loadMemo());
+        XeRuntime.VISIBILITY_MEMO.enable(XeRuntime.memoHooksAvailable() && XeConfig.loadMemo());
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> {
             var root = ClientCommands.literal("xe").requires(FabricClientCommandSource::attended)
                 .executes(c -> reply(c.getSource(), "Xe-Mod: /xe status, diagnose, memo true|false, label, benchmark start|stop"));
             root.then(ClientCommands.literal("status").executes(c -> {
                 var source = c.getSource();
                 reply(source, "Experimental visibility memo: " + XeRuntime.VISIBILITY_MEMO.enabled() + "; safe mode: " + XeRuntime.safeMode());
-                for (String id : new String[]{"ferritecore", "modernfix", "jasione", "chunky"}) {
+                reply(source, "Safe mode controls Xe-Mod hooks only; bundled modules use their own configuration.");
+                for (String id : new String[]{"ferritecore", "modernfix", "jasione", "chunky", "immediatelyfast", "lithium", "sodium"}) {
                     var component = FabricLoader.getInstance().getModContainer(id);
                     reply(source, "Optimization component " + id + ": " + component.map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("not loaded"));
                 }
@@ -97,6 +98,7 @@ public final class XeClient implements ClientModInitializer {
     }
 
     private int setMemo(FabricClientCommandSource source, boolean enabled) {
+        if (enabled && !XeRuntime.memoHooksAvailable()) return reply(source, "Memo hooks were not installed. Restart with -Dxe.enableVisibilityMemo=true and safe mode off to opt in.");
         if (enabled && XeRuntime.safeMode()) return reply(source, "Safe mode disables optimization hooks. Remove -Dxe.safeMode=true and restart to test this feature.");
         if (enabled && XeRuntime.VISIBILITY_MEMO.failure() != null) return reply(source, "Feature previously failed and remains disabled. Save /xe diagnose and restart before retrying.");
         try {
@@ -124,6 +126,8 @@ public final class XeClient implements ClientModInitializer {
         report.put("javaVersion", System.getProperty("java.version"));
         report.put("os", System.getProperty("os.name"));
         report.put("safeMode", XeRuntime.safeMode());
+        report.put("safeModeScope", "Xe-Mod original hooks only; does not disable bundled upstream modules");
+        report.put("memoHooksAvailable", XeRuntime.memoHooksAvailable());
         report.put("hookReceipts", HookAudit.snapshot());
         report.put("visibilityMemoEnabled", XeRuntime.VISIBILITY_MEMO.enabled());
         report.put("visibilityMemoFailure", XeRuntime.VISIBILITY_MEMO.failure());

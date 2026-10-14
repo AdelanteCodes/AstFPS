@@ -1,0 +1,2 @@
+Fabric Loader 0.19.5's VersionPredicate parser accepted all 27 declared requirements in the compiled 0.3.0-rc.1 JAR and its six bundled modules against Minecraft 26.3, Java 25, Loader 0.19.5, Fabric API 0.162.0+26.3, MixinExtras 0.5.5, and the pinned component versions.
+This checks version predicates only. It does not execute Minecraft, apply mixins, or establish runtime compatibility or FPS gains.

@@ -1,0 +1,569 @@
+{
+  "modules": [
+    {
+      "id": "ferritecore",
+      "version": "9.0.0",
+      "depends": {
+        "fabricloader": ">=0.14.21",
+        "minecraft": ">=26.1 <27"
+      },
+      "breaks": {
+        "hydrogen": "<=0.3"
+      }
+    },
+    {
+      "id": "modernfix",
+      "version": "5.27.20-build.2",
+      "depends": {
+        "minecraft": "~26.3-",
+        "fabricloader": ">=0.16.10"
+      },
+      "breaks": {
+        "dashloader": "<5.0.0-beta.1"
+      }
+    },
+    {
+      "id": "jasione",
+      "version": "1.0.9+26.1.2-fabric",
+      "depends": {
+        "minecraft": ">=26.1",
+        "fabricloader": ">=0.16.0"
+      },
+      "breaks": {
+        "redirector": "*"
+      }
+    },
+    {
+      "id": "chunky",
+      "version": "1.5.3",
+      "depends": {
+        "fabricloader": ">=0.18.1",
+        "fabric-api": "*",
+        "minecraft": ">=26.1",
+        "java": ">=25"
+      },
+      "breaks": null
+    },
+    {
+      "id": "immediatelyfast",
+      "version": "1.17.1+26.3",
+      "depends": {
+        "java": ">=25",
+        "minecraft": "26.3.x",
+        "fabricloader": ">=0.19.3"
+      },
+      "breaks": null
+    },
+    {
+      "id": "lithium",
+      "version": "0.26.2+mc26.3",
+      "depends": {
+        "fabricloader": ">=0.19.5",
+        "minecraft": "~26.3",
+        "mixinextras": ">=0.5.5"
+      },
+      "breaks": {
+        "optifabric": "*"
+      }
+    }
+  ],
+  "sharedMixinTargets": {
+    "net.minecraft.world.phys.shapes.ArrayVoxelShape": [
+      {
+        "module": "ferritecore",
+        "mixin": "malte0811.ferritecore.mixin.accessors.ArrayVSAccess"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.minimal_nonvanilla.collisions.empty_space.ArrayVoxelShapeInvoker"
+      }
+    ],
+    "net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape": [
+      {
+        "module": "ferritecore",
+        "mixin": "malte0811.ferritecore.mixin.accessors.BitSetDVSAccess"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.minimal_nonvanilla.collisions.empty_space.BitSetDiscreteVoxelShapeAccessor"
+      }
+    ],
+    "net.minecraft.world.phys.shapes.VoxelShape": [
+      {
+        "module": "ferritecore",
+        "mixin": "malte0811.ferritecore.mixin.accessors.VoxelShapeAccess"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.block.moving_block_shapes.VoxelShapeMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.shapes.specialized_shapes.VoxelShapeMixin"
+      }
+    ],
+    "net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase": [
+      {
+        "module": "ferritecore",
+        "mixin": "malte0811.ferritecore.mixin.blockstatecache.BlockStateBaseMixin"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.perf.dynamic_resources.MixinBlockState"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.ai.pathing.BlockStateBaseMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.util.block_tracking.BlockStateBaseMixin"
+      }
+    ],
+    "net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase$Cache": [
+      {
+        "module": "ferritecore",
+        "mixin": "malte0811.ferritecore.mixin.blockstatecache.BlockStateCacheMixin"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.perf.cache_blockstate_cache_arrays.AbstractBlockStateCacheMixin"
+      }
+    ],
+    "net.minecraft.world.level.block.state.StateDefinition": [
+      {
+        "module": "ferritecore",
+        "mixin": "malte0811.ferritecore.mixin.fastmap.StateDefinitionMixin"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.perf.state_definition_construct.StateDefinitionMixin"
+      }
+    ],
+    "net.minecraft.core.component.PatchedDataComponentMap": [
+      {
+        "module": "ferritecore",
+        "mixin": "malte0811.ferritecore.mixin.datacomponents.PatchedDataComponentMapMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.util.item_component_and_count_tracking.PatchedDataComponentMapMixin"
+      }
+    ],
+    "net.minecraft.world.level.chunk.PalettedContainer": [
+      {
+        "module": "ferritecore",
+        "mixin": "malte0811.ferritecore.mixin.threaddetec.PalettedContainerMixin"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.perf.compact_bit_storage.PalettedContainerMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.chunk.no_locking.PalettedContainerMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.chunk.serialization.PalettedContainerMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.chunk_ticking.random_block_ticking.PalettedContainerMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.debug.palette.PalettedContainerMixin"
+      }
+    ],
+    "net.minecraft.server.MinecraftServer": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.fabric.mixin.core.MinecraftServerMixin"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.fabric.mixin.core.ClientMinecraftServerMixin"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.core.MinecraftServerMixin"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.perf.dedicated_reload_executor.MinecraftServerMixin"
+      },
+      {
+        "module": "chunky",
+        "mixin": "org.popcraft.chunky.mixin.MinecraftServerAccess"
+      },
+      {
+        "module": "chunky",
+        "mixin": "org.popcraft.chunky.mixin.MinecraftServerMixin"
+      }
+    ],
+    "net.minecraft.client.Minecraft": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.fabric.mixin.core.MCMixin_Fabric"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.fabric.mixin.feature.measure_time.MinecraftMixin_Fabric"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.bugfix.concurrency.MinecraftMixin"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.bugfix.world_leaks.MinecraftMixin"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.devenv.MinecraftMixin"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.feature.measure_time.MinecraftMixin"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.feature.remove_telemetry.MinecraftMixin_Telemetry"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.feature.spark_profile_world_join.MinecraftMixin"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.perf.dedicated_reload_executor.MinecraftMixin"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.perf.encoder_cache_leak.MinecraftMixin"
+      },
+      {
+        "module": "immediatelyfast",
+        "mixin": "net.raphimc.immediatelyfast.injection.mixins.core.MixinMinecraft"
+      },
+      {
+        "module": "immediatelyfast",
+        "mixin": "net.raphimc.immediatelyfast.injection.mixins.resource_pack_conflict_handling.MixinMinecraft"
+      }
+    ],
+    "net.minecraft.world.entity.Entity": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.bugfix.chunk_deadlock.EntityMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.alloc.deep_passengers.EntityMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.block.hopper.EntityAccessor"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.entity.collisions.movement.EntityMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.entity.collisions.unpushable_cramming.EntityMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.entity.sprinting_particles.EntityMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.experimental.entity.block_caching.EntityMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.experimental.entity.block_caching.block_support.EntityMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.experimental.entity.block_caching.suffocation.EntityMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.util.in_world_tracking.entity.EntityMixin"
+      }
+    ],
+    "net.minecraft.server.level.ServerChunkCache": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.bugfix.chunk_deadlock.ServerChunkCacheAccessor"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.feature.stalled_chunk_load_detection.ServerChunkCacheMixin"
+      },
+      {
+        "module": "chunky",
+        "mixin": "org.popcraft.chunky.mixin.ServerChunkCacheMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.chunk_access.ServerChunkCacheMixin"
+      }
+    ],
+    "net.minecraft.server.level.ServerLevel": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.bugfix.chunk_deadlock.ServerLevelMixin"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.perf.cache_strongholds.ServerLevelMixin"
+      },
+      {
+        "module": "chunky",
+        "mixin": "org.popcraft.chunky.mixin.ServerLevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.alloc.chunk_random.ServerLevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.entity.inactive_navigations.ServerLevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.minimal_nonvanilla.spawning.ServerLevelAccessor"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.util.accessors.ServerLevelAccessor"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.util.entity_movement_tracking.ServerLevelAccessor"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.block_entity_ticking.sleeping.ServerLevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.chunk_ticking.precipitation.ServerLevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.chunk_ticking.random_block_ticking.ServerLevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.explosions.block_raycast.skip_air.no_air_counting.ServerLevelMixin"
+      }
+    ],
+    "net.minecraft.util.SortedArraySet": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.bugfix.paper_chunk_patches.SortedArraySetMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.collections.chunk_tickets.SortedArraySetMixin"
+      }
+    ],
+    "net.minecraft.world.level.Level": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.feature.blockentity_incorrect_thread.LevelThreadAccessor"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.alloc.chunk_random.LevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.entity.collisions.intersection.LevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.entity.collisions.unpushable_cramming.LevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.minimal_nonvanilla.collisions.empty_space.LevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.util.accessors.LevelAccessor"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.util.block_entity_retrieval.LevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.util.data_storage.LevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.block_entity_ticking.chunk_tickable.LevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.block_entity_ticking.sleeping.LevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.chunk_access.LevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.inline_block_access.LevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.inline_height.LevelMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.fabric.mixin.block.hopper.LevelMixin"
+      }
+    ],
+    "net.minecraft.core.MappedRegistry": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.perf.compact_mojang_registries.MappedRegistryMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.util.initialization.MappedRegistryMixin"
+      }
+    ],
+    "net.minecraft.server.level.GenerationChunkHolder": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.perf.release_protochunks.GenerationChunkHolderAccessor"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.chunk_access.GenerationChunkHolderAccessor"
+      }
+    ],
+    "net.minecraft.server.level.ChunkHolder": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.perf.release_protochunks.ChunkHolderMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.util.chunk_status_tracking.ChunkHolderMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.chunk_access.ChunkHolderMixin"
+      }
+    ],
+    "net.minecraft.server.level.ChunkMap": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.perf.release_protochunks.ChunkMapMixin"
+      },
+      {
+        "module": "chunky",
+        "mixin": "org.popcraft.chunky.mixin.ChunkMapMixin"
+      }
+    ],
+    "net.minecraft.world.level.biome.Biome": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.perf.remove_biome_temperature_cache.BiomeMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.chunk_ticking.spread_ice.BiomeMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.temperature_cache.BiomeMixin"
+      }
+    ],
+    "net.minecraft.world.level.chunk.LevelChunk": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.bugfix.missing_block_entities.LevelChunkMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.collections.block_entity_tickers.LevelChunkMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.minimal_nonvanilla.world.block_entity_ticking.support_cache.LevelChunkMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.util.chunk_status_tracking.LevelChunkMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.block_entity_ticking.sleeping.LevelChunkMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.combined_heightmap_update.LevelChunkMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.game_events.dispatch.LevelChunkMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.inline_block_access.LevelChunkMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.world.inline_height.LevelChunkMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.fabric.mixin.compat.worldedit.LevelChunkMixin"
+      }
+    ],
+    "net.minecraft.client.multiplayer.ClientPacketListener": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.core.ClientPlayNetHandlerMixin"
+      },
+      {
+        "module": "lithium",
+        "mixin": "net.caffeinemc.mods.lithium.mixin.debug.palette.ClientPacketListenerMixin"
+      }
+    ],
+    "net.minecraft.client.gui.components.debug.DebugScreenEntries": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.feature.branding.DebugScreenEntriesInvoker"
+      },
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.feature.branding.DebugScreenEntriesMixin"
+      },
+      {
+        "module": "immediatelyfast",
+        "mixin": "net.raphimc.immediatelyfast.injection.mixins.core.MixinDebugScreenEntries"
+      }
+    ],
+    "net.minecraft.client.server.IntegratedServer": [
+      {
+        "module": "modernfix",
+        "mixin": "org.embeddedt.modernfix.common.mixin.perf.thread_priorities.IntegratedServerMixin"
+      },
+      {
+        "module": "chunky",
+        "mixin": "org.popcraft.chunky.mixin.client.IntegratedServerMixin"
+      }
+    ]
+  },
+  "limits": "Shared targets identify review candidates, not proven incompatibilities. No mixin application or game execution."
+}

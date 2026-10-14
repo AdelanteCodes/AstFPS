@@ -3,12 +3,45 @@
   "id": "xe_mod",
   "version": "${version}",
   "name": "Xe-Mod",
-  "description": "Performance optimizations with credited rendering, game-logic and memory components, plus Xe-Mod diagnostics.",
-  "authors": ["KyzerGoated"],
-  "contact": {"sources": "https://github.com/KyzerGoated/Xe-Mod"},
+  "description": "General-purpose memory, rendering and game-logic optimizations with optional diagnostics and chunk pregeneration.",
+  "authors": [
+    "KyzerGoated"
+  ],
+  "contact": {
+    "sources": "https://github.com/KyzerGoated/Xe-Mod"
+  },
   "license": "MIT",
   "environment": "client",
-  "entrypoints": {"client": ["dev.kyzer.xemod.client.XeClient"]},
-  "mixins": [{"config": "xe-mod.client.mixins.json", "environment": "client"}],
-  "depends": {"fabricloader": ">=0.19.5", "minecraft": "~26.3", "java": ">=25", "fabric-api": "*", "ferritecore": ">=9.0.0", "modernfix": "5.27.20-build.2", "jasione": ">=1.0.9", "chunky": ">=1.5.3"}
+  "entrypoints": {
+    "client": [
+      "dev.kyzer.xemod.client.XeClient"
+    ]
+  },
+  "mixins": [
+    {
+      "config": "xe-mod.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*",
+    "ferritecore": ">=9.0.0",
+    "modernfix": "5.27.20-build.2",
+    "jasione": ">=1.0.9",
+    "chunky": ">=1.5.3",
+    "immediatelyfast": "1.17.1+26.3",
+    "lithium": "0.26.2+mc26.3",
+    "mixinextras": ">=0.5.5"
+  },
+  "custom": {
+    "lithium:options": {
+      "mixin.world.temperature_cache": false
+    },
+    "ferritecore:disabled_options": [
+      "useSmallThreadingDetector"
+    ]
+  }
 }

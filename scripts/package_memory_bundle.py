@@ -1,4 +1,4 @@
-"""Package pinned, unmodified Fabric modules; no compilation or game tests."""
+"""Recreate the historical 0.2 memory bundle; use package_release.py for current releases."""
 import hashlib
 import io
 import json
@@ -9,7 +9,8 @@ ROOT = Path(__file__).resolve().parents[1]
 BASE_HASH = '305bd31aec577fd2218130c395487ebe5f8fcdb84a7c45b9414aaf2aecc2931f'
 
 def main():
-    components = json.loads((ROOT / 'third-party/components.json').read_text())
+    components = [c for c in json.loads((ROOT / 'third-party/components.json').read_text())
+                  if c['id'] in {'ferritecore', 'modernfix', 'jasione', 'chunky'}]
     base = ROOT / 'vendor/xe-mod-0.1.0-alpha.1.jar'
     assert hashlib.sha256(base.read_bytes()).hexdigest() == BASE_HASH, 'Core hash mismatch'
     paths = [base]

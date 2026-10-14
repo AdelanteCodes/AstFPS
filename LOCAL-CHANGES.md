@@ -17,3 +17,9 @@ Upstream: https://modrinth.com/mod/ferrite-core and https://github.com/malte0811
 ## Single-JAR packaging
 
 Created artifacts/xe-mod-memory-bundle-0.2.0-dev.jar with all four memory/pregeneration modules and the compiled alpha core nested unchanged. Added reproducible packaging script, pinned vendor binaries, manifest, checksums, and installation instructions. No game execution, tests, or GitHub upload. New source hooks are not compiled into this artifact.
+
+## 0.3.0-rc.1: FPS-focused general-purpose candidate
+
+Added ImmediatelyFast and Lithium to the single-JAR package. Compiled current core with Java 25. Removed default experimental frustum injections, made AABB/cleanup opt-in, delayed recorder allocation until start, and stopped inactive epoch writes. Added module/Sodium diagnostics and clear safe-mode scope. Applied supported compatibility overrides for duplicate temperature-cache and palette thread-detector patches. Manifest now drives hash validation and nested packaging. Six-module archive inspection found 24 shared targets; two overlapping implementations were addressed, not blanket compatibility verified.
+
+Local build initially hit Windows Java Unix-domain selector failure; a TCP-only build-JDK patch outside the repo allowed Gradle to run. Loom local-file include failed; switched to manifest-driven unmodified nested resources. Compilation and packaging then succeeded. No Minecraft launch, tests, or FPS measurement. Previous GitHub synchronization is ff4b56b; future updates use the current remote parent through the connector to avoid overwriting divergent local history.

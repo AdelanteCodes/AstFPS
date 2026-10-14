@@ -1,0 +1,87 @@
+{
+  "version": "0.3.0-rc.1",
+  "core": "Fresh Java 25 compilation of current source; no old alpha core nested",
+  "modules": [
+    {
+      "slug": "ferrite-core",
+      "id": "ferritecore",
+      "version": "9.0.0",
+      "file": "vendor/ferritecore-9.0.0-fabric.jar",
+      "license": "MIT",
+      "source": "https://github.com/malte0811/FerriteCore",
+      "page": "https://modrinth.com/mod/ferrite-core",
+      "sha512": "d81fa97e11784c19d42f89c2f433831d007603dd7193cee45fa177e4a6a9c52b384b198586e04a0f7f63cd996fed713322578bde9a8db57e1188854ae5cbe584",
+      "minecraftConstraint": ">=26.1 <27",
+      "state": "Included in compiled 0.3.0-rc.1; static archive review; runtime unverified"
+    },
+    {
+      "slug": "modernfix-mvus",
+      "id": "modernfix",
+      "version": "5.27.20-build.2",
+      "file": "vendor/modernfix-5.27.20-build.2.jar",
+      "license": "LGPL-3.0",
+      "source": "https://github.com/coredex-source/ModernFix---mVUS",
+      "page": "https://modrinth.com/mod/modernfix-mvus",
+      "sha512": "b586434056107aac4ef86e9351d66170dac65a45a1e5f8bd48fb931b3012ab2431b16476eb9c256773339e2b4c60f6f3e90a4709180f700b2aea59ff607f4243",
+      "minecraftConstraint": "~26.3-",
+      "state": "Included in compiled 0.3.0-rc.1; static archive review; runtime unverified"
+    },
+    {
+      "slug": "jasione",
+      "id": "jasione",
+      "version": "1.0.9+26.1.2-fabric",
+      "file": "vendor/jasione-1.0.9+26.1.2-fabric.jar",
+      "license": "LGPL-3.0-only",
+      "source": "https://github.com/decce6/Jasione",
+      "page": "https://modrinth.com/mod/jasione",
+      "sha512": "ad6ff0c19eab2945489c2523d19fcd79b39cc33ed7130e3c5b3ac13028dd66ed1d207faaa0b04399d2cfd67cbb1c2390d0733c667dea8c3bb9a01a3e03a61829",
+      "minecraftConstraint": ">=26.1",
+      "state": "Included in compiled 0.3.0-rc.1; static archive review; runtime unverified"
+    },
+    {
+      "slug": "chunky",
+      "id": "chunky",
+      "version": "1.5.3",
+      "file": "vendor/Chunky-Fabric-1.5.3.jar",
+      "license": "GPLv3",
+      "source": "https://github.com/pop4959/Chunky",
+      "page": "https://modrinth.com/mod/chunky",
+      "sha512": "b83bfe7b218d0aa6232af977ae741dc1f82b10e50cd12bb759f65cf416b8b62beccb543e587ef0b9670abe03815660f8e091bc6823624d65cf07300571573516",
+      "minecraftConstraint": ">=26.1",
+      "state": "Included in compiled 0.3.0-rc.1; static archive review; runtime unverified"
+    },
+    {
+      "slug": "immediatelyfast",
+      "id": "immediatelyfast",
+      "version": "1.17.1+26.3",
+      "file": "vendor/ImmediatelyFast-Fabric-1.17.1+26.3.jar",
+      "license": "LGPL-3.0-or-later",
+      "source": "https://github.com/RaphiMC/ImmediatelyFast",
+      "sha512": "8e139589fd995bce3d485a34d92a07243964212f7ed2e4fc2f6de5b9a74d0f59b03252e7ce40c64e006cf3e21bed5de27b830d33ef048b286e041f6178ad8428",
+      "minecraftConstraint": "26.3.x",
+      "state": "Included in compiled 0.3.0-rc.1; static archive review; runtime unverified"
+    },
+    {
+      "slug": "lithium",
+      "id": "lithium",
+      "version": "0.26.2+mc26.3",
+      "file": "vendor/lithium-fabric-0.26.2+mc26.3.jar",
+      "license": "LGPL-3.0-only",
+      "source": "https://github.com/CaffeineMC/lithium-fabric",
+      "sha512": "4d7fee66132eedc71feab9390b92c95d7058edbdad0fecfac1d836a2950b97a7ca463afbede61c7ef361ce65e1f927ab9e89dde5bf2e0e0ce486afb5c5dbee40",
+      "minecraftConstraint": "~26.3",
+      "state": "Included in compiled 0.3.0-rc.1; static archive review; runtime unverified"
+    }
+  ],
+  "validation": [
+    "Java compilation",
+    "archive integrity",
+    "pinned nested binaries",
+    "metadata module list",
+    "compatibility overrides",
+    "Java class version"
+  ],
+  "runtimeVerification": false,
+  "fpsImprovementMeasured": false,
+  "buildEnvironment": "Local Windows Java 25; build-only TCP selector workaround outside repository, not included in artifacts."
+}

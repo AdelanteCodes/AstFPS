@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MinecraftFrameMixin {
     @Inject(method = "runTick", at = @At("HEAD"))
     private void xeFrameStart(CallbackInfo callback) {
-        XeRuntime.frameEpoch++;
+        if (XeRuntime.VISIBILITY_MEMO.enabled()) XeRuntime.frameEpoch++;
         if (XeClient.RECORDER.isRecording()) XeClient.RECORDER.frameStart(System.nanoTime());
     }
 }

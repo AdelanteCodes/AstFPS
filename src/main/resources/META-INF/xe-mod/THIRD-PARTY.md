@@ -1,10 +1,10 @@
-# Local included components
+# Included components
 
-The local Xe-Mod dependency configuration includes unmodified modules with their own authors, identities, licenses and configuration:
+- ferritecore 9.0.0 — MIT — https://github.com/malte0811/FerriteCore
+- modernfix 5.27.20-build.2 — LGPL-3.0 — https://github.com/coredex-source/ModernFix---mVUS
+- jasione 1.0.9+26.1.2-fabric — LGPL-3.0-only — https://github.com/decce6/Jasione
+- chunky 1.5.3 — GPLv3 — https://github.com/pop4959/Chunky
+- immediatelyfast 1.17.1+26.3 — LGPL-3.0-or-later — https://github.com/RaphiMC/ImmediatelyFast
+- lithium 0.26.2+mc26.3 — LGPL-3.0-only — https://github.com/CaffeineMC/lithium-fabric
 
-- FerriteCore 9.0.0 â€” malte0811 and contributors â€” MIT â€” https://github.com/malte0811/FerriteCore
-- ModernFix-mVUS 5.27.20-build.2 â€” embeddedt, coredex and contributors â€” LGPL-3.0 â€” https://github.com/coredex-source/ModernFix---mVUS
-- Jasione 1.0.9+26.1.2-fabric â€” decce and contributors â€” LGPL-3.0-only â€” https://github.com/decce6/jasione
-- Chunky 1.5.3 â€” pop4959 and contributors â€” GPL v3 â€” https://github.com/pop4959/Chunky
-
-Copies of license texts are retained under `licenses/`; artifact identities and SHA-512 hashes are recorded in `third-party/components.json`. These components are not original Xe-Mod implementations. Xe-Mod's MIT license does not replace their licenses. This update is local only and is not compiled or redistributed. Before future distribution, provide the corresponding sources and required notices for the copyleft components. No component JAR has been renamed internally or modified.
+Unmodified independent modules retain upstream identities, authors and licenses. Xe-Mod own code is MIT; bundled components retain their respective licenses. Notices are under licenses/. Binary hashes and source links are in third-party/components.json. Available pinned source archives are under third-party/sources; verify remaining corresponding-source coverage before broader redistribution.

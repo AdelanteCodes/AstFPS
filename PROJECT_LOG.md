@@ -113,4 +113,14 @@ Module identities and notices are preserved. See `third-party/components.json`,
 Keep exact corresponding upstream sources with any future copyleft distribution.
 All changes and artifacts are saved in the local Git repository. Nothing was
 uploaded to GitHub during this integration. Read PROJECT_LOG.md to continue.
-`n## GitHub synchronization requested`nUser authorized uploading the complete local integration, changelogs and existing research records. Copied the historical audit/inventory/review records into research/records. These records describe prior investigation, not proof that every mod was deeply reviewed. No new Minecraft tests were run.
+
+## GitHub synchronization requested
+User authorized uploading the complete local integration, changelogs and existing research records. Copied the historical audit/inventory/review records into research/records. These records describe prior investigation, not proof that every mod was deeply reviewed. No new Minecraft tests were run.
+
+## 0.3.0-rc.1: FPS-focused general-purpose candidate
+
+Added ImmediatelyFast and Lithium to the single-JAR package. Compiled current core with Java 25. Removed default experimental frustum injections, made AABB/cleanup opt-in, delayed recorder allocation until start, and stopped inactive epoch writes. Added module/Sodium diagnostics and clear safe-mode scope. Applied supported compatibility overrides for duplicate temperature-cache and palette thread-detector patches. Manifest now drives hash validation and nested packaging. Six-module archive inspection found 24 shared targets; two overlapping implementations were addressed, not blanket compatibility verified.
+
+Local build initially hit Windows Java Unix-domain selector failure; a TCP-only build-JDK patch outside the repo allowed Gradle to run. Loom local-file include failed; switched to manifest-driven unmodified nested resources. Compilation and packaging then succeeded. No Minecraft launch, tests, or FPS measurement. Previous GitHub synchronization is ff4b56b; future updates use the current remote parent through the connector to avoid overwriting divergent local history.
+
+Publication: user-authorized private GitHub update includes the compiled 0.3.0-rc.1 artifacts, source package, six-module manifest, static review and changelogs. No automatic cloud workflow is triggered; workflows remain manual.

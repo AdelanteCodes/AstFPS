@@ -5,7 +5,7 @@ import java.util.Arrays;
 /** Render-thread recorder: bounded storage, no allocations on the per-frame path. */
 public final class FrameRecorder {
     public static final int CAPACITY = 60_000;
-    private final long[] intervals = new long[CAPACITY];
+    private long[] intervals;
     private int count;
     private long previous;
     private boolean hasPrevious;
@@ -13,6 +13,7 @@ public final class FrameRecorder {
     private boolean capped;
 
     public void start() {
+        if (intervals == null) intervals = new long[CAPACITY];
         count = 0;
         hasPrevious = false;
         capped = false;
@@ -34,7 +35,7 @@ public final class FrameRecorder {
 
     public Snapshot stop() {
         recording = false;
-        return new Snapshot(Arrays.copyOf(intervals, count), capped);
+        return new Snapshot(intervals == null ? new long[0] : Arrays.copyOf(intervals, count), capped);
     }
 
     public boolean isRecording() { return recording; }

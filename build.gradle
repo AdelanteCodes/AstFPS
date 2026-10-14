@@ -25,10 +25,13 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
     // Independent, credited modules, kept unmodified and replaceable by Fabric Loader.
-    include(implementation(files('vendor/ferritecore-9.0.0-fabric.jar')))
-    include(implementation(files('vendor/modernfix-5.27.20-build.2.jar')))
-    include(implementation(files('vendor/jasione-1.0.9+26.1.2-fabric.jar')))
-    include(implementation(files('vendor/Chunky-Fabric-1.5.3.jar')))
+    new groovy.json.JsonSlurper().parse(file('third-party/components.json')).each { component ->
+        def binary = file(component.file)
+        if (!binary.exists()) throw new GradleException("Missing pinned component: ${component.file}")
+        def actual = java.security.MessageDigest.getInstance('SHA-512').digest(binary.bytes).encodeHex().toString()
+        if (actual != component.sha512) throw new GradleException("Component checksum mismatch: ${component.file}")
+        implementation(files(binary))
+    }
     testImplementation platform('org.junit:junit-bom:5.13.4')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -44,8 +47,22 @@ tasks.withType(JavaCompile).configureEach { options.release = 25 }
 processResources {
     inputs.property 'version', project.version
     filesMatching('fabric.mod.json') { expand 'version': project.version }
+    inputs.file('third-party/components.json')
+    doLast {
+        def metadataFile = destinationDir.toPath().resolve('fabric.mod.json').toFile()
+        def metadata = new groovy.json.JsonSlurper().parse(metadataFile)
+        metadata.jars = new groovy.json.JsonSlurper().parse(file('third-party/components.json')).collect {
+            [file: "META-INF/jars/${file(it.file).name}"]
+        }
+        metadataFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(metadata))
+    }
 }
-jar { from('LICENSE') }
+jar {
+    from('LICENSE')
+    new groovy.json.JsonSlurper().parse(file('third-party/components.json')).each { component ->
+        from(component.file) { into 'META-INF/jars' }
+    }
+}
 tasks.named('sourcesJar') {
     from('third-party/sources') { into 'third-party/sources' }
 }

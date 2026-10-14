@@ -9,6 +9,7 @@ public final class XeRuntime {
     public static final FeatureGate VISIBILITY_MEMO = new FeatureGate("visibility-memo");
     private static final Logger LOGGER = LoggerFactory.getLogger("Xe-Mod");
     public static boolean safeMode() { return Boolean.getBoolean("xe.safeMode"); }
+    public static boolean memoHooksAvailable() { return !safeMode() && Boolean.getBoolean("xe.enableVisibilityMemo"); }
     public static void memoFailure(String stage, RuntimeException error) {
         VISIBILITY_MEMO.disableAfterFailure(stage, error);
         LOGGER.error("XE-FEATURE-DISABLED visibility-memo stage={} -- vanilla fallback retained; /xe diagnose", stage, error);
