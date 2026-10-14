@@ -80,7 +80,7 @@ public final class BenchmarkClient implements ClientModInitializer {
             var server = client.getSingleplayerServer();
             if (server == null) throw new IllegalStateException("Missing integrated server");
             server.execute(() -> {
-                server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "tp @p 0 -60 0 180 0");
+                server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "tp @p 0.0 -60.0 0.0 180 0");
                 server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "time set noon");
                 for (int row = 0; row < 8; row++) {
                     for (int col = 0; col < 16; col++) {
@@ -104,7 +104,7 @@ public final class BenchmarkClient implements ClientModInitializer {
                 if (stableAt == 0) stableAt = now;
             } else stableAt = 0;
             if (now - readyAt < 30_000_000_000L || stableAt == 0 || now - stableAt < 5_000_000_000L) return;
-            if (Math.abs(client.player.getX()) > 0.1 || Math.abs(client.player.getZ()) > 0.1) throw new IllegalStateException("Player setup failed");
+            if (Math.abs(client.player.getX()) > 0.1 || Math.abs(client.player.getZ()) > 0.1) throw new IllegalStateException("Player setup failed: " + client.player.position());
             measuring = true;
             sampleAt = previous = now;
             if (!MODE.equals("baseline")) {
@@ -157,6 +157,8 @@ public final class BenchmarkClient implements ClientModInitializer {
         result.put("fpsLimit", client.options.framerateLimit().get());
         result.put("graphicsPreset", client.options.graphicsPreset().get().toString());
         result.put("world", "flat seed 5600; fixed camera; 128 stationary cows; noon");
+        result.put("cameraPosition", new double[]{client.player.getX(), client.player.getY(), client.player.getZ()});
+        result.put("cameraAngles", new float[]{client.player.getYRot(), client.player.getXRot()});
         result.put("samples", count);
         result.put("averageFps", count * 1_000_000_000D / total);
         result.put("p99FrameTimeMs", sorted[(int) Math.ceil(count * 0.99) - 1] / 1_000_000D);
