@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "xe_mod_gametest",
+  "version": "1.0.0",
+  "name": "Xe-Mod client checks",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-client-gametest": ["dev.kyzer.xemod.gametest.VisibilityGameTest"]
+  },
+  "depends": {"xe_mod": "*"}
+}

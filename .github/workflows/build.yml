@@ -22,3 +22,32 @@ jobs:
           name: xe-mod-original-prototype
           path: build/libs/*.jar
           if-no-files-found: error
+  client-checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        safe-mode: ['false', 'true']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+      - run: sudo apt-get update && sudo apt-get install -y xvfb mesa-vulkan-drivers libgl1-mesa-dri
+      - run: chmod +x gradlew
+      - name: Launch Minecraft and verify hooks
+        run: xvfb-run -a ./gradlew --no-daemon runClientGameTest
+        env:
+          JAVA_TOOL_OPTIONS: '-Dxe.safeMode=${{ matrix.safe-mode }}'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: client-checks-${{ matrix.safe-mode }}
+          path: |
+            build/run/clientGameTest/logs/
+            build/run/clientGameTest/crash-reports/
+            build/run/clientGameTest/screenshots/
+            build/reports/
+            build/test-results/

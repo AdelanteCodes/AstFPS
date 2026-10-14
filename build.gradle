@@ -41,3 +41,10 @@ tasks.register('coreChecks', JavaExec) {
 }
 check.dependsOn coreChecks
 test { useJUnitPlatform() }
+
+fabricApi.configureTests {
+    createSourceSet = true
+    modId = 'xe_mod_gametest'
+    enableGameTests = false
+    enableClientGameTests = true
+}
