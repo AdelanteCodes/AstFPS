@@ -4,7 +4,7 @@ User direction: build original terrain-rendering code, do not depend on Sodium.
 The user will run before/after captures on their PC later. Minecraft execution
 and runtime tests remain off in this environment. The active goal is not achieved.
 
-## Current original stage: 0.4.0-dev.1
+## Current original stage: 0.4.0-dev.2
 
 XeTerrainBatcher independently collects visible section draws, groups opaque
 commands by actual GPU-buffer identity within each terrain layer, and submits
@@ -13,7 +13,7 @@ dispatcher buffer lookups; ordered transparency only groups adjacent compatible
 draws, then preserves the engine's reverse submission order. No meshes, lights,
 textures, visible entities, particles, resolution or distance settings are reduced.
 
-This replaces CPU preparation for the engine's indirect terrain path. It still
+This replaces CPU preparation for both the engine's direct and indirect terrain paths. It still
 uses vanilla meshing, visibility, GPU allocation and shader pipelines. It is not
 a completed independent terrain engine or a demonstrated Sodium replacement.
 Minecraft 26.3 already has shared terrain buffers and indirect multi-draw; adding
@@ -22,7 +22,7 @@ those names alone is not evidence of a speedup. Our stage could still regress.
 Opt in with -Dxe.enableTerrainBatcher=true. The hook is skipped in Xe safe mode
 and when Sodium, Iris, Nvidium, VulkanMod, VulkanFlow or Meshelium is loaded.
 Unrecognized renderer mods remain unassessed. On devices where Minecraft chooses
-direct drawing, that path stays vanilla. The first RuntimeException disables
+direct drawing, our stage constructs direct draw descriptors instead of requiring indirect hardware support. The first RuntimeException disables
 our stage, records a stack trace and leaves the vanilla method uncancelled.
 This is a defensive fallback, not proof that every runtime error is recoverable.
 
@@ -65,3 +65,20 @@ https://github.com/RaphiMC/ImmediatelyFast#performance
 
 No deadline, universal multiplier or 500-FPS guarantee is established. The 5x
 target remains active and requires real measurements of a fixed agreed workload.
+
+## dev.2 CPU reuse and direct backend
+
+Renderer-owned scratch now reuses layer containers, grouping maps and immutable
+integer-only command records when all five command fields match. GPU buffer
+identities/offsets are re-read every frame under the dispatcher lock; no GPU slices,
+meshes, world objects or mutable render commands are cached across frames.
+Scratch drops GPU references in a finally block, limits retained records to 16,384
+across at most 32 batches per layer, trims high-water arrays, and is released on
+renderer close or feature failure. Direct descriptors capture uniform indices by
+value and have frame-owned result lists.
+
+Vanilla DynamicGpuDataStorageMapped.writeDataBatchedMultiple serializes command
+lists synchronously inside a mapped-view scope and retains only the last immutable
+record; this was checked against the 26.3 client bytecode/decompilation before
+adding CPU scratch reuse. GPU storage and in-flight lifetime management remain
+vanilla. Compilation does not establish visual parity or an FPS gain.

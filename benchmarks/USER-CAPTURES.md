@@ -3,7 +3,7 @@
 No benchmark was run here. This procedure isolates our terrain submission stage;
 it does not measure the entire package against Minecraft without Xe-Mod.
 
-Install the 0.4.0-dev.1 JAR with Fabric API, removing old Xe-Mod/bundle copies and
+Install the 0.4.0-dev.2 JAR with Fabric API, removing old Xe-Mod/bundle copies and
 separate bundled modules. Leave Sodium and other renderer replacements out.
 Add -Dxe.enableTerrainBatcher=true to JVM arguments. Keep the same world snapshot,
 PC, Java/heap, GPU backend, drivers, graphics, resolution, render/simulation distance,
@@ -19,7 +19,7 @@ focused and active so background/AFK throttling does not limit the run.
 4. Set /xe terrain true. Warm up again and record the identical route for 45 seconds.
 5. Repeat until there are at least three captures per mode. Alternate starting order.
 6. Export /xe diagnose. If optimized captures show no submitted terrain frames,
-   this GPU/path used vanilla fallback and cannot establish a backend gain.
+   the hook was skipped, disabled or failed; the capture cannot establish a backend gain.
 
 Compare the local JSON files with:
 

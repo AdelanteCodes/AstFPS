@@ -128,3 +128,7 @@ Publication: user-authorized private GitHub update includes the compiled 0.3.0-r
 ## 0.4.0-dev.1: original terrain submission stage
 
 User clarified: build our own terrain-rendering code with no Sodium dependency, and keep coding while they perform captures later. Added XeTerrainBatcher and TerrainBatchMixin: identity-based per-layer buffer grouping, empty-layer lookup avoidance, ordered transparent submission and indirect commands via portable Minecraft API. No Sodium code/binary was imported. Vanilla meshing/visibility/shaders/GPU allocation remain in use. Opt-in hook, known-renderer bypass and runtime failure gate preserve a vanilla fallback. Added terrain toggle, diagnostics, per-capture context/frame counts, and user-capture comparison script. Compilation succeeded without Minecraft execution or tests. Full engine and 5x target are unfinished.
+
+## 0.4.0-dev.2: direct submission and bounded CPU command reuse
+
+Added original direct submission alongside indirect submission, selected by the vanilla renderer capability path. Added renderer-owned scratch and exact immutable command record reuse; all five command integers must match. GPU identities and offsets remain fresh per frame. GPU/world references are cleared after preparation; pooled primitive records and arrays have retention limits/high-water trimming; workspace discarded on close/failure. Added allocated/reused command and direct/indirect frame counters. Inspected vanilla synchronous command serialization before allowing scratch reuse. No runtime tests or measurements. 5x remains unproven.

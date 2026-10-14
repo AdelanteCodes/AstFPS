@@ -22,6 +22,10 @@ public final class XeRuntime {
         return null;
     }
     public static long terrainBatchFrames;
+    public static long terrainDirectFrames;
+    public static long terrainIndirectFrames;
+    public static long terrainCommandRecordsAllocated;
+    public static long terrainCommandRecordsReused;
     public static long terrainSectionDraws;
     public static long terrainGpuBatches;
     public static long terrainFallbacks;

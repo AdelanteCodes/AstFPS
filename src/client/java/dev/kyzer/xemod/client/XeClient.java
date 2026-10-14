@@ -40,6 +40,7 @@ public final class XeClient implements ClientModInitializer {
                 var source = c.getSource();
                 reply(source, "Experimental visibility memo: " + XeRuntime.VISIBILITY_MEMO.enabled() + "; safe mode: " + XeRuntime.safeMode());
                 reply(source, "Original terrain batcher: " + XeRuntime.TERRAIN_BATCHER.enabled() + "; frames/draws/batches: " + XeRuntime.terrainBatchFrames + "/" + XeRuntime.terrainSectionDraws + "/" + XeRuntime.terrainGpuBatches);
+                reply(source, "Terrain direct/indirect frames: " + XeRuntime.terrainDirectFrames + "/" + XeRuntime.terrainIndirectFrames + "; command records reused/allocated: " + XeRuntime.terrainCommandRecordsReused + "/" + XeRuntime.terrainCommandRecordsAllocated);
                 if (XeRuntime.rendererConflict() != null) reply(source, "Terrain replacement bypassed for renderer: " + XeRuntime.rendererConflict());
                 reply(source, "Safe mode controls Xe-Mod hooks only; bundled modules use their own configuration.");
                 for (String id : new String[]{"ferritecore", "modernfix", "jasione", "chunky", "immediatelyfast", "lithium", "sodium"}) {
@@ -98,6 +99,10 @@ public final class XeClient implements ClientModInitializer {
         metadata.put("terrainFramesInCapture", XeRuntime.terrainBatchFrames - benchmarkTerrainFramesStart);
         metadata.put("terrainSectionDraws", XeRuntime.terrainSectionDraws);
         metadata.put("terrainGpuBatches", XeRuntime.terrainGpuBatches);
+        metadata.put("terrainDirectFrames", XeRuntime.terrainDirectFrames);
+        metadata.put("terrainIndirectFrames", XeRuntime.terrainIndirectFrames);
+        metadata.put("terrainCommandRecordsReused", XeRuntime.terrainCommandRecordsReused);
+        metadata.put("terrainCommandRecordsAllocated", XeRuntime.terrainCommandRecordsAllocated);
         metadata.put("visibilityMemoHits", XeRuntime.visibilityHits);
         metadata.put("visibilityMemoMisses", XeRuntime.visibilityMisses);
         metadata.put("sampleCapReached", snapshot.capped());
@@ -160,6 +165,10 @@ public final class XeClient implements ClientModInitializer {
         report.put("terrainSectionDraws", XeRuntime.terrainSectionDraws);
         report.put("terrainGpuBatches", XeRuntime.terrainGpuBatches);
         report.put("terrainFallbacks", XeRuntime.terrainFallbacks);
+        report.put("terrainDirectFrames", XeRuntime.terrainDirectFrames);
+        report.put("terrainIndirectFrames", XeRuntime.terrainIndirectFrames);
+        report.put("terrainCommandRecordsReused", XeRuntime.terrainCommandRecordsReused);
+        report.put("terrainCommandRecordsAllocated", XeRuntime.terrainCommandRecordsAllocated);
         report.put("hookReceipts", HookAudit.snapshot());
         report.put("visibilityMemoEnabled", XeRuntime.VISIBILITY_MEMO.enabled());
         report.put("visibilityMemoFailure", XeRuntime.VISIBILITY_MEMO.failure());

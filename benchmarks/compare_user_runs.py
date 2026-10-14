@@ -33,7 +33,7 @@ def main():
             raise ValueError('PC/settings, labels and loaded mod versions must match across all captures')
     if any(run.get('terrainBatcherEnabled') for run, _ in baseline): raise ValueError('Baseline must use vanilla terrain submission')
     if not all(run.get('terrainBatcherEnabled') for run, _ in optimized): raise ValueError('Optimized captures must enable Xe terrain submission')
-    if not all(run.get('terrainFramesInCapture', 0) > 0 for run, _ in optimized): raise ValueError('No original terrain frames were submitted; GPU may be using vanilla direct draws')
+    if not all(run.get('terrainFramesInCapture', 0) > 0 for run, _ in optimized): raise ValueError('No original terrain frames were submitted; check hook status, failures and world rendering')
     old = statistics.median(fps for _, fps in baseline)
     new = statistics.median(fps for _, fps in optimized)
     paired = [new_fps / old_fps for (_, old_fps), (_, new_fps) in zip(baseline, optimized)]
