@@ -1,10 +1,5 @@
 name: Publish first Xe-Mod prerelease
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/release.yml'
-      - 'releases/0.1.0-alpha.1.md'
   workflow_dispatch:
 permissions:
   contents: write

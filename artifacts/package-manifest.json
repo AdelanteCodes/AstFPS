@@ -1,0 +1,71 @@
+{
+  "modules": [
+    {
+      "file": "xe-mod-0.1.0-alpha.1.jar",
+      "id": "xe_mod",
+      "version": "0.1.0-alpha.1",
+      "depends": {
+        "fabricloader": ">=0.19.5",
+        "minecraft": "~26.3",
+        "java": ">=25",
+        "fabric-api": "*"
+      },
+      "breaks": {},
+      "sha256": "305bd31aec577fd2218130c395487ebe5f8fcdb84a7c45b9414aaf2aecc2931f"
+    },
+    {
+      "file": "ferritecore-9.0.0-fabric.jar",
+      "id": "ferritecore",
+      "version": "9.0.0",
+      "depends": {
+        "fabricloader": ">=0.14.21",
+        "minecraft": ">=26.1 <27"
+      },
+      "breaks": {
+        "hydrogen": "<=0.3"
+      },
+      "sha256": "213966c72ed967acc7392beb28a866fba301ff56b9976c2e7801c2db7de6bf22"
+    },
+    {
+      "file": "modernfix-5.27.20-build.2.jar",
+      "id": "modernfix",
+      "version": "5.27.20-build.2",
+      "depends": {
+        "minecraft": "~26.3-",
+        "fabricloader": ">=0.16.10"
+      },
+      "breaks": {
+        "dashloader": "<5.0.0-beta.1"
+      },
+      "sha256": "f340fff04132ae9b60eae494d2de4cd177d436da8c0e525d6bd8f5b15ed141b5"
+    },
+    {
+      "file": "jasione-1.0.9+26.1.2-fabric.jar",
+      "id": "jasione",
+      "version": "1.0.9+26.1.2-fabric",
+      "depends": {
+        "minecraft": ">=26.1",
+        "fabricloader": ">=0.16.0"
+      },
+      "breaks": {
+        "redirector": "*"
+      },
+      "sha256": "111b508a5eb9486af2d4c53408b5e73b1fc3f390e11a28402dbc9ef56204e118"
+    },
+    {
+      "file": "Chunky-Fabric-1.5.3.jar",
+      "id": "chunky",
+      "version": "1.5.3",
+      "depends": {
+        "fabricloader": ">=0.18.1",
+        "fabric-api": "*",
+        "minecraft": ">=26.1",
+        "java": ">=25"
+      },
+      "breaks": {},
+      "sha256": "ecdfc55a0f67f3ec6f40850687615c941ae226bd88f4e06188a7b268fd3da942"
+    }
+  ],
+  "validation": "Archive integrity, pinned hashes, unique IDs and referenced resources checked. No game execution or tests.",
+  "core": "Unmodified compiled 0.1.0-alpha.1; newer source-only hooks are not in this artifact."
+}

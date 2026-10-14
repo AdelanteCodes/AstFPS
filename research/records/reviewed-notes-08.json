@@ -1,0 +1,51 @@
+{
+  "reload-server-list": {
+    "scope": "All four reconstructed classes reviewed.",
+    "mechanics": ["Registers a refresh key and invokes multiplayer-list refresh when it is pressed with Control. Plays a UI click sound for that path and at the existing refresh invocation."],
+    "risks": ["Adds another refresh path and can overlap normal key processing/sound hooks. Refreshing creates additional network ping work."],
+    "validation": ["Check Ctrl/key remapping, existing F5 behavior, event consumption, duplicate sounds, and refresh cancellation."],
+    "fit": "UI convenience, not optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "rebind-quick-swap": {
+    "scope": "All four reconstructed classes reviewed; external config/keybind library not reviewed.",
+    "mechanics": ["Adds a configurable held quick-swap key. Container click/release shift tests become originalShift OR customHeld, while recipe-book shift testing is replaced by customHeld only."],
+    "risks": ["Container and recipe-book behavior treat the original Shift key differently. Changes inventory action selection rather than computation cost."],
+    "validation": ["Test original/custom keys separately and together, click/release, recipe-book crafting, and modifier changes during dragging."],
+    "fit": "Input remapping utility, not performance optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "log-cleaner-multiloader": {
+    "scope": "Complete reconstructed main class and nested config reviewed.",
+    "mechanics": ["At initialization, loads/writes a config, scans the relative logs directory, and deletes matching compressed dated logs only when their newest access/modification/creation timestamp is older than fourteen days.", "The filename pattern accepts a single-digit log sequence. The observed implementation uses inlined fourteen-day/non-silent behavior rather than reading configurable values at the deletion/logging sites."],
+    "risks": ["Permanently deletes diagnostic files when installed. Relative directory assumptions and timestamp support differ by launcher/filesystem; malformed JSON can fail separately from I/O errors.", "Changing serialized final config fields may not affect already-inlined code behavior."],
+    "validation": ["Inspect policy without executing deletions; test path/pattern/date selection in an isolated fixture, config behavior, missing directories, and I/O failures."],
+    "fit": "Disk housekeeping, not frame-time optimization; not executed during this research.",
+    "evidence": ["**/*.java"]
+  },
+  "environmental-fog-disable": {
+    "scope": "Core option, renderer accessor, and video-settings hook reviewed; complete config error handling still pending.",
+    "partial": true,
+    "mechanics": ["Adds a persisted environmental-fog boolean option to the video settings array. Each client tick writes the chosen value to FogRenderer.fogEnabled through a static accessor; default disables fog."],
+    "risks": ["Changes atmosphere/visibility. The target field can govern more than one fog mode; static field replacement can overlap other mods or renderer changes."],
+    "validation": ["Trace the field's consumers, inspect full config parsing/writes, and compare dimensions, fluids, status effects, toggling, and renderer integrations."],
+    "fit": "Visual setting change, not unchanged-visuals optimization.",
+    "evidence": ["**/EnvFogDisableMod.java", "**/*Mixin.java"]
+  },
+  "nimbus-2000": {
+    "scope": "All three reconstructed Java classes reviewed; broom assets/recipes remain data content.",
+    "mechanics": ["Registers a broom item. On server join and every server tick, grants survival players flight while either hand holds the broom, turns flight off after release, synchronizes changed abilities, and resets fall distance while held.", "Cancels hunger exhaustion for those survival broom holders."],
+    "risks": ["Changes movement, fall damage, hunger, and flight permissions; can overwrite other mods' mayfly decisions. Additional item data is required for full content review."],
+    "validation": ["Test hand switches, inventory changes in flight, game-mode transitions, other flight systems, fall damage, exhaustion, and client ability synchronization."],
+    "fit": "Gameplay/content feature, not optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "calc": {
+    "scope": "Both reconstructed Java classes reviewed completely.",
+    "mechanics": ["Registers a client /calc command and evaluates arithmetic with recursive descent: sum over products over parenthesized/numeric primaries.", "Strips whitespace, caps expression length at 4096 and parenthesis depth at 128, checks trailing input, rejects division by zero and non-finite results. The shown grammar does not implement unary minus or exponent notation."],
+    "risks": ["Runs parsing in the command handler; bounded input/depth limit workload but unsupported syntax can surprise users."],
+    "validation": ["Check precedence, nested expressions, malformed numbers, negative/unary syntax, length/depth boundaries, and floating-point overflow."],
+    "fit": "Calculator UI utility, unrelated to Minecraft rendering optimization.",
+    "evidence": ["**/*.java"]
+  }
+}

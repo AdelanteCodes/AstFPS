@@ -1,0 +1,90 @@
+{
+  "nopackcompatcheck": {
+    "scope": "Both reconstructed classes reviewed.",
+    "mechanics": ["Replaces PackCompatibility.isCompatible's returned value with true, hiding incompatibility handling wherever callers use that query. The initializer is empty."],
+    "risks": ["A pack can be reported compatible without its resource format actually being understood. This suppresses a check, not a resource migration."],
+    "validation": ["Check too-old/too-new pack formats, real load errors, and every caller affected by the substituted query."],
+    "fit": "Compatibility-warning suppression; not performance optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "podium": {
+    "scope": "Both reconstructed mixins reviewed.",
+    "mechanics": ["Returns false from a renderer's PojavLauncher detection and cancels its LWJGL runtime version check."],
+    "risks": ["Suppressing environment checks does not supply missing graphics/runtime capabilities. Renderer class/method contracts can change across versions."],
+    "validation": ["Verify actual backend/LWJGL support and behavior after check suppression on the targeted launcher."],
+    "fit": "Launcher compatibility bypass; not an optimization algorithm.",
+    "evidence": ["**/*.java"]
+  },
+  "nondirectionaldamagetiltfix": {
+    "scope": "Both reconstructed classes reviewed.",
+    "mechanics": ["Wraps the hurt-direction read during camera render-state extraction. If damage has no source position, indirect entity, or direct entity, chooses a random zero/180-degree direction once per DamageSource instance and reuses it during that hit."],
+    "risks": ["Changes camera tilt for nondirectional damage. Caching by DamageSource identity and consuming the entity RNG can differ from the intended original behavior."],
+    "validation": ["Check directional/non-directional sources, repeated damage-source instances, hurt-time transitions, and camera animation."],
+    "fit": "Camera bug fix/visual behavior change, not general performance optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "breaking-place": {
+    "scope": "All three reconstructed classes reviewed.",
+    "mechanics": ["After successful client-side block-item placement, reads the placed state and invokes the ordinary destroy-block particle effect when the state is non-air."],
+    "risks": ["Adds particles and rendering/simulation work; does not reduce work. Success-result and placed-position semantics matter for special placement items."],
+    "validation": ["Check successful/failed/multiblock placements, client/server duplication, particle settings, and special block items."],
+    "fit": "Additional visual effect; excluded from optimization candidates.",
+    "evidence": ["**/*.java"]
+  },
+  "better-place-bind": {
+    "scope": "Both reconstructed classes reviewed.",
+    "mechanics": ["Tracks how long the use key is held with wall-clock time. After 200 milliseconds, clears Minecraft.rightClickDelay every client tick; releasing use resets the hold timer."],
+    "risks": ["Changes action repeat rate and can increase network/action work. Wall-clock adjustments and screen/item behavior can change timing."],
+    "validation": ["Check hold/release, GUI use, different use items, server rate limits, and clock adjustments."],
+    "fit": "Input/gameplay repeat behavior, not cheaper frames.",
+    "evidence": ["**/*.java"]
+  },
+  "better-left-click": {
+    "scope": "Both reconstructed classes reviewed.",
+    "mechanics": ["After holding attack for 200 milliseconds, clears missTime each tick and calls startAttack while no GUI screen is open. Releasing attack resets the timer."],
+    "risks": ["Changes attack repeat/miss cooldown behavior and can issue additional actions. It does not remove rendering cost."],
+    "validation": ["Test held attacks against entities/blocks/air, GUI transitions, key rebindings, and server action handling."],
+    "fit": "Input/gameplay timing modification, not optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "enttick": {
+    "scope": "All four reconstructed classes reviewed.",
+    "mechanics": ["Suppresses ChunkMap.tick at its ServerChunkCache.tick call site, then invokes that method through an accessor at the tail of ServerLevel.tick."],
+    "risks": ["Moves entity tracking/network updates to a different tick phase. Every relevant call path must tick exactly once, including exceptional/paused/skipped paths."],
+    "validation": ["Compare impulse/position packets and tracker timing, count calls per world tick, and test pause/freeze/dimension transitions."],
+    "fit": "Server update-order fix; no direct work-count/FPS reduction established.",
+    "evidence": ["**/*.java"]
+  },
+  "deobfuscator": {
+    "scope": "Both reconstructed classes reviewed.",
+    "mechanics": ["A key binding toggles a client flag and status overlay. When enabled, Style.isObfuscated always returns false, exposing the original characters rather than randomized obfuscated glyph rendering."],
+    "risks": ["Changes displayed text and server-intended presentation. The scope applies to every style query, not only selected player labels."],
+    "validation": ["Check chat, labels, UI, all style inheritance, and toggle changes in cached text rendering."],
+    "fit": "Text presentation utility; excluded from unchanged visuals.",
+    "evidence": ["**/*.java"]
+  },
+  "the-nofog-mod": {
+    "scope": "All three reconstructed classes reviewed.",
+    "mechanics": ["At fog setup completion, sets render-distance and environmental fog end to a very large float except for blindness/darkness and water/lava/powder-snow fog cases."],
+    "risks": ["Changes atmospheric visuals and can expose/render work previously hidden by fog. Capturing specific local variables is version-fragile."],
+    "validation": ["Check dimensions, weather, effects, fluid/submersion cases, fog starts/ends, and local capture layout."],
+    "fit": "Fog removal; not unchanged-visuals performance optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "betterclock": {
+    "scope": "All three reconstructed source files reviewed, including the nested phase enum.",
+    "mechanics": ["On a rising use-key edge while holding a clock, converts overworld clock ticks to day/hour/minute and one of four phase labels, then sends a formatted message.", "Uses floor division/modulo for negative time and suppresses repeated messages while the key remains held."],
+    "risks": ["Adds a small per-tick input check and message behavior. The four equal tick partitions' phase labels may differ from visual dawn/dusk timing."],
+    "validation": ["Check time boundaries/negative ticks, offhand clocks, held keys, leaving worlds, and custom time progression."],
+    "fit": "Informational UI utility, not performance optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "lower-shelves": {
+    "scope": "All three reconstructed classes reviewed.",
+    "mechanics": ["On server-side, empty-main-hand sneaking interaction with a wooden shelf, toggles align_items_to_bottom using a block data-modification command executed from the server command source."],
+    "risks": ["Changes shelf presentation/state and uses server-level command authority after only interaction checks. Region permissions/protection callbacks and data synchronization need verification."],
+    "validation": ["Check protected blocks, hand/sneak conditions, shelf variants, client sync, and command/schema failure."],
+    "fit": "Shelf interaction feature, not optimization.",
+    "evidence": ["**/*.java"]
+  }
+}

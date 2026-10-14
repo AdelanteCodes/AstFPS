@@ -1,0 +1,130 @@
+{
+  "async-pack-scan": {
+    "scope": "Top-level implementation reviewed; embedded Fabric resource-loader implementation is a dependency, not reviewed here.",
+    "mechanics": ["Adds an asynchronous reload interface to PackRepository. A common ForkJoinPool task invokes repository.reload and then a completion callback.", "PackSelectionModel replaces synchronous discovery with one running scan and one coalesced follow-up request. Separate reentrant locks protect scan state and selected/unselected pack collections.", "After discovery it retains still-available selections, rebuilds the unselected list, and removes hidden Fabric packs. Stream access is materialized under the resource lock so callers do not traverse a list being changed by the worker.", "Committing selected packs waits for the outstanding Future before accessing repository state. VoidFuture adapts arbitrary task completion to Future<Void>."],
+    "risks": ["Moving repository reload to a shared pool requires every invoked pack provider to tolerate that thread. Locking the selection lists does not establish thread safety of external providers.", "The callback reads a one-element Future holder assigned after submit. A sufficiently fast worker could observe the holder before assignment; this is a static concurrency concern, not a reproduced upstream failure.", "Reload/callback exceptions can prevent the scan-finished state transition. Interrupt handling and failure cleanup need explicit tests."],
+    "validation": ["Exercise overlapping scan requests, close/commit during scanning, cancellation, provider exceptions, hidden packs, and interruption. Verify selection order and repository contents match a synchronous baseline."],
+    "fit": "Resource-pack menu responsiveness; no direct steady-state playing FPS benefit, especially with no external packs.",
+    "evidence": ["**/*.java"]
+  },
+  "fast-ip-ping": {
+    "scope": "All six top-level reconstructed classes reviewed.",
+    "mechanics": ["Patches the InetAddress obtained during server address resolution only when the supplied host is a numeric IPv4/IPv6 address.", "Reconstructs the address from the same address bytes and an explicit numeric host string. Subsequent hostname access therefore avoids needing reverse DNS for a literal IP.", "Domain names retain the ordinary resolution path. Two version-specific mixin classes target a dummy class and contain no active hooks in this artifact."],
+    "risks": ["Targets a generated resolver lambda and an assignment site, which may move between game versions. IPv6 scoped addresses and literal parsing require care.", "This does not bypass DNS for ordinary domains or increase network bandwidth."],
+    "validation": ["Compare address bytes, IPv4/IPv6 connection behavior, hostname connections, and resolver time with deliberately slow reverse DNS."],
+    "fit": "Connection/server-list latency; no direct rendering FPS optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "smoothtexturefix": {
+    "scope": "All three reconstructed classes reviewed; exception-heavy config code has decompiler reconstruction limitations.",
+    "mechanics": ["Modifies GPU sampler creation in the level main pass, replacing FilterMode arguments with NEAREST while its configuration switch is enabled.", "The command changes the switch, resets the level sampler, and persists the setting. The default enables the override."],
+    "risks": ["It deliberately changes texture filtering and therefore image appearance. A sampler-call lambda target is version-sensitive.", "Config error handling should be checked against original source/bytecode before asserting exact malformed-file behavior."],
+    "validation": ["Compare texture magnification/minification and mip transitions, command-driven sampler reset, resource reload, and malformed config handling."],
+    "fit": "Visual preference/fix; excluded from an unchanged-visuals optimization design.",
+    "evidence": ["**/*.java"]
+  },
+  "disconnect-packet-fix": {
+    "scope": "All three reconstructed classes reviewed.",
+    "mechanics": ["Intercepts IdDispatchCodec.encode before encoding. It obtains the packet type and checks whether that type exists in the active protocol's ID map.", "Cancels only an unmapped type whose string representation matches the disconnect packet type. Valid mapped disconnect packets and other packet types continue normally."],
+    "risks": ["The workaround suppresses encoding in one protocol mismatch case; it does not repair the protocol transition itself. String matching depends on the packet type representation.", "Cancellation must not leave a surrounding packet encoder expecting bytes that were never written."],
+    "validation": ["Exercise disconnects during login/configuration/play transitions, valid disconnects, unrelated unmapped packets, and connection cleanup."],
+    "fit": "Protocol robustness, not steady-state FPS.",
+    "evidence": ["**/*.java"]
+  },
+  "xxl-packets": {
+    "scope": "All four reconstructed mixin classes reviewed.",
+    "mechanics": ["Changes selected constants in custom payload construction, packet encoding, compression decoding, and NBT reading from their existing megabyte-sized budgets to Integer.MAX_VALUE.", "The NBT replacement is a long constant carrying the same enlarged budget. No faster compression, allocation reuse, or packet batching algorithm is present in these classes."],
+    "risks": ["Larger accepted data can trigger much larger allocations and processing times. Matching exact constants can affect different checks after a version update.", "Client/server protocol and transport limits can still reject enlarged packets. Removing a budget does not make large transfers efficient."],
+    "validation": ["Verify oversized valid and malformed input behavior, bounded memory use, compression expansion, NBT nesting limits, and peer compatibility."],
+    "fit": "Large-payload compatibility; not an FPS optimization and unsuitable as a general performance default.",
+    "evidence": ["**/*.java"]
+  },
+  "modthatclosesthegamewhenitopens": {
+    "scope": "Entire one-class implementation reviewed.",
+    "mechanics": ["The Fabric initialization callback calls System.exit(0). There is no rendering, memory, networking, or simulation optimization."],
+    "risks": ["Installing the mod intentionally terminates the game during startup."],
+    "validation": ["Static call-path inspection is enough to identify the terminating behavior; no execution needed for this research."],
+    "fit": "Joke/utility result; excluded from performance research candidates.",
+    "evidence": ["**/*.java"]
+  },
+  "smoothmenu": {
+    "scope": "Entire one-mixin implementation reviewed.",
+    "mechanics": ["Intercepts the framerate-limit getter. When vanilla reports OUT_OF_LEVEL_MENU throttling, returns the configured framerate limit rather than the special menu throttle.", "Other throttle reasons use the original result. There is no change to how a gameplay frame is rendered."],
+    "risks": ["Can increase GPU/CPU consumption in menus. Other FPS limit mods can intercept the same getter."],
+    "validation": ["Check focused menus, gameplay, minimized/unfocused states, and interaction with other limiters."],
+    "fit": "Menu FPS limit behavior; does not make rendering faster.",
+    "evidence": ["**/*.java"]
+  },
+  "serverpingerfixer": {
+    "scope": "Entire one-mixin implementation reviewed.",
+    "mechanics": ["After server-list class initialization, shuts down the original executor and substitutes a pool with one core thread, a practically unbounded maximum, a SynchronousQueue, and 30-second excess-thread expiry.", "Uses the original thread factory. Direct handoff lets pending server pings start without waiting behind a fixed-size pool."],
+    "risks": ["A long server list or slow connections can create many concurrent threads. This exchanges queue latency for concurrency/resource pressure.", "Another mod replacing the same static executor can conflict or leave an old executor alive."],
+    "validation": ["Test many slow/unreachable servers, cancellation when leaving the screen, thread expiry, repeat screen openings, and bounded resource use."],
+    "fit": "Multiplayer-list responsiveness, not in-world FPS.",
+    "evidence": ["**/*.java"]
+  },
+  "client-movement": {
+    "scope": "Both reconstructed mixins reviewed.",
+    "mechanics": ["For local-player movement-speed attribute updates, reconstructs the server snapshot modifiers so the client's existing sprint modifier is preserved or removed according to local state.", "For local-player synchronized metadata, ignores accessor ID 6 and rewrites flag byte ID 0 to retain the local sprint bit while accepting the other incoming bits.", "Updates for other entities continue normally. The mechanism gives selected local movement state priority over server synchronization."],
+    "risks": ["Numeric metadata IDs depend on the exact game entity-data layout. Suppressing server corrections changes authoritative behavior and can disagree with server movement rules.", "This is a responsiveness/gameplay change, not an algorithm that reduces rendering work."],
+    "validation": ["Check sprint/pose changes, respawn, spectators, server-imposed movement restrictions, latency, and each targeted metadata ID for the selected game version."],
+    "fit": "Gameplay synchronization behavior; excluded from unchanged-behavior optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "serverlist-fix": {
+    "scope": "Both reconstructed classes reviewed.",
+    "mechanics": ["Replaces the server-selection static ping executor with Executors.newCachedThreadPool, using daemon threads and an uncaught-exception handler.", "Cached pools create threads as needed and expire idle excess workers. The initializer only prints a startup message."],
+    "risks": ["Concurrency is not bounded by a small fixed worker count. Many slow pings can cause thread growth.", "The reconstructed static replacement does not show shutdown of the old executor; source/bytecode and mixin merge behavior should confirm its lifecycle."],
+    "validation": ["Test server lists with slow endpoints, screen transitions, repeat refreshes, executor shutdown/expiry, and overlap with other pinger mods."],
+    "fit": "Server-list UI latency; no gameplay FPS benefit.",
+    "evidence": ["**/*.java"]
+  },
+  "hotbar-lag-fixer": {
+    "scope": "Both reconstructed classes reviewed.",
+    "mechanics": ["Registers a CLIENT_STARTED callback from the hotbar manager constructor, then calls get(0) to eagerly trigger saved-hotbar loading.", "Cancels HotbarManager.save and submits an asynchronous task that reads nine hotbars, codec-encodes them into a versioned CompoundTag, and writes the original options file."],
+    "risks": ["The worker reads live hotbar objects without a shown immutable snapshot. Concurrent edits and overlapping save tasks can produce inconsistent or out-of-order writes.", "The shared async pool and direct file writes require shutdown, exception, and persistence-order checks. Eager loading shifts work to startup rather than eliminating it."],
+    "validation": ["Edit while saving, request multiple saves, exit immediately after save, inject I/O failure, and verify the last intended state survives restart."],
+    "fit": "Creative saved-hotbar stutter; useful problem domain, but the observed concurrency pattern needs stronger guarantees.",
+    "evidence": ["**/*.java"]
+  },
+  "framepacer": {
+    "scope": "Both reconstructed classes reviewed.",
+    "mechanics": ["Cancels the vanilla framerate limiter. Calculates a deadline from the prior pacing time plus one target-frame interval.", "Parks the thread while more than one millisecond remains, then spins with Thread.onSpinWait until the deadline. Retains the last observed timestamp for the next call."],
+    "risks": ["Busy spinning consumes CPU. Oversleep, zero/invalid FPS arguments, clock scheduling, and interruptions require checks.", "Smoother cap timing does not reduce the cost of rendering a frame or raise an uncapped throughput ceiling."],
+    "validation": ["Measure interval distributions and CPU use at 60/144/300 FPS, under load and oversleep, with VSync, and after a long stall."],
+    "fit": "Frame pacing; potential smoothness benefit, not a promised FPS gain.",
+    "evidence": ["**/*.java"]
+  },
+  "lite-fps-patrolin": {
+    "scope": "Both reconstructed classes reviewed.",
+    "mechanics": ["Overwrites the vanilla FPS limiter with nanosecond deadline accounting. Sleeps for whole remaining milliseconds, then spins until the next draw time.", "If it is more than one frame interval late, resets the target to now; otherwise advances using the scheduled deadline to limit drift."],
+    "risks": ["The final spin uses CPU. InterruptedException is swallowed in the reconstructed implementation. Invalid target FPS values and timer scheduling need testing.", "Whole-millisecond sleep precision varies by OS and load. This changes cap behavior, not rendering throughput."],
+    "validation": ["Compare deadline drift, p99 interval jitter, CPU use, late-frame recovery, and limiter interactions across Windows/Linux."],
+    "fit": "Frame pacing, not an increase in uncapped rendering capacity.",
+    "evidence": ["**/*.java"]
+  },
+  "do-i-reload": {
+    "scope": "All three reconstructed classes reviewed; advertised intent and the observed hook differ.",
+    "mechanics": ["Cancels PackSelectionScreen.onClose after committing the selection model. Calls closeWatcher only when its hasChanges field is true.", "The available source shows a newly declared hasChanges field but no assignment or event that sets it. The advertised change detection is therefore not established by this artifact's reconstructed implementation."],
+    "risks": ["Cancelling the original close method can skip screen transition or watcher cleanup. A missing change-state update can leave the conditional permanently false.", "Need original-source/bytecode verification before concluding this is a real upstream defect."],
+    "validation": ["Inspect field writes in bytecode, close the screen with changed/unchanged selection, edit pack files while the screen is open, and check watcher lifecycle."],
+    "fit": "Avoiding redundant resource reload is useful; this specific observed hook is not evidence of a working optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "thiepine": {
+    "scope": "All three reconstructed classes reviewed.",
+    "mechanics": ["Before translating a candidate collision VoxelShape, obtains its axis bounds and adds the integer block offset. If that translated enclosing box cannot intersect the entity query box, returns the shared empty shape without constructing the translated shape.", "For potentially intersecting candidates it performs the ordinary shape translation. This is a conservative broad-phase rejection, not a replacement for precise shape collision.", "A second hook returns the existing immutable AABB for a zero-vector translation. Atomic counters and exponentially spaced logging report skipped translations."],
+    "risks": ["Broad-phase intersection must have identical boundary semantics to the later exact test. Unusual shapes, non-finite bounds, and overlapping collision optimizations need checks.", "Atomic accounting in a hot path has a cost; the reported four objects per skipped translation is an estimate, not an allocation profile."],
+    "validation": ["Differentially test movement/collision against vanilla on slabs, stairs, fences, pistons, negative coordinates, exact touching faces, empty shapes, and randomized shapes. Profile allocations and CPU separately."],
+    "fit": "Promising allocation-reduction principle that can preserve visuals and collision behavior when proven conservative.",
+    "evidence": ["**/*.java"]
+  },
+  "fastmapcodec": {
+    "scope": "All five reconstructed classes reviewed.",
+    "mechanics": ["Replaces BaseMapCodec decoding with a fast successful-input pass: materializes entries, parses keys and values, and inserts them into an immutable-map builder.", "If parsing fails or the builder detects duplicate keys, re-runs the complete input through an error-preserving fallback that accumulates partial values and missed input. Encoding still iterates every key/value through the codecs.", "A marker interface and startup probe report whether the codec mixin was applied."],
+    "risks": ["Calling result() and creating a fresh success can discard Lifecycle information returned by successfully parsed keys/values. Successful decoding equivalence includes metadata, not only the resulting map.", "Fallback reparses entries, so custom codecs with side effects or nondeterministic results may observe additional calls. Materializing the entry stream also consumes memory."],
+    "validation": ["Compare success values, lifecycle metadata, duplicate-key diagnostics, partial failures, iteration order, and codec invocation counts against the original. Benchmark successful and failing inputs separately."],
+    "fit": "Serialization/load-time optimization candidate; not a direct per-frame rendering optimization.",
+    "evidence": ["**/*.java"]
+  }
+}

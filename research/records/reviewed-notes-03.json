@@ -1,0 +1,74 @@
+{
+  "pingfixer": {
+    "scope": "Both reconstructed Java source files reviewed, including the anonymous packet-listener class.",
+    "mechanics": ["Wraps the server-status packet listener and forwards status/pong/acceptance events. On a non-success disconnect, increments a concurrent per-server attempt counter and queues a retry until the third failure.", "A tail hook on the pinger tick drains queued retry tasks. Retried pongs remove attempt state before invoking the normal callback; final failures and retry exceptions also clean up."],
+    "risks": ["The initial successful-listener path does not show the same counter cleanup as the retry pong callback. Successful disconnect recognition depends on a translation key.", "The static retry queue and attempt map can outlive a screen/pinger instance. Leaving the screen, changing server data, and retrying closed event-loop holders need lifecycle checks."],
+    "validation": ["Test first/second/third-attempt success and failure, legacy/status disconnect reasons, screen close before retry, repeated refresh, and retained map/queue entries."],
+    "fit": "Server-list reliability; not gameplay rendering performance.",
+    "evidence": ["**/*.java"]
+  },
+  "stfudisconnect": {
+    "scope": "Both reconstructed classes reviewed.",
+    "mechanics": ["Within Connection.exceptionCaught, substitutes SERVERBOUND as the reported sending packet flow when the current listener protocol is STATUS or HANDSHAKING.", "Other protocols call the original flow getter. This changes exception-path decisions without replacing the transport or codecs."],
+    "risks": ["Misreporting flow can suppress or change disconnect handling, not just shorten a log line. Confirm the surrounding vanilla exception logic for the selected version."],
+    "validation": ["Inspect the caller branch using the substituted flow and test failed handshakes, status pings, ordinary play errors, and channel closure."],
+    "fit": "Exception-path workaround, not a steady-state optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "disable-narrator": {
+    "scope": "All seven reconstructed classes reviewed; Windows native superclass reconstruction is incomplete.",
+    "mechanics": ["Redirects GameNarrator construction to Narrator.EMPTY, replaces narration with a no-op, and changes the narrator hotkey option default to false.", "Additional platform-specific mixins cancel portions of Linux/macOS narrator constructors and suppress Windows SAPI initialization and speech methods."],
+    "risks": ["Removes accessibility functionality. Native constructor cancellation and no-op cleanup must not leave half-initialized native objects reachable.", "The Windows reconstructed class extends an unresolved superclass; native lifetime details require original source or bytecode."],
+    "validation": ["Check each OS's startup, cleanup, absent native libraries, narrator options/hotkeys, and UI consumers of narrator active state."],
+    "fit": "Accessibility removal/startup workaround; excluded as a general performance default.",
+    "evidence": ["**/*.java"]
+  },
+  "nomorenarrator": {
+    "scope": "All four reconstructed classes reviewed.",
+    "mechanics": ["On every client tick, forces narrator status to OFF and narrator hotkey to false when needed.", "A narrator active hook always returns false. The remaining initializer/data-generator code adds no optimization path."],
+    "risks": ["Overrides user accessibility choices and adds per-tick option checks. Does not show avoidance of native narrator construction itself."],
+    "validation": ["Check toggles, saved options, narration startup cost, and whether interface/default-method interception applies to actual implementations."],
+    "fit": "Feature disabling rather than equivalent work reduction.",
+    "evidence": ["**/*.java"]
+  },
+  "better-narrator-error": {
+    "scope": "All three reconstructed source files reviewed, including the nested native-library mixin.",
+    "mechanics": ["Uses JVM properties to select Narrator.EMPTY or control how narrator initialization exceptions are reported.", "Rebuilds the native-library failure cause with shortened resource-path text, optionally empty stack traces, and optionally a replacement cause. Another wrapper clears the throwable stack before logging."],
+    "risks": ["Trimming exception evidence makes later diagnosis harder. Assumptions about cause messages and parentheses can fail on different native error formats.", "This affects a failure path and startup noise, not normal per-frame work."],
+    "validation": ["Test missing native libraries with all property combinations, null/unusual cause messages, and confirm the original narration fallback remains intact."],
+    "fit": "Log presentation utility; Xe-Mod diagnostics should preserve failure evidence instead.",
+    "evidence": ["**/*.java"]
+  },
+  "window-fix": {
+    "scope": "All three reconstructed classes reviewed.",
+    "mechanics": ["On Windows client ticks, installs a Win32 window-procedure hook once an SDL window/native HWND exists. Retains the original procedure for forwarding.", "Either blocks selected title-bar/system-menu messages or attempts to set the system menu to modeless mode. Posts a custom empty SDL event around menu/resize/minimize/restore transitions to wake the event loop.", "Native function availability and hook failures are logged; callback exceptions fall back to the original procedure. Window destruction resets installation state."],
+    "risks": ["Native callback lifetime, HWND recreation, restoring the original procedure, and freeing the callback require careful verification. The shown reset clears state but does not visibly free every native resource.", "Configuration catches I/O exceptions but malformed JSON can throw separately. Native structure sizes/offsets depend on pointer size."],
+    "validation": ["Exercise right-click title bar, Alt+Space, drag-resize, minimize/restore, fullscreen transitions, window recreation, both menu modes, and callback failures on supported Windows architectures."],
+    "fit": "Windows freeze workaround; not a normal-frame throughput optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "preferopengl": {
+    "scope": "All four reconstructed classes reviewed.",
+    "mechanics": ["At prelaunch and client initialization, reads options.txt and rewrites recognized backend preference keys to preferredGraphicsBackend:opengl.", "Collapses duplicate candidate keys, preserves unrelated lines, adds the target key when absent, and writes only when content differs. If options.txt is absent, logs and returns."],
+    "risks": ["Forces a persisted graphics API preference. Actual selection requires the exact game version to recognize the key and available backend.", "Direct replacement has no shown backup or atomic-write protection. Candidate key matching can rewrite old/third-party settings."],
+    "validation": ["Test first launch, existing/multiple keys, unsupported keys, write failure, backend selection, and repeat initialization."],
+    "fit": "Backend preference utility; performance is hardware/driver-dependent, not an independent optimization algorithm.",
+    "evidence": ["**/*.java"]
+  },
+  "nodynamicfps": {
+    "scope": "All four reconstructed classes reviewed.",
+    "mechanics": ["Adds a disabled inactivity-limit enum option, installs its tooltip/default, and exposes it in a renderer configuration integration.", "When selected, returns the configured cap in a level or unobstructed no-level state, and 60 FPS in other menus, bypassing ordinary inactivity throttles."],
+    "risks": ["Increases background/idle resource use. Enum extension, option-constructor slices, and tooltip lambda targets are version-sensitive."],
+    "validation": ["Check active/background/minimized states, menus/overlays, saved options, enum serialization, and interactions with other FPS limit mods."],
+    "fit": "FPS throttle policy, not cheaper frame rendering.",
+    "evidence": ["**/*.java"]
+  },
+  "audiothrottle": {
+    "scope": "All four reconstructed source files reviewed, including the nested Entry record.",
+    "mechanics": ["Before positional sound playback, scans recent sound events of the same ID within eight blocks. Rejects playback after five matching events in the last 20 game ticks; relative sounds are exempt.", "Maintains a synchronized deque, expires old entries, and clears when the clock moves backward. Uses world game time when present and a nanoTime-derived clock otherwise.", "The play-result hook returns NOT_STARTED for rejected sounds and uses require=0, permitting startup even if the target injection is absent."],
+    "risks": ["Deliberately removes audible overlapping sounds. A clock switch between worlds with increasing game time can retain unrelated old events until expiry logic catches up.", "The deque has no shown hard capacity, and each check scans it linearly. The separate check/log synchronized calls are not one atomic admission operation across multiple threads.", "A permissive unmatched hook can make the feature silently do nothing."],
+    "validation": ["Test crowded sound sources, relative sounds, dimension/world changes, clock transitions, concurrency, deque growth, and hook application receipts."],
+    "fit": "Sound suppression for crowded scenes; not unchanged sensory output.",
+    "evidence": ["**/*.java"]
+  }
+}

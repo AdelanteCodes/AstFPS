@@ -16,4 +16,6 @@ public final class XeRuntime {
     public static volatile long frameEpoch;
     public static long visibilityHits;
     public static long visibilityMisses;
+    public static long worldTargetCleanups;
+    public static long releasedTargetReferences;
 }

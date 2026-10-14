@@ -15,7 +15,17 @@ public final class XeMixinPlugin implements IMixinConfigPlugin {
     @Override public void onLoad(String mixinPackage) { LOGGER.info("XE-STARTUP package={} safeMode={}", mixinPackage, SAFE_MODE); }
     @Override public String getRefMapperConfig() { return null; }
     @Override public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        boolean apply = !(SAFE_MODE && mixinClassName.endsWith("FrustumMemoMixin"));
+        boolean optimization = mixinClassName.endsWith("FrustumMemoMixin") || mixinClassName.endsWith("AabbZeroOffsetMixin")
+            || mixinClassName.endsWith("WorldTargetCleanupMixin");
+        boolean apply = !(SAFE_MODE && optimization);
+        if (mixinClassName.endsWith("AabbZeroOffsetMixin") && Boolean.getBoolean("xe.disableZeroOffsetReuse")) {
+            HookAudit.record(mixinClassName, "disabled by xe.disableZeroOffsetReuse");
+            return false;
+        }
+        if (mixinClassName.endsWith("WorldTargetCleanupMixin") && Boolean.getBoolean("xe.disableWorldTargetCleanup")) {
+            HookAudit.record(mixinClassName, "disabled by xe.disableWorldTargetCleanup");
+            return false;
+        }
         if (!apply) HookAudit.record(mixinClassName, "disabled by xe.safeMode");
         return apply;
     }

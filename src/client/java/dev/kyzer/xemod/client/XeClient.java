@@ -36,7 +36,12 @@ public final class XeClient implements ClientModInitializer {
             root.then(ClientCommands.literal("status").executes(c -> {
                 var source = c.getSource();
                 reply(source, "Experimental visibility memo: " + XeRuntime.VISIBILITY_MEMO.enabled() + "; safe mode: " + XeRuntime.safeMode());
+                for (String id : new String[]{"ferritecore", "modernfix", "jasione", "chunky"}) {
+                    var component = FabricLoader.getInstance().getModContainer(id);
+                    reply(source, "Optimization component " + id + ": " + component.map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("not loaded"));
+                }
                 reply(source, "Memo hits/misses: " + XeRuntime.visibilityHits + "/" + XeRuntime.visibilityMisses + "; benchmark samples: " + RECORDER.count());
+                reply(source, "World target cleanups: " + XeRuntime.worldTargetCleanups + "; released references: " + XeRuntime.releasedTargetReferences);
                 if (XeRuntime.VISIBILITY_MEMO.failure() != null) reply(source, "Disabled after error in " + XeRuntime.VISIBILITY_MEMO.failure().stage() + "; /xe diagnose for details.");
                 return 1;
             }));
@@ -124,6 +129,8 @@ public final class XeClient implements ClientModInitializer {
         report.put("visibilityMemoFailure", XeRuntime.VISIBILITY_MEMO.failure());
         report.put("cacheHits", XeRuntime.visibilityHits);
         report.put("cacheMisses", XeRuntime.visibilityMisses);
+        report.put("worldTargetCleanups", XeRuntime.worldTargetCleanups);
+        report.put("releasedTargetReferences", XeRuntime.releasedTargetReferences);
         Map<String, String> versions = new java.util.TreeMap<>();
         FabricLoader.getInstance().getAllMods().forEach(mod -> versions.put(mod.getMetadata().getId(), mod.getMetadata().getVersion().getFriendlyString()));
         report.put("loadedVersions", versions);

@@ -1,52 +1,34 @@
-# Xe-Mod
+# Xe-Mod memory bundle
 
-An original Minecraft Java 26.3 performance mod under development.
+The local single-JAR artifact is `artifacts/xe-mod-memory-bundle-0.2.0-dev.jar`.
+It contains the unmodified compiled Xe-Mod 0.1.0-alpha.1 core, FerriteCore 9.0.0,
+ModernFix-mVUS 5.27.20-build.2, Jasione 1.0.9+26.1.2-fabric, and Chunky 1.5.3.
+Fabric loads the independent nested modules from this one container.
 
-[Download the first prerelease](https://github.com/KyzerGoated/Xe-Mod/releases/tag/v0.1.0-alpha.1).
-Use the runtime JAR, Fabric Loader 0.19.5+, matching Fabric API 0.162.0+26.3,
-and Java 25. See [installation and release notes](releases/0.1.0-alpha.1.md).
+Use Minecraft Java 26.3, Java 25, Fabric Loader 0.19.5 or newer, and matching
+Fabric API (0.162.0+26.3). Put the bundle and Fabric API in the profile's mods
+folder. Remove separate copies of the five included modules to avoid duplicates.
+Do not combine with Redirector, Hydrogen <=0.3, or DashLoader <5.0.0-beta.1;
+these are upstream-declared conflicts. Other installed mods remain unassessed.
 
-The goal is faster rendering and smoother frame times with unchanged vanilla
-visuals: native resolution, the same render distance, the same visible entities,
-particles, lighting and textures. No shader packs or resource packs are included.
+FerriteCore and ModernFix reduce memory/startup overhead; Jasione reduces certain
+temporary enum-array allocations. Chunky pregenerates terrain on disk using its
+commands; no job starts automatically and chunks are not kept permanently in RAM.
+No visual settings, shaders or resource packs are changed by this packaging.
 
-## Current prototype
+Pinned hashes, archive integrity, unique module IDs, declared requirements, and
+referenced resources were checked. Minecraft and tests were not run for this
+bundle. Working together in an actual game is not yet verified; no FPS or RAM
+improvement has been measured for this combination.
 
-- Original, frame-scoped visibility memoization. It reuses an exact prior result
-  and invalidates on camera/frustum updates. Experimental and off by default.
-- A bounded frame-time recorder with average FPS, p99 frame time and 1% low FPS.
-- Local benchmark exports and configurable on/off comparison.
+The new zero-offset AABB and world-target cleanup hooks exist in source only.
+They are not in the packaged alpha core. A later Java 25 compilation is needed
+to ship those hooks. The source Gradle configuration includes the four modules;
+the current artifact uses the existing compiled core to avoid claiming new code
+was compiled. Recreate it with `python scripts/package_memory_bundle.py`.
 
-This is a prerelease prototype. Compilation, core checks, actual Minecraft client
-startup, visibility comparisons, and safe-mode checks passed in CI. Full-world
-visual parity, arbitrary modpack compatibility, and FPS improvement remain
-unmeasured. No performance gain or bug-free stability is claimed.
-
-## Build
-
-Use Java 25 and run `./gradlew build` (Windows: `gradlew.bat build`). The repository
-also has a GitHub Actions build. The mod uses Fabric Loader and Fabric API as
-framework dependencies; it contains no other performance-mod binaries or code.
-
-## Commands
-
-- `/xe status`: feature state, cache hits/misses and recording status.
-- `/xe diagnose`: save a local report with hook receipts, feature failures and stack traces.
-- `/xe memo true` / `/xe memo false`: enable/disable the experimental cache.
-- `/xe label <text>`: label a benchmark with resolution, distance and scene.
-- `/xe benchmark start` / `/xe benchmark stop`: record and export locally.
-
-Exports go to `xe-benchmarks/` in the game folder and are not uploaded. Use the
-same world, camera route and settings for comparisons. The FPS measurement
-includes frame pacing; it is not a GPU timer or CPU-only render-cost measurement.
-
-## Continue on another PC
-
-If an optimization hook prevents startup, add `-Dxe.safeMode=true` to the JVM
-arguments. Diagnostics identify hooks with `XE-HOOK-BEGIN` and `XE-HOOK-OK` log
-markers. A runtime cache failure disables that feature for the rest of the session
-and retains the first failure's stack trace. No automatic retries occur.
-
-Clone https://github.com/KyzerGoated/Xe-Mod, open the folder in Codex, and ask it to
-read PLAN.md and STATUS.md. Pull before starting and push completed changes before
-switching machines.
+Module identities and notices are preserved. See `third-party/components.json`,
+`META-INF/xe-mod` notices, and `artifacts/package-manifest.json` for provenance.
+Keep exact corresponding upstream sources with any future copyleft distribution.
+All changes and artifacts are saved in the local Git repository. Nothing was
+uploaded to GitHub during this integration. Read PROJECT_LOG.md to continue.

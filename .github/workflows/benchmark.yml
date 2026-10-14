@@ -1,8 +1,5 @@
 name: Compare released Xe-Mod in Minecraft
 on:
-  push:
-    branches: [main]
-    paths: ['benchmarks/**', '.github/workflows/benchmark.yml']
   workflow_dispatch:
 permissions:
   contents: read

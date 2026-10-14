@@ -1,27 +1,34 @@
-# Status
+# Xe-Mod memory bundle
 
-Direction: original code, unchanged vanilla visuals, no repackaged performance
-mods and no external shader/resource packs.
+The local single-JAR artifact is `artifacts/xe-mod-memory-bundle-0.2.0-dev.jar`.
+It contains the unmodified compiled Xe-Mod 0.1.0-alpha.1 core, FerriteCore 9.0.0,
+ModernFix-mVUS 5.27.20-build.2, Jasione 1.0.9+26.1.2-fabric, and Chunky 1.5.3.
+Fabric loads the independent nested modules from this one container.
 
-Implemented: original frame-scoped visibility memo, invalidation hooks, on/off
-control, frame recorder, benchmark exports and Gradle/GitHub build configuration.
+Use Minecraft Java 26.3, Java 25, Fabric Loader 0.19.5 or newer, and matching
+Fabric API (0.162.0+26.3). Put the bundle and Fabric API in the profile's mods
+folder. Remove separate copies of the five included modules to avoid duplicates.
+Do not combine with Redirector, Hydrogen <=0.3, or DashLoader <5.0.0-beta.1;
+these are upstream-declared conflicts. Other installed mods remain unassessed.
 
-Verified locally: Java core checks for FPS statistics, recorder limits/lifecycle,
-exact cache queries, changed bounds, epochs, invalidation and thread fallback.
+FerriteCore and ModernFix reduce memory/startup overhead; Jasione reduces certain
+temporary enum-array allocations. Chunky pregenerates terrain on disk using its
+commands; no job starts automatically and chunks are not kept permanently in RAM.
+No visual settings, shaders or resource packs are changed by this packaging.
 
-Verified in CI: Java 25 build and core checks; actual Minecraft 26.3 client startup
-in normal and safe mode; 12,000 generated/expanded visibility comparisons, repeated
-queries, camera/frustum invalidation, hook receipts, and running frame capture.
-Successful run: https://github.com/KyzerGoated/Xe-Mod/actions/runs/38528794581
+Pinned hashes, archive integrity, unique module IDs, declared requirements, and
+referenced resources were checked. Minecraft and tests were not run for this
+bundle. Working together in an actual game is not yet verified; no FPS or RAM
+improvement has been measured for this combination.
 
-Not yet verified: full-world visual equivalence, other-mod compatibility, or an
-FPS improvement. The first prerelease publishes the already-built artifact without
-new test runs. Experimental memoization stays off by default.
+The new zero-offset AABB and world-target cleanup hooks exist in source only.
+They are not in the packaged alpha core. A later Java 25 compilation is needed
+to ship those hooks. The source Gradle configuration includes the four modules;
+the current artifact uses the existing compiled core to avoid claiming new code
+was compiled. Recreate it with `python scripts/package_memory_bundle.py`.
 
-Research: 481 broad catalogue matches, 410 downloaded artifacts. Archive and
-decompilation inventories are separate from a completed behavioral review.
-Research documentation is published separately under research/. It is not
-optimization code in this repo. Incomplete behavioral reviews remain labelled.
-
-Release: 0.1.0-alpha.1, Minecraft 26.3 / Fabric / Java 25. No visual cutbacks.
-Next: measure cache on/off in controlled vanilla scenes on the target PC.
+Module identities and notices are preserved. See `third-party/components.json`,
+`META-INF/xe-mod` notices, and `artifacts/package-manifest.json` for provenance.
+Keep exact corresponding upstream sources with any future copyleft distribution.
+All changes and artifacts are saved in the local Git repository. Nothing was
+uploaded to GitHub during this integration. Read PROJECT_LOG.md to continue.

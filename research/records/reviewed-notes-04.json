@@ -1,0 +1,123 @@
+{
+  "ferrite-core": {
+    "partial": true,
+    "scope": "Focused source review: FastMap, state-holder indexing, block-state cache sharing, and deduplication. Source checkout build-9.0.0 at 0cef1f2add1f1329aa6e690e8e292acd625c5c6d. Remaining mixins/configuration paths still need review.",
+    "mechanics": ["Replaces repeated block-state property maps/transition structures with compact shared lookup structures and indexes representing a state's property values.", "Shares equivalent immutable collision/cache data such as shape and face-sturdiness information rather than allocating a separate equivalent instance for every block state.", "The benefit is lower retained heap and potentially less GC/memory traffic; this does not by itself establish higher rendering FPS."],
+    "risks": ["Sharing is safe only if consumers treat shared values as immutable. Property combinations, indexed transitions, and custom block states must remain complete.", "Deduplication keys must express semantic equality, and caches must not retain obsolete reload objects indefinitely."],
+    "validation": ["Enumerate property combinations and transitions against original maps. Compare shape/collision results and profile retained heap/GC, including modded blocks and reloads."],
+    "fit": "Useful representation/sharing principles; exact invariants must be established before independent implementation.",
+    "evidence": ["**/FastMap.java", "**/FastMapStateHolderImpl.java", "**/BlockStateCacheImpl.java"]
+  },
+  "immediatelyfast": {
+    "partial": true,
+    "scope": "Focused source review: initialization/mixin selection, batching/atlas organization, configuration, and sign text caching. Source v1.17.1 at 40950692ba461842f74e75efd0c8154588a216cf; full render-path review remains pending.",
+    "mechanics": ["Organizes immediate rendering work into batches and texture-atlas usage so compatible operations can share submission/state rather than repeatedly switching or issuing small work items.", "Feature hooks are selected during startup. Configuration distinguishes ordinary options from experimental paths.", "Observed sign-text caching has timed expiry and reload handling; reuse must account for text/style/light state rather than assume every sign stays constant."],
+    "risks": ["Batching must preserve ordering, blending, clip/state changes, and buffer ownership. Opaque draw reordering is not automatically safe for translucent/UI work.", "Timed cache expiry alone is not a correctness proof for live content changes; required invalidation must be immediate where output changes."],
+    "validation": ["Compare UI/text/sign output, blending order, animated textures, buffer growth/flush points, resource reload, and extension renderers. Measure submissions and frame time separately."],
+    "fit": "High-value submission and allocation work, but requires a full renderer integration review.",
+    "evidence": ["**/*Plugin*.java", "**/*Atlas*.java", "**/*Sign*.java", "**/*Config*.java"]
+  },
+  "lithium": {
+    "partial": true,
+    "scope": "Focused source review: behavior-memory condition caching, hopper/inventory modification tracking, and startup rule selection. Source mc26.3-0.26.2 at 38104b18fa0f21d8e04e0599ce3ee2bb0566bd58; hundreds of other classes remain pending.",
+    "mechanics": ["Caches behavior preconditions against brain-memory modification state so unchanged memory does not trigger repeated equivalent condition checks.", "Tracks inventory modification state to reuse hopper search/transfer-related information until relevant inventories or neighboring conditions change.", "Configuration and dependency rules select compatible mixin groups. Optimizing a local integrated/server simulation does not optimize an unrelated remote server from the client."],
+    "risks": ["Every mutation that can affect a cached answer must advance the relevant change state. Custom inventories and alternative mutation paths can invalidate assumptions.", "Timers, neighbor updates, item entities, comparator notifications, and successful/failed transfer side effects must remain equivalent."],
+    "validation": ["Differentially test hopper throughput/order, inventory edits, block replacement, brain-memory changes, modded containers, and integrated versus dedicated servers."],
+    "fit": "Strong change-tracking and simulation principles; no full-project completion or client FPS result is claimed.",
+    "evidence": ["**/BehaviorMixin.java", "**/HopperBlockEntityMixin.java", "**/*Config*.java"]
+  },
+  "entityculling": {
+    "partial": true,
+    "scope": "Focused top-level review: cull task, client-world/render hooks, and exemption logic. Embedded rendering/transition libraries and the entire algorithm are not yet fully reviewed.",
+    "mechanics": ["Performs visibility/occlusion work asynchronously and uses results to suppress eligible entity/block-entity rendering. Selected client tick work can also be gated.", "Observed exemptions include camera/player-sensitive cases, glowing entities, vehicles, large bounds, and configured exceptions. These safeguards show that a simple center-point occlusion test is insufficient."],
+    "risks": ["Async results can become stale while camera, entity, world geometry, or bounds move. A conservative implementation must prefer rendering when uncertain.", "Render suppression and tick suppression have different correctness requirements. Skipped ticks can change animations, age, or client effects even when geometry is hidden."],
+    "validation": ["Check rapid camera motion, changing occluders, falling items, glowing outlines, vehicles, large/custom render bounds, reloads, and world changes."],
+    "fit": "Potentially valuable occlusion, but unchanged visuals demand conservative bounds and timely invalidation.",
+    "evidence": ["**/CullTask.java", "**/ClientWorldMixin.java", "**/WorldRendererMixin.java"]
+  },
+  "moreculling": {
+    "partial": true,
+    "scope": "Focused review: cached face/opacity decisions, weighted-model caches, and renderer integration. Full option/mixin set remains pending.",
+    "mechanics": ["Caches reusable model/face information used to decide whether hidden faces can be omitted. Weighted variants can share prepared state rather than recalculating on every query.", "Renderer-specific hooks connect cached occlusion information to the active block rendering pipeline. Optional leaf/angle/distance behavior must be distinguished from exact hidden-face elimination."],
+    "risks": ["Transparency, dynamic/custom models, weighted variants, resource reload, and alternative renderer hooks can invalidate cached decisions.", "Aggressive culling modes may change visible leaves, signs, or item-frame content. A shared mixin target is only a conflict candidate, not proof of incompatibility."],
+    "validation": ["Compare transparent/opaque faces, leaf modes, weighted models, resource reload, renderer combinations, and off-angle visibility."],
+    "fit": "Exact hidden-work removal is relevant; optional visual reductions must stay separate.",
+    "evidence": ["**/WeightedVariants_cacheMixin.java", "**/BlockOcclusionCache_sodiumMixin.java"]
+  },
+  "nvidium": {
+    "partial": true,
+    "scope": "Focused review: renderer startup capability checks and NVIDIA-specific pipeline architecture. Full mesh/storage/shader implementation remains pending.",
+    "mechanics": ["Uses an NVIDIA-oriented terrain rendering path with GPU features such as mesh-shader-style processing, bindless resources, and sparse storage.", "Checks required graphics capabilities before activating its path and integrates with a particular terrain renderer rather than independently optimizing all game systems."],
+    "risks": ["GPU vendor/model alone is not a capability proof; API extensions, drivers, game backend, and exact renderer versions all matter.", "GPU memory ownership/residency, shader execution order, device limits, and fallback activation require verification. A new backend can have compatibility costs."],
+    "validation": ["Inspect precise extension checks and supported version contracts; test capability failure, device reset/resource reload, memory pressure, visual equivalence, and frame timing on target hardware."],
+    "fit": "Research into GPU-driven terrain submission; not a hardware-independent drop-in improvement.",
+    "evidence": ["**/Nvidium.java"]
+  },
+  "krypton": {
+    "partial": true,
+    "scope": "Focused top-level review: compression encoder, framing/VarInt helpers, and native integration. Embedded velocity-native implementation is not fully reviewed.",
+    "mechanics": ["Optimizes packet framing/compression/encryption-related work using buffer-oriented helpers and a native networking library.", "VarInt/framing work aims to avoid repeated small-byte operations and temporary allocations. Compressor/cipher state is associated with the relevant network path."],
+    "risks": ["Netty reader/writer indexes and reference counts must be preserved, including partial reads and exceptions. Native buffers/compressors need deterministic release.", "Compression thresholds, malformed data, encryption state, and compatible codec replacements can change network behavior if handled incorrectly."],
+    "validation": ["Round-trip compressed/encrypted packets at thresholds, partial buffers, invalid inputs, reconnects, reference-count leak checks, and native fallback."],
+    "fit": "Networking CPU/allocation reduction; frame-rate benefit depends on an actual network-processing bottleneck.",
+    "evidence": ["**/*CompressEncoder*.java", "**/VarIntUtil.java"]
+  },
+  "badoptimizations": {
+    "partial": true,
+    "scope": "Focused review: lightmap tick invalidation, zero-effect FOV path, empty toasts/particles, and renderer lookup caching. Remaining configuration/debug hooks still pending.",
+    "mechanics": ["Cancels lightmap extraction ticks only when tracked inputs appear unchanged: sky light color/factor, underwater transition, End flashes, night vision and its expiry, darkness, conduit power, dimension identity, sky darkness, gamma, and extension hooks.", "When FOV effect scale is zero, substitutes a fixed modifier with a scoped-first-person exception. Empty toast/particle containers avoid entering work with no output.", "Renderer lookup caches associate entity/type data with renderer instances and refresh references after resource reload, with separate player-model handling."],
+    "risks": ["The lightmap dependency set must be complete; untracked effects or mutable external hooks can produce stale lighting. Identity and input ordering can defer tracking updates.", "Renderer caches must invalidate every instance/reference on reload and respect custom lookup behavior. Empty fast paths must preserve required side effects."],
+    "validation": ["Test each lighting input and extension hook independently, short effects, lightning/End flash, underwater transition, reloads, player skins/models, and empty/nonempty renderer transitions."],
+    "fit": "Useful exact empty-path and dependency-tracked caching ideas; full review still pending.",
+    "evidence": ["**/MixinLightmapExtractor.java", "**/MixinCamera.java", "**/MixinToastComponent.java", "**/MixinParticleManager.java", "**/MixinEntityRendererDispatcher.java"]
+  },
+  "glowsquidspawnfix": {
+    "scope": "All five reconstructed top-level source files reviewed; class/method mappings remain intermediary names.",
+    "mechanics": ["After an originally successful glow-squid spawn eligibility check, inspects neighboring blocks using a reusable mutable position. Rejects the candidate when an examined neighbor is air.", "Other original failures remain failures. Loader/platform helper classes do not add another optimization path."],
+    "risks": ["Changes spawn eligibility and world population. The exact enumerated direction set and air test must be mapped for this artifact's version."],
+    "validation": ["Compare water columns/caves and the full direction set against the selected vanilla spawn predicate; count spawn and downstream item changes."],
+    "fit": "Spawn-rule bug fix/gameplay change; not equivalent FPS optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "cavemushroomfix": {
+    "scope": "Both Java classes reviewed; placed-feature resource values remain a separate data review.",
+    "mechanics": ["Registers a cave mushroom feature and attaches different placed-feature definitions to selected overworld biome groups.", "Rejects non-overworld/sky-visible positions and selected unsuitable biomes. Chooses a red/brown mushroom group and attempts nearby positions with brightness, supporting-block, air, and canSurvive checks.", "Limits placement attempts to twelve times the desired group size, returning success only when at least one mushroom is placed."],
+    "risks": ["Adds world-generation content and additional sampling, not a speedup. RNG consumption and placed-feature frequency affect generated results."],
+    "validation": ["Inspect placed/configured-feature resources, generated chunk outcomes and frequency, biome restrictions, light/support rules, and deterministic seeds."],
+    "fit": "World-generation correction/content; not a general performance feature.",
+    "evidence": ["**/*.java"]
+  },
+  "anti-freeze": {
+    "scope": "All three reconstructed Java classes reviewed.",
+    "mechanics": ["Injects at the start and tail of the same Biome.shouldFreeze overload and returns false. The start cancellation ordinarily prevents reaching the original/tail path."],
+    "risks": ["Disables natural water freezing and changes world behavior. Other overloads or freezing paths may remain unaffected."],
+    "validation": ["Check frozen biomes, boundary temperatures, the exact overload/caller set, and overlap with other biome-rule mods."],
+    "fit": "Gameplay rule change; excluded from exact optimization.",
+    "evidence": ["**/*.java"]
+  },
+  "resourcepackcached": {
+    "scope": "All six reconstructed top-level source files reviewed; startup reconstruction has anonymous-class/decompiler caveats.",
+    "mechanics": ["Persists server pack UUIDs and cached paths plus normalized server identity. Startup registers existing local packs and marks them active while suppressing selected reload/update operations.", "On server pack pushes, compares cached filenames with the advertised hash and reports accepted/applied without repeating work for matches. Keeps packs across popAll unless forced unloading is active.", "Connection flags track whether packs were received. Joining without any advertised packs clears stale cached selection. A multiplayer-screen reset control unloads cached selection after a second confirmation."],
+    "risks": ["Filename/hash matching is not a fresh content hash or proof that a pack is already active in the resource manager. UUID/order/removal changes and switching servers require exact invalidation.", "The cache reader accepts persisted filesystem paths; malformed JSON and unavailable files need robust handling. Reset clears bookkeeping/unloads but does not visibly delete all cached download files despite button wording."],
+    "validation": ["Reconnect same/different servers; change pack hash/order/UUID, remove packs, reject/require packs, corrupt cache/files, and compare actual applied resources before reporting success."],
+    "fit": "Reconnect/resource reload avoidance; little relevance to play without external resource packs.",
+    "evidence": ["**/*.java"]
+  },
+  "hot-reload-resource-packs-forked": {
+    "scope": "Both reconstructed source files reviewed, including the anonymous directory visitor.",
+    "mechanics": ["Starts a watcher thread, registers the resource-pack directory and existing subdirectories, and registers newly created directories.", "On watcher events, suppresses reload when the preceding event was within 1.5 seconds, and avoids reload around recognized pack-management screens and a three-second cooldown.", "Otherwise invokes the client's resource reload. Determines the watched directory by traversing upward from its mod-origin path."],
+    "risks": ["The throttle can drop the final event of a burst without scheduling a later reload. WatchService overflow events can have null contexts that the shown handler treats as a Path.", "Calls client/UI APIs from the watcher thread without a shown client-thread handoff. Thread shutdown/daemon lifecycle and nonstandard mod origins need checks."],
+    "validation": ["Test bursts of edits, newly nested directories, overflow, interrupted watcher, launcher layouts, shutdown, and correct client-thread reload dispatch."],
+    "fit": "Resource-pack developer convenience; no steady-state FPS benefit.",
+    "evidence": ["**/*.java"]
+  },
+  "compresso": {
+    "partial": true,
+    "scope": "Upstream v1.0.3 source at f9150b48bdcb633b51de5754db1b92ef6e0e7dd9: screenshot interception, processor, encoders, PNG filters/chunks, and config reviewed. Config-screen/native codec dependencies still pending; artifact download unavailable.",
+    "mechanics": ["Intercepts screenshot capture, converts native pixels to a buffered image, closes the native image, and dispatches processing to an I/O pool.", "Optionally resizes to window resolution; selects PNG/JPEG/WebP/AVIF through internal ImageIO or external encoders. Encoder failure falls back to PNG and reports file size/path.", "Its PNG writer evaluates five standard row filters using residual absolute sums, deflates the chosen rows, and emits IHDR/IDAT/IEND chunks with CRCs. External codecs use temporary PNG input and argument-list ProcessBuilder execution.", "Configuration clamps codec settings and caches encoder availability probes."],
+    "risks": ["Reading all subprocess stdout before a timed wait can block indefinitely, undermining the stated timeout. Concurrent screenshot filename selection can race without atomic reservation.", "Resizing and lossy modes change saved image content; PNG here stores RGB and drops alpha. Config object mutation during asynchronous work and callback thread requirements need checks."],
+    "validation": ["Round-trip lossless RGB, verify PNG filters/CRC/dimensions, test concurrent captures and blocked/failed encoders, fallback formats, native-image release, and callback threading."],
+    "fit": "Screenshot file size/encoding behavior; not a general in-game FPS optimization.",
+    "evidence": ["src/main/java/dev/mudkip/compresso/compression/*.java", "src/main/java/dev/mudkip/compresso/config/ScreenshotConfig.java", "src/main/java/dev/mudkip/compresso/mixin/ScreenshotMixin.java"]
+  }
+}

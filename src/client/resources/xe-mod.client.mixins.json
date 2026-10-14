@@ -3,6 +3,6 @@
   "package": "dev.kyzer.xemod.client.mixin",
   "plugin": "dev.kyzer.xemod.client.mixin.XeMixinPlugin",
   "compatibilityLevel": "JAVA_25",
-  "client": ["MinecraftFrameMixin", "FrustumMemoMixin"],
+  "client": ["MinecraftFrameMixin", "FrustumMemoMixin", "AabbZeroOffsetMixin", "WorldTargetCleanupMixin"],
   "injectors": {"defaultRequire": 1}
 }
