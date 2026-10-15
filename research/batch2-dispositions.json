@@ -1,0 +1,681 @@
+{
+  "scope": "All15 recorded batch2 mods considered; original upstream/repository left read-only; no blanket bundle imports.",
+  "validation": "Static source/bytecode and mathematical proof only; no unit/runtime tests, Minecraft, network execution or benchmark. Parent owns registration and coordinated compilation.",
+  "implemented_files": [
+    "src/main/java/dev/adelantecodes/astfps/VarIntSize.java",
+    "src/client/java/dev/adelantecodes/astfps/client/mixin/VarIntSizeMixin.java"
+  ],
+  "varint_proof": "Native result is smallest k in1..4 with no unsigned bits at or above7k, otherwise5. Define b=32-numberOfLeadingZeros(value|1), hence1<=b<=32; result ceil(b/7)=(b+6)/7. Negative values haveb32 and give5. Native native getByteSize performs no IO, mutates no state and throws no input-specific exception. Replaced arithmetic is independent of byte order, buffers and packet lifetime. getByteSize formula derived independently; no third-party code copied.",
+  "performance_limit": "Removes variable-count branch/mask loop; leadingZeros lowering and division by constant may depend on JIT. No measured CPU/FPS/heap benefit asserted. Typed method avoids extra callback/varargs allocations.",
+  "startup_requirements": "Mixin must be absent unless astfps.enableVarIntSize=true and safeMode=false; exclude installed Krypton and any known competing VarInt overwrite. Client-side only. No runtime command claims because overwrite installation is startup-only.",
+  "mods": [
+    {
+      "slug": "accelerated-recoiling",
+      "version": "26.3.0-fabric",
+      "disposition": "not integrated",
+      "reason": "Native collision batching overlaps Lithium and requires ABI, candidate-order, cramming RNG and mutation-hook parity proof; no native module or gameplay shortcut added.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\accelerated-recoiling\\com\\wiyuka\\acceleratedrecoiling\\config\\FoldConfig.java",
+          "sha256": "a34cdc90c8f5106b00eeb3c4ac5a146aeb96028f041cc1d01fbde2140f00e7a9",
+          "line_start": 1,
+          "line_end": 58,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\accelerated-recoiling\\com\\wiyuka\\acceleratedrecoiling\\natives\\realtime\\CollisionMethods.java",
+          "sha256": "e30c3ad609001e70098d80effea8c278b2c25dc1c6882e3a97c82dbf6547b628",
+          "line_start": 1,
+          "line_end": 166,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\accelerated-recoiling\\com\\wiyuka\\acceleratedrecoiling\\natives\\realtime\\LithiumCompatibility.java",
+          "sha256": "66acbffdae8fb00eb3ae80db64399480cff6d42d3c541e42c9f5985c401f4945",
+          "line_start": 1,
+          "line_end": 72,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\accelerated-recoiling\\com\\wiyuka\\acceleratedrecoiling\\natives\\realtime\\PushableCache.java",
+          "sha256": "d1d02d39def0320c3106ccd864b0bb2d0ba95f2a1623b0eff095884a5d25df5a",
+          "line_start": 1,
+          "line_end": 20,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\accelerated-recoiling\\com\\wiyuka\\acceleratedrecoiling\\natives\\realtime\\BatchedCollisions.java",
+          "sha256": "088f0ed409891684d655d1f39d85bc085a5f23b5cccdc27f70dabe8a997315c9",
+          "line_start": 1,
+          "line_end": 274,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\accelerated-recoiling\\com\\wiyuka\\acceleratedrecoiling\\natives\\realtime\\PushableMemoryEntity.java",
+          "sha256": "407ae22d92432938dc9725eb21fae1225c6fa6d82b7c4bb6dc5a4248b2d5086d",
+          "line_start": 1,
+          "line_end": 9,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\accelerated-recoiling\\com\\wiyuka\\acceleratedrecoiling\\natives\\realtime\\RealtimeSection.java",
+          "sha256": "8336f5b412d4c4114c86a0fc6c1925ff42ad827e939d82b7e34707fde2f3f2a1",
+          "line_start": 1,
+          "line_end": 309,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "Native batched entity push broadphase: server class/method inheritance guards; primitive SoA box buffers and pinned section views; nested per-thread Frame stack; retain/release cleanup in tryPush129-136. Native query returns ordered candidate references/counts; Java applies cramming RNG/damage and doPush212-238. RealtimeSection tracks dirty per-entity classification and native coordinates; epochs force policy refresh51-75.",
+      "remaining_limits": "Native source/library kernels, BatchedRules cleanWorld/classification, every entity-state invalidation and server-stop ownership remain. Default collision switch true."
+    },
+    {
+      "slug": "potatoptimize",
+      "version": "mc26.2-2.2.2",
+      "disposition": "not integrated",
+      "reason": "Selected spawn/navigation changes risk random-stream/gameplay differences and overlap Lithium. Seasonal caching changes wall-clock transition semantics. No blanket transplant.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\potatoptimize\\com\\github\\tatercertified\\potatoptimize\\config\\PotatoptimizeConfig.java",
+          "sha256": "9f8c972735630c47338a68231464303cee6ec1d964100e32f5989a49084d529c",
+          "line_start": 1,
+          "line_end": 268,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\potatoptimize\\com\\github\\tatercertified\\potatoptimize\\mixin\\vanilla\\entity\\spawning\\slime\\RandomSlimeEntityMixin.java",
+          "sha256": "03a1f0658e846ff44014caf6884ec3da621803058f3b95df0c3303e9c87546bd",
+          "line_start": 1,
+          "line_end": 65,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\potatoptimize\\com\\github\\tatercertified\\potatoptimize\\mixin\\vanilla\\entity\\spawning\\slime\\SlimeChunkMixin.java",
+          "sha256": "eaccd897f7ccd47ee7afebd1637c327367b6a914b4aa79c5d8c1067bacf52a9c",
+          "line_start": 1,
+          "line_end": 78,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\potatoptimize\\com\\github\\tatercertified\\potatoptimize\\mixin\\vanilla\\entity\\halloween\\SpecialDatesMixin.java",
+          "sha256": "13edf123c0e72e1c3f5ed8a56c2d8b70457e96b83a0f8eb8b60e74ad731cffac",
+          "line_start": 1,
+          "line_end": 130,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\potatoptimize\\com\\github\\tatercertified\\potatoptimize\\mixin\\semivanilla\\entity\\navigation\\CancelNavigationMixin.java",
+          "sha256": "bebb30c2aab0773ff949b332cd4d3674cc06b9ca371068cda73d4a5fd5abddc0",
+          "line_start": 1,
+          "line_end": 38,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "Caches deterministic slime-chunk seed result on chunk construction48-75; spawn hook checks cached flag instead of constructing seeded RNG. SpecialDates caches wall-clock event boundaries. Config builds layered mixin tree with mod overrides.",
+      "remaining_limits": "Only selected actual mod mixins reviewed;693 decompiled files include bundled libraries. Full defaults tree and remaining mod overrides not certified."
+    },
+    {
+      "slug": "lomka",
+      "version": "mc26.3-0.7.0-fabric",
+      "disposition": "partially derived independently",
+      "reason": "Existing opt-in terrain CPU record reuse, section-state memo and model-rotation scratch are original narrow mechanisms informed by this study. Cube scratch was rejected because operation bridge allocations can exceed savings. No AO formula, packed writer or GPU slice lifetime changes imported.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\lomka\\lomka\\starl\\mixins\\net\\minecraft\\client\\renderer\\block\\MixinBlockModelLighter.java",
+          "sha256": "b35e8757ee9451578d24b06d11ce826ebbf2a62c7f949b31a1ac7ed8971592cb",
+          "line_start": 1,
+          "line_end": 106,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\lomka\\lomka\\starl\\mixins\\com\\mojang\\blaze3d\\vertex\\MixinBufferBuilder.java",
+          "sha256": "e02cd0fc03ab6c9bc7e09ea40e4c24d6d2f30dea901aa616f52495d7342854cb",
+          "line_start": 1,
+          "line_end": 74,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\lomka\\lomka\\starl\\mixins\\com\\mojang\\blaze3d\\vertex\\MixinVertexConsumer.java",
+          "sha256": "03cf3384063420fb5a7ce77cc358bd0aaf52067893d372d24a68432839a0f12b",
+          "line_start": 1,
+          "line_end": 103,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\lomka\\lomka\\starl\\mixins\\net\\minecraft\\client\\renderer\\MixinDynamicGpuDataStorageMapped.java",
+          "sha256": "409571c5945ab1b6f973319c5fb4a1606e7cf408057f3f1bbb92ae04eca47f76",
+          "line_start": 1,
+          "line_end": 127,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\lomka\\lomka\\starl\\mixins\\net\\minecraft\\util\\MixinLightCoordsUtil.java",
+          "sha256": "5962a0cb955e77a62890ec4aa4a1b32f3fc01266a43d3b710df129666af794d8",
+          "line_start": 1,
+          "line_end": 75,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\lomka\\lomka\\starl\\mixins\\net\\minecraft\\util\\MixinARGB.java",
+          "sha256": "69afc853dbc19bcd679bf7a6ef21b3cd95df643393da3a95c6570573ef33df6c",
+          "line_start": 1,
+          "line_end": 124,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\lomka\\lomka\\starl\\mixins\\net\\minecraft\\client\\model\\geom\\MixinModelPart.java",
+          "sha256": "d31dc32e7a7ea8a88be58759af39ae7ff6981c8983c9d25df72189af7132f792",
+          "line_start": 1,
+          "line_end": 56,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\lomka\\lomka\\starl\\mixins\\net\\minecraft\\client\\renderer\\entity\\MixinDisplayRenderer.java",
+          "sha256": "0181ad73a8c2f99c5a1c14b4ab44e03ae268c5e9a23f2418711cfd069be5b1af",
+          "line_start": 1,
+          "line_end": 31,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\lomka\\lomka\\starl\\utils\\cache\\UniformPaletteCache.java",
+          "sha256": "5459500c20fb5dfc485cb023fd920cce11aa5674e7234bf21b7a2652711540b9",
+          "line_start": 1,
+          "line_end": 13,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "AO cache47-75 memoizes15 state reads with512-slot primitive-key open addressing and enableCaching/clearCache epoch. BufferBuilder packs two UV floats into native64-bit store55-61 and shorts into32-bit65-71. ModelPart uses reusable thread-local matrix/vector scratch46-53. GPU storage caches last immutable slice wrapper keyed buffer identity+offset60-67 while retaining fresh array results.",
+      "remaining_limits": "Native26.3 ModelPart.rotateBy bytecode verified: one Matrix3f and Vector3f allocation, in-place rotation then extraction. Independent opt-in depth-safe scratch is a concrete candidate. JIT scalar replacement and call frequency unmeasured. Rest of86 classes not fully audited."
+    },
+    {
+      "slug": "krypton",
+      "version": "0.3.2",
+      "disposition": "narrow original CPU optimization implemented",
+      "reason": "NEW VarIntSize.of(int) plus startup-gated VarIntSizeMixin changes only pure getByteSize arithmetic. Full network compression/framing/native codecs not bundled. Root registration must exclude Krypton because its exact local mixin overwrites the same method.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\krypton\\me\\steinborn\\krypton\\mod\\shared\\network\\compression\\MinecraftCompressDecoder.java",
+          "sha256": "eede6a527914a3e6a2270177da2558d6d6040ff43c0ea2c0abec0aa97e021d66",
+          "line_start": 1,
+          "line_end": 79,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\krypton\\me\\steinborn\\krypton\\mod\\shared\\network\\compression\\MinecraftCompressEncoder.java",
+          "sha256": "76a6e1b7ce6e26c9c92d1020691bc6bca0cdbe9d3d8c2cc9ae424c4b163878ea",
+          "line_start": 1,
+          "line_end": 69,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\krypton\\me\\steinborn\\krypton\\mod\\shared\\network\\util\\VarIntUtil.java",
+          "sha256": "74179c3a5620c7f7ab6f6543dc76f9f541e077103b4929d39ee3dfca7a13a0fa",
+          "line_start": 1,
+          "line_end": 20,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\krypton\\me\\steinborn\\krypton\\mixin\\shared\\network\\microopt\\VarIntMixin.java",
+          "sha256": "bc9d22bac45e616b11338e4ff1fc7df0ea7cf5d1e5d683989946468683a749d1",
+          "line_start": 1,
+          "line_end": 57,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\krypton\\me\\steinborn\\krypton\\mixin\\shared\\network\\microopt\\Utf8StringMixin.java",
+          "sha256": "bc00374745143b3ed02946cda7aea21849da76be90d6f0cc1e4e628bdba0ccbf",
+          "line_start": 1,
+          "line_end": 40,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\krypton\\me\\steinborn\\krypton\\mixin\\shared\\network\\pipeline\\Varint21FrameDecoderMixin.java",
+          "sha256": "d0a37cc32e56b0625bdf2a34e8093d8fc3a8e4d91895e7fe4073de6fec2e39d7",
+          "line_start": 1,
+          "line_end": 106,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\krypton\\me\\steinborn\\krypton\\mod\\shared\\network\\pipeline\\MinecraftVarintPrepender.java",
+          "sha256": "3f2bec31eddfb6ff23e5ea20c36f55f36b2bc99adcc3b8d8e31b7f194c05ca32",
+          "line_start": 1,
+          "line_end": 39,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "VarInt length uses33-entry leading-zero lookup; writes common1/2-byte cases with packed short then3/4/5-byte stores. UTF8 encoder counts bytes and writes directly to ByteBuf, avoiding intermediary byte[]. Compression uses Velocity native-compatible buffers; closes compressor on handlerRemoved. Prepender emits length buffer plus retained payload instead of full copy.",
+      "remaining_limits": "Pipeline replacement/flush consolidation, external Velocity MoreByteBufUtils/native implementations, encryption and malformed-packet parity remain. Not ready to duplicate network stack."
+    },
+    {
+      "slug": "zfastnoise",
+      "version": "1.1.1+26.3",
+      "disposition": "not integrated",
+      "reason": "Direct palette writes assume task ownership, palette<=16 and slot-zero AIR; worldgen output/locking/rollback not validated. Does not improve existing terrain render submission.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\zfastnoise\\org\\codeberg\\zenxarch\\fastnoise\\noise\\FastNoiseGen.java",
+          "sha256": "918e9f1e14a1dc31fa8e2fb4435878bd7c546feabf4ef21c1dc4977afd5917f8",
+          "line_start": 1,
+          "line_end": 97,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\zfastnoise\\org\\codeberg\\zenxarch\\fastnoise\\noise\\FastChunkSection.java",
+          "sha256": "60e3a059170ed55dcac15f66bf6fafa3480b9da14302e0fc4b1c8d23e376ebdb",
+          "line_start": 1,
+          "line_end": 74,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\zfastnoise\\org\\codeberg\\zenxarch\\fastnoise\\noise\\FastNoisePaletteHelper.java",
+          "sha256": "d756f4c810a4723a562957cf7deae968c6f114901ce8967ce64981f7ea593467",
+          "line_start": 1,
+          "line_end": 132,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\zfastnoise\\org\\codeberg\\zenxarch\\fastnoise\\mixin\\perf\\noise\\NoiseChunkGeneratorMixin.java",
+          "sha256": "33182e8dbdebbfb1c5b2d2250bc73f8a3e4b845bb5bf1886223060aad955e7ae",
+          "line_start": 1,
+          "line_end": 66,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\zfastnoise\\org\\codeberg\\zenxarch\\fastnoise\\noise\\container\\BlockCountingPalettedContainer.java",
+          "sha256": "8f4670571d6ac7a285a6c8df87195dcc5907012b3d0b3a49b08bd5ef3e7c2a9d",
+          "line_start": 1,
+          "line_end": 60,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "Noise generation writes task-owned4-bit section long[] directly; accumulates palette occurrence counts while filling, then recalc once and restores regular container69-71. AIR slots stay implicit; fluid postprocess entries retained. Specialized biome palette pack avoids generic per-element insertion.",
+      "remaining_limits": "Aquifer/density sampling exact output, all supported generator/domain assumptions, fallback locks and heightmap helper not exhaustively compared. Native26.3 density APIs present; no world equivalence tests."
+    },
+    {
+      "slug": "zfastsurface",
+      "version": "1.0.0+26.3",
+      "disposition": "not integrated",
+      "reason": "Rule-state completeness, palette relocation, heightmap/fluid postprocessing and external generator ownership unproven; no raw storage mutation.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\zfastsurface\\org\\codeberg\\zenxarch\\fastsurface\\surface\\cache\\FastColumnBitMask.java",
+          "sha256": "937761f56ed705b8a780d0beba8d8a10d6a240483ffcba63cced5939f28aba28",
+          "line_start": 1,
+          "line_end": 92,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\zfastsurface\\org\\codeberg\\zenxarch\\fastsurface\\surface\\cache\\FastIsFluidCache.java",
+          "sha256": "0a3a3b543c58352b4853fe75d0873ddcb1d41cb813c2227034edaf7fd0e54e6b",
+          "line_start": 1,
+          "line_end": 32,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\zfastsurface\\org\\codeberg\\zenxarch\\fastsurface\\surface\\cache\\FastPaletteIndexCache.java",
+          "sha256": "6017ff02def59809e6f5bbf820eba894e5dd2d48938fac4d1d76ae52ef890930",
+          "line_start": 1,
+          "line_end": 101,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\zfastsurface\\org\\codeberg\\zenxarch\\fastsurface\\surface\\FastSurfaceGen.java",
+          "sha256": "51639cb61a5c78c0a5cf127a0e057acf8ca2e0c8b8d1a9a4cff5a4330c5ecb22",
+          "line_start": 1,
+          "line_end": 211,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\zfastsurface\\org\\codeberg\\zenxarch\\fastsurface\\surface\\FastBlockColumn.java",
+          "sha256": "d003f57bd7282a5b14b626cac16ec95bdd35aa8533922fdf9008faac8942826f",
+          "line_start": 1,
+          "line_end": 132,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "Per-generation column iterators and bit masks skip runs; four-entry identity fluid cache. Palette last-state/index cached per section and raw4-bit updates; fallback generic storage if palette grows. Computes whether rules can alter heightmap/add fluid/grow palette; skips irrelevant writes and final recalc once.",
+      "remaining_limits": "Generic/trivial iterator full vertical context, HeightmapUtil and external rule compatibility still need deep comparison. Config defaults not exhaustively read; task-owned fast operations only."
+    },
+    {
+      "slug": "zmaterial-rule-compiler",
+      "version": "1.1.2+26.3",
+      "disposition": "not integrated",
+      "reason": "Saved bytecode confirms float narrowing before double return in positional RNG. Unbounded outer specialization keys and generated classes need lifecycle proof. No worldgen compiler adopted.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\zmaterial-rule-compiler\\org\\codeberg\\zenxarch\\matcomp\\compiler\\CompiledMaterialRule.java",
+          "sha256": "ba5ceb6ed5a866205e54eaa348dfb9edf5f1f43002880a43c606afd5df71ae5c",
+          "line_start": 1,
+          "line_end": 30,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\zmaterial-rule-compiler\\org\\codeberg\\zenxarch\\matcomp\\compiler\\MaterialRuleCompilerCache.java",
+          "sha256": "0f3483c650946345567ab239b2ae1439b6953e0a49fd81ccf3e96082e5fa8953",
+          "line_start": 1,
+          "line_end": 60,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\zmaterial-rule-compiler\\org\\codeberg\\zenxarch\\matcomp\\compiler\\MaterialRuleCompilerCacheHeightContextSpecific.java",
+          "sha256": "ea993ece141529add659bd889754ee3d867a726ded3c7a3b3f1fe02cf5c807f6",
+          "line_start": 1,
+          "line_end": 331,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\zmaterial-rule-compiler\\org\\codeberg\\zenxarch\\matcomp\\util\\AllocFreeRandom.java",
+          "sha256": "4ea31f3b71d6a68f606a99178ac69e61ad7d6da11703c5669f76497cfebc249f",
+          "line_start": 1,
+          "line_end": 82,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "Flattens material condition/rule graph and specializes biome-constant branches; synchronized custom fastutil cache keys use RandomState/rule identity plus world height/sea-level values. Counts uses before dynamic compilation; compiled LRU capped while outer specialization map persists. Uses allocation-free positional RNG arithmetic.",
+      "remaining_limits": "Class writers, flatten rules, unsupported custom conditions, generated code verification and reload/world lifecycle not fully traced. Saved javap evidence."
+    },
+    {
+      "slug": "better-biome-blend",
+      "version": "26.3-1.4.0-fabric",
+      "disposition": "not integrated",
+      "reason": "OKLab blend intentionally differs from native color sampling/output; slice-key domain and invalidation/lock ownership need proof. Visual parity target excludes replacement.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\better-biome-blend\\fionathemortal\\betterbiomeblend\\common\\ColorBlending.java",
+          "sha256": "9ebad34b8064821a7658cc83cee84accef3e9aa1f19f52e14912d72c809989a6",
+          "line_start": 1,
+          "line_end": 233,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\better-biome-blend\\fionathemortal\\betterbiomeblend\\common\\cache\\LocalCache.java",
+          "sha256": "663d8225ccb210df56de926c525cf55e2f3911572c25f3d4cb1f5be8e4582cf0",
+          "line_start": 1,
+          "line_end": 72,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\better-biome-blend\\fionathemortal\\betterbiomeblend\\common\\cache\\Slice.java",
+          "sha256": "02fb013f666a75820e94b20707d3786e154aa242aa0d2b409cce71f36f68df61",
+          "line_start": 1,
+          "line_end": 110,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\better-biome-blend\\fionathemortal\\betterbiomeblend\\common\\cache\\SliceCache.java",
+          "sha256": "61fe68c6d1de889959b434f939eb2bbc6c591cb6007ba8e1dd8db00ffaf33fba",
+          "line_start": 1,
+          "line_end": 356,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\better-biome-blend\\fionathemortal\\betterbiomeblend\\mixin\\MixinClientWorld.java",
+          "sha256": "8d1de43837ee475f620e1e68b35b244e83601cca9916ce301085c35d9b04fece",
+          "line_start": 1,
+          "line_end": 120,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "Separable running-sum3D filter using ring buffers, converts sRGB samples into OKLab then back. Slices cached in primitive long keyed LRU with reference counts; local per-resolver last slice avoids shared lock on hits. Invalidation expands by blending perimeter; generation tickets reject obsolete output. World clear destroys source; chunk load invalidates neighborhood.",
+      "remaining_limits": "ColorSource ownership transfer, all locks/exceptions and worker shutdown not exhaustively reviewed. Parts of long ColorBlending output truncated; central running sums and conversion path established."
+    },
+    {
+      "slug": "structure-layout-optimizer",
+      "version": "1.1.4+26.3-fabric",
+      "disposition": "not integrated",
+      "reason": "Compressed template list narrows coordinate domains and changes collection mutability/aliasing; octree placement tolerance not fully established. No generic collection substitution.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\structure-layout-optimizer\\telepathicgrunt\\structure_layout_optimizer\\utils\\BoxOctree.java",
+          "sha256": "86dfc74da5164bacbdfeecd1757a5e680f19c9926f515110ea2b0bdbbe519662",
+          "line_start": 1,
+          "line_end": 128,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\structure-layout-optimizer\\telepathicgrunt\\structure_layout_optimizer\\utils\\PalettedStructureBlockInfoList.java",
+          "sha256": "160be1ab9f69bf21d41b01554534832b6e1123a2dc640131ac2c73dd3a5dc381",
+          "line_start": 1,
+          "line_end": 270,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\structure-layout-optimizer\\telepathicgrunt\\structure_layout_optimizer\\utils\\PalettedStructureBlockInfoListIterator.java",
+          "sha256": "7c273fa94852dbe9eba6bcb719dbebc74d8f664b7765e98e362d2363d618acda",
+          "line_start": 1,
+          "line_end": 75,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "Spatial octree partitions occupied structure AABBs after>10 boxes up to depth3; exact AABB downstream intersection retained. Palettes structure states/NBT by identity, packs nonnegative coordinates+indices into longs; lazy expansion back to object list weakly cached.",
+      "remaining_limits": "Jigsaw caller transformations, epsilon/trojan voxel collision and all template processor semantics unreviewed. Potential use only in its narrow placement domain."
+    },
+    {
+      "slug": "fast-ip-ping",
+      "version": "v1.0.12-mc26.3",
+      "disposition": "rejected after additional native audit",
+      "reason": "Exact native26.3 AddressCheck.isAllowed(ResolvedServerAddress) obtains getHostName and tests both hostname and IP. Numeric-host substitution before this check changes native hostname-policy semantics; IPv6 scope also requires care. No DNS shortcut added.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\fast-ip-ping\\me\\fallenbreath\\fastipping\\impl\\InetAddressPatcher.java",
+          "sha256": "b5c28fd8fb1c5c7290519ff942bd23d6093e703e516da612dbdcdc323687d587",
+          "line_start": 1,
+          "line_end": 24,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\fast-ip-ping\\me\\fallenbreath\\fastipping\\mixins\\AddressResolverMixin.java",
+          "sha256": "8085aa51aaed0cc95500e96fcee9dfe914d6037505d5d74dad5dd140f0021c03",
+          "line_start": 1,
+          "line_end": 30,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\fast-ip-ping\\me\\fallenbreath\\fastipping\\mixins\\ConnectScreenThreadMixin.java",
+          "sha256": "bf810114ac7cc0c757bd370590d60e0620f0cb75e3b062042483496fd3b4c262",
+          "line_start": 1,
+          "line_end": 15,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\fast-ip-ping\\me\\fallenbreath\\fastipping\\mixins\\MultiplayerServerListPingerMixin.java",
+          "sha256": "4957ef951dc79e2bfec6a96fd5c45baa217c19d8a7300235a705061a54f72658",
+          "line_start": 1,
+          "line_end": 15,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "For literal IP hosts only, reconstructs InetAddress with same address bytes and numeric host name15-21 so later getHostName avoids reverse DNS. Resolver return assignment modified26-27.",
+      "remaining_limits": "No network execution; exact scope ID and resolver lambda matching across mods unverified."
+    },
+    {
+      "slug": "do-i-reload",
+      "version": "1.1",
+      "disposition": "rejected",
+      "reason": "Selected private hasChanges has no observed assignment; cancelling native onClose skips guaranteed watcher cleanup. No reload or watcher cancellation.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\do-i-reload\\com\\doireload\\client\\mixin\\SkipIfNotNeeded.java",
+          "sha256": "0858176d61c69f555c6434f5d0af509c80714cc5b8317e649cd3ce816d4afdea",
+          "line_start": 1,
+          "line_end": 45,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\do-i-reload\\com\\doireload\\client\\DoIReloadClient.java",
+          "sha256": "d76294a84c174259580c0072d583e90b5aabcc4037bd91b38d6f8fa78f8b22bb",
+          "line_start": 1,
+          "line_end": 16,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "onClose HEAD always commits pack model; conditionally closeWatcher on private hasChanges then cancels original36-42.",
+      "remaining_limits": "No runtime confirmation of method remap/injected target or omitted GUI behavior. Not a recommended transplant."
+    },
+    {
+      "slug": "server-resource-pack-checker",
+      "version": "fabric-1.2.2+26.3",
+      "disposition": "rejected",
+      "reason": "Selected hash match does not prove full ordered stack equivalence; early loaded acknowledgements and stream ownership flaws change lifecycle. No pack handshake/reload shortcuts.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\server-resource-pack-checker\\de\\maxhenkel\\resourcepackchecker\\utils\\ApplyPackUtils.java",
+          "sha256": "38cc8d826d978a73cadfac1bedb65e70d2cbb8e59877e775479e79737ce10528",
+          "line_start": 1,
+          "line_end": 39,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\server-resource-pack-checker\\de\\maxhenkel\\resourcepackchecker\\utils\\ShaUtils.java",
+          "sha256": "cf3ae95f74d35d537d303d666d7225de151a6d3bcf1ee18dd507f564930f0542",
+          "line_start": 1,
+          "line_end": 27,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\server-resource-pack-checker\\de\\maxhenkel\\resourcepackchecker\\mixin\\ServerPackManagerMixin.java",
+          "sha256": "96d6755f95a1cc53ccc3678c1013364119c62ba4941ff4aca6a26ec4050b9567",
+          "line_start": 1,
+          "line_end": 31,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\server-resource-pack-checker\\de\\maxhenkel\\resourcepackchecker\\mixin\\ClientCommonPacketListenerImplMixin.java",
+          "sha256": "80565913d05e641be1de8c8459ece6fdd12fa005e2ed21418e7c05984715490b",
+          "line_start": 1,
+          "line_end": 114,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\server-resource-pack-checker\\de\\maxhenkel\\resourcepackchecker\\mixin\\DownloadedPackSourceMixin.java",
+          "sha256": "8e66019273aa66a0566af4e67597c312c9f92cc2c0a82b1d1871417231b087f6",
+          "line_start": 1,
+          "line_end": 58,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\server-resource-pack-checker\\de\\maxhenkel\\resourcepackchecker\\repository\\ServerPacksCacheRepositorySource.java",
+          "sha256": "9fc79feb7cae098b400a14ccc2575119776f484219427277f0f2f3a10356bca8",
+          "line_start": 1,
+          "line_end": 100,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "Scans selected/available file packs and computes SHA1 to reuse identical content. Equips cached packs through repository selected list and updates options. Can retain/list server packs by bypassing DownloadedPackSource reload and clearing manager list.",
+      "remaining_limits": "Full configured defaults, resource layering/invalidation, asynchronous apply completion and connections not exhaustively traced."
+    },
+    {
+      "slug": "language-reload",
+      "version": "1.7.8+26.3",
+      "disposition": "not integrated",
+      "reason": "Language-only reload bypasses arbitrary mod listeners and requires complete dependent text/font/cache invalidation. Native reload semantics retained.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\language-reload\\jerozgen\\languagereload\\LanguageReload.java",
+          "sha256": "1971dccd2c0518ed4d051041b45e68bb2226ebfc5b49a05b180b3de753af63c5",
+          "line_start": 1,
+          "line_end": 156,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\language-reload\\jerozgen\\languagereload\\mixin\\LanguageManagerMixin.java",
+          "sha256": "c20e1e0b025c71acd132c7e27e6053790115513102326202e43a878f8a1738bc",
+          "line_start": 1,
+          "line_end": 92,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\language-reload\\jerozgen\\languagereload\\mixin\\TranslatableContentsMixin.java",
+          "sha256": "f70f1246004380b55474f6715ce2bb4e87868c8c325dff0fd852b7e7ae72b67a",
+          "line_start": 1,
+          "line_end": 99,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "Language-only reload invokes language manager instead of global assets71-74; explicitly invalidates chat/book/advancement/sign front/back/textdisplay render caches75-101. Unchanged language+fallback selection returns early125-128. Adds language fallbacks and multilingual search.",
+      "remaining_limits": "Search tree rebuilding and all screen mixins/font dependencies not fully traced; no language correctness UI execution."
+    },
+    {
+      "slug": "resourcepackcached",
+      "version": "1.2.8",
+      "disposition": "rejected",
+      "reason": "UUID/path existence without digest/ordered-stack equivalence cannot establish correct current resources; retaining server packs across disconnect changes visuals/lifecycle.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\resourcepackcached\\dev\\furq\\resourcepackcached\\utils\\CachingUtils.java",
+          "sha256": "b80d9ad1edec82e9d7c51db7e9d3bc70973787cc9a9cffb6c444a78f964c0d9a",
+          "line_start": 1,
+          "line_end": 259,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\resourcepackcached\\dev\\furq\\resourcepackcached\\mixin\\ClientPacketListenerMixin.java",
+          "sha256": "cf85f5098efcfe710ecc67e6cbb2176984f57c0dc7f690874eb9d172ca82a220",
+          "line_start": 1,
+          "line_end": 29,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\resourcepackcached\\dev\\furq\\resourcepackcached\\mixin\\DownloadedPackSourceMixin.java",
+          "sha256": "ac44e4f4ed0631af22404e301ed6592ec8571abd76cb02c96f3de1aaf4ef66e0",
+          "line_start": 1,
+          "line_end": 46,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\resourcepackcached\\dev\\furq\\resourcepackcached\\mixin\\ServerPackManagerMixin.java",
+          "sha256": "ad94a8ae1b260d3a8b0b22a27f3e7e5c6413d0bd0c8a6c52b62bfd265b3c954c",
+          "line_start": 1,
+          "line_end": 111,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "Persists server pack UUID\u2192download path; retained pack content survives disconnect. push hook checks UUID and hash-shaped filename, returns accepted/applied without new download; no-packs login unloads stale cache. ForceUnload bracket finally220-225 permits explicit removal.",
+      "remaining_limits": "Startup loader, server ordering/reload failures, resource expiration and all connection paths remain."
+    },
+    {
+      "slug": "fastserverpings",
+      "version": "1.1.5+26.3",
+      "disposition": "rejected",
+      "reason": "Selected implementation has IPv6 host parsing errors, listener coalescing loss, dropped future tasks and ByteBuf ownership leaks. No ping executor/network lifecycle replacement.",
+      "record_evidence": [
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\fastserverpings\\net\\vansen\\fastserverpings\\cache\\FastPingCache.java",
+          "sha256": "81f3a99201594961d65108a4c0b78eddd9f091209727626b20da287ab491e24d",
+          "line_start": 1,
+          "line_end": 30,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\fastserverpings\\net\\vansen\\fastserverpings\\cache\\CacheEntry.java",
+          "sha256": "5781cca48d42f7ec0bd2b2bffd321ab8cc472c6c09908f58e6e99827d829056d",
+          "line_start": 1,
+          "line_end": 14,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\fastserverpings\\net\\vansen\\fastserverpings\\mixin\\ServerPingerMixin.java",
+          "sha256": "f740feecfadf1a060d69bc2e2c0f676de6fecbe8a03397b9a62ed68fcf7638c5",
+          "line_start": 1,
+          "line_end": 252,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\fastserverpings\\net\\vansen\\fastserverpings\\pipeline\\FastPing.java",
+          "sha256": "578df1ba216485136d68c49e38bf5ef0daecdcddaf639ff9bbbb85eda253ba8a",
+          "line_start": 1,
+          "line_end": 311,
+          "status": "selected class read; decompile caveats explicitly noted"
+        },
+        {
+          "path": "C:\\Users\\Multiwings\\Documents\\Codex\\2026-10-14\\so-x20\\work\\decompiled\\fastserverpings\\net\\vansen\\fastserverpings\\pipeline\\srv\\SrvResolver.java",
+          "sha256": "b2d31e425b636fb86060121084a4b7fa0db0689eaf586282a10f575053183748",
+          "line_start": 1,
+          "line_end": 48,
+          "status": "selected class read; decompile caveats explicitly noted"
+        }
+      ],
+      "original_mechanism": "15sec status cache plus active ping future coalescing by host:port. Separate Netty event loop4 and32-worker executor with256 queue.3 retries, connect3sec/deadline10sec, early status then latency publication. SRV resolver caches5min.",
+      "remaining_limits": "All malicious packet limits, shutdown hooks, translated protocol behavior and memory leak runtime reproduction not tested; static source evidence only."
+    }
+  ]
+}

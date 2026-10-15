@@ -8,9 +8,11 @@ import com.mojang.renderpearl.api.pipeline.IndexType;
 import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 import dev.adelantecodes.astfps.client.AstFPSRuntime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.function.BiConsumer;
 import net.minecraft.client.renderer.DynamicGpuData;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.chunk.ChunkSectionsToRender;
@@ -23,6 +25,13 @@ import org.joml.Matrix4fc;
 public final class AstFPSTerrainBatcher {
     private static final ChunkSectionLayer[] LAYERS = ChunkSectionLayer.values();
     private AstFPSTerrainBatcher() { }
+
+    /** Captures only an immutable integer. The caller supplies the current frame's GPU slices. */
+    private record SectionUniform(int infoIndex) implements BiConsumer<GpuBufferSlice[], RenderPass.UniformUploader> {
+        @Override public void accept(GpuBufferSlice[] buffers, RenderPass.UniformUploader uploader) {
+            uploader.setUniform("ChunkSection", buffers[infoIndex]);
+        }
+    }
 
     private static final class Batch {
         GpuBuffer vertex;
@@ -63,6 +72,7 @@ public final class AstFPSTerrainBatcher {
         final ArrayList<Batch> ordered = new ArrayList<>();
         IdentityHashMap<GpuBuffer, Batch> byVertex = new IdentityHashMap<>();
         final ArrayList<Batch> pool = new ArrayList<>();
+        Batch last;
         int used;
         Batch acquire(GpuBuffer vertex, GpuBuffer index, IndexType type) {
             Batch batch;
@@ -71,18 +81,20 @@ public final class AstFPSTerrainBatcher {
             used++; batch.reset(vertex, index, type); return batch;
         }
         Batch find(GpuBuffer vertex, GpuBuffer index, IndexType type, boolean orderedTransparency) {
+            // Consecutive sections often share an arena. This avoids a map lookup/chain walk while
+            // still checking this frame's complete GPU key. For transparency only adjacency merges.
+            if (last != null && last.matches(vertex, index, type)) return last;
             if (orderedTransparency) {
-                if (!ordered.isEmpty() && ordered.getLast().matches(vertex, index, type)) return ordered.getLast();
                 Batch batch = acquire(vertex, index, type);
-                ordered.add(batch); return batch;
+                ordered.add(batch); last = batch; return batch;
             }
             Batch head = byVertex.get(vertex);
             for (Batch candidate = head; candidate != null; candidate = candidate.nextWithSameVertex) {
-                if (candidate.matches(vertex, index, type)) return candidate;
+                if (candidate.matches(vertex, index, type)) { last = candidate; return candidate; }
             }
             Batch batch = acquire(vertex, index, type);
             batch.nextWithSameVertex = head;
-            byVertex.put(vertex, batch); ordered.add(batch); return batch;
+            byVertex.put(vertex, batch); ordered.add(batch); last = batch; return batch;
         }
     }
 
@@ -93,6 +105,16 @@ public final class AstFPSTerrainBatcher {
         private final Thread owner = Thread.currentThread();
         private final EnumMap<ChunkSectionLayer, LayerBatches> layers = new EnumMap<>(ChunkSectionLayer.class);
         private final ArrayList<DynamicGpuData.ChunkSectionInfo> infos = new ArrayList<>();
+        private final ArrayList<SectionUniform> sectionUniforms = new ArrayList<>();
+        private long uniformCallbacksAllocated;
+        private long uniformCallbacksReused;
+        private DynamicGpuData.ChunkSectionInfo[] directSectionInfos;
+        // Nearby visible-section counts can oscillate while moving. Keep up to four exact
+        // lengths, with the same total reference-slot budget as the previous single array.
+        private final DynamicGpuData.ChunkSectionInfo[][] directInfoArrays =
+                new DynamicGpuData.ChunkSectionInfo[4][];
+        private int directArraySlots;
+        private int nextDirectArraySlot;
         private final ArrayList<List<DynamicGpuData.IndexedDraw>> commandGroups = new ArrayList<>();
         private final ArrayList<Batch> submissionOrder = new ArrayList<>();
         private final int[] strides = new int[LAYERS.length];
@@ -101,6 +123,23 @@ public final class AstFPSTerrainBatcher {
         private long infosReused;
         private boolean busy;
         public Workspace() { for (var layer : LAYERS) layers.put(layer, new LayerBatches()); }
+        public long uniformCallbacksAllocated() { return uniformCallbacksAllocated; }
+        public long uniformCallbacksReused() { return uniformCallbacksReused; }
+        private SectionUniform sectionUniform(int infoIndex) {
+            if (infoIndex < 0) throw new IllegalArgumentException("Negative section info index");
+            // Bound retained callbacks independently of transient render distance spikes.
+            if (infoIndex >= RETAINED_COMMAND_BUDGET) {
+                uniformCallbacksAllocated++;
+                return new SectionUniform(infoIndex);
+            }
+            int previousSize = sectionUniforms.size();
+            while (sectionUniforms.size() <= infoIndex) {
+                sectionUniforms.add(new SectionUniform(sectionUniforms.size()));
+                uniformCallbacksAllocated++;
+            }
+            if (infoIndex < previousSize) uniformCallbacksReused++;
+            return sectionUniforms.get(infoIndex);
+        }
         private void begin() {
             if (Thread.currentThread() != owner || busy) throw new IllegalStateException("Terrain workspace ownership/reentrancy violation");
             busy = true;
@@ -126,7 +165,43 @@ public final class AstFPSTerrainBatcher {
         private void sealInfos() {
             if (infoCursor < infos.size()) infos.subList(infoCursor, infos.size()).clear();
         }
+        private DynamicGpuData.ChunkSectionInfo[] directSectionInfos() {
+            int count = infos.size();
+            // The engine serializes every array entry synchronously, so the array must have exact length.
+            // Only this CPU scratch array is reused; returned GPU slices remain engine-owned.
+            if (directSectionInfos == null || directSectionInfos.length != count) {
+                directSectionInfos = null;
+                for (var candidate : directInfoArrays) {
+                    if (candidate != null && candidate.length == count) {
+                        directSectionInfos = candidate;
+                        break;
+                    }
+                }
+                if (directSectionInfos == null) {
+                    directSectionInfos = new DynamicGpuData.ChunkSectionInfo[count];
+                    if (count <= RETAINED_COMMAND_BUDGET) {
+                        // Round-robin eviction is bounded to four entries. Every candidate was
+                        // cleared by finish() before another frame can borrow the workspace.
+                        do {
+                            var evicted = directInfoArrays[nextDirectArraySlot];
+                            if (evicted != null) directArraySlots -= evicted.length;
+                            directInfoArrays[nextDirectArraySlot] = null;
+                            if (directArraySlots + count <= RETAINED_COMMAND_BUDGET) break;
+                            nextDirectArraySlot = (nextDirectArraySlot + 1) % directInfoArrays.length;
+                        } while (true);
+                        directInfoArrays[nextDirectArraySlot] = directSectionInfos;
+                        directArraySlots += count;
+                        nextDirectArraySlot = (nextDirectArraySlot + 1) % directInfoArrays.length;
+                    }
+                }
+            }
+            return infos.toArray(directSectionInfos);
+        }
         private void finish() {
+            if (directSectionInfos != null) {
+                Arrays.fill(directSectionInfos, null);
+                if (directSectionInfos.length > RETAINED_COMMAND_BUDGET) directSectionInfos = null;
+            }
             int remaining = RETAINED_COMMAND_BUDGET;
             int retainInfos = Math.min(infoCursor, RETAINED_COMMAND_BUDGET);
             if (retainInfos < infos.size()) infos.subList(retainInfos, infos.size()).clear();
@@ -139,6 +214,7 @@ public final class AstFPSTerrainBatcher {
                 var state = layers.get(layer);
                 boolean largeOrderedList = state.ordered.size() > 128;
                 state.ordered.clear();
+                state.last = null;
                 if (largeOrderedList) state.ordered.trimToSize();
                 if (state.byVertex.size() > 128) state.byVertex = new IdentityHashMap<>();
                 else state.byVertex.clear();
@@ -204,17 +280,31 @@ public final class AstFPSTerrainBatcher {
                         if (draw == null) continue;
                         var slice = dispatcher.getRenderSectionSlice(mesh, layer);
                         if (slice == null || (draw.hasCustomIndexBuffer() && slice.indexBuffer() == null)) continue;
+                        int indexCount = draw.indexCount();
+                        int stride = strides[layer.ordinal()];
+                        long vertexOffset = slice.vertexBufferOffset();
+                        if (indexCount < 0 || stride <= 0 || vertexOffset < 0 || vertexOffset % stride != 0
+                                || slice.vertexBuffer() == null || vertexOffset > slice.vertexBuffer().size()) {
+                            throw new IllegalStateException("Invalid terrain vertex slice or draw count");
+                        }
+                        IndexType type = draw.hasCustomIndexBuffer() ? draw.indexType() : null;
+                        long indexOffset = slice.indexBufferOffset();
+                        if (draw.hasCustomIndexBuffer() && (type == null || type.bytes <= 0 || indexOffset < 0
+                                || indexOffset % type.bytes != 0 || indexOffset > slice.indexBuffer().size()
+                                || (long) indexCount * type.bytes > slice.indexBuffer().size() - indexOffset)) {
+                            throw new IllegalStateException("Invalid terrain index slice");
+                        }
+                        // Validate all conversions before any GPU writer is called, allowing preparation fallback.
+                        int firstIndex = type == null ? 0 : Math.toIntExact(indexOffset / type.bytes);
+                        int baseVertex = Math.toIntExact(vertexOffset / stride);
                         if (infoIndex < 0) {
                             BlockPos origin = section.getRenderOrigin();
                             infoIndex = workspace.addInfo(origin, section.getVisibility(now, fadeMillis));
                         }
                         GpuBuffer index = draw.hasCustomIndexBuffer() ? slice.indexBuffer() : null;
-                        IndexType type = draw.hasCustomIndexBuffer() ? draw.indexType() : null;
-                        int firstIndex = type == null ? 0 : Math.toIntExact(slice.indexBufferOffset() / type.bytes);
-                        int baseVertex = Math.toIntExact(slice.vertexBufferOffset() / strides[layer.ordinal()]);
-                        if (type == null) largestSequentialIndexCount = Math.max(largestSequentialIndexCount, draw.indexCount());
+                        if (type == null) largestSequentialIndexCount = Math.max(largestSequentialIndexCount, indexCount);
                         Batch batch = layers.get(layer).find(slice.vertexBuffer(), index, type, orderedTransparency && layer.translucent());
-                        batch.add(draw.indexCount(), firstIndex, baseVertex, infoIndex);
+                        batch.add(indexCount, firstIndex, baseVertex, infoIndex);
                         drawCount++;
                     }
                 }
@@ -246,20 +336,28 @@ public final class AstFPSTerrainBatcher {
             EnumMap<ChunkSectionLayer, List<RenderPass.Draw<GpuBufferSlice[]>>> directDraws = new EnumMap<>(ChunkSectionLayer.class);
             int group = 0;
             for (ChunkSectionLayer layer : LAYERS) {
-                var list = new ArrayList<RenderPass.Draw<GpuBufferSlice[]>>();
+                int batchCount = layers.get(layer).ordered.size();
+                int layerDrawCount = 0;
+                for (int b = 0; b < batchCount; b++) {
+                    layerDrawCount = Math.addExact(layerDrawCount, submissionOrder.get(group + b).commands.size());
+                }
+                // These lists escape into DrawSeparate; allocate a fresh, exact-sized list each frame.
+                // The empty immutable list is safe to share and carries no frame resources.
+                List<RenderPass.Draw<GpuBufferSlice[]>> list = layerDrawCount == 0
+                    ? List.of() : new ArrayList<>(layerDrawCount);
                 directDraws.put(layer, list);
-                for (int b = 0; b < layers.get(layer).ordered.size(); b++) {
+                for (int b = 0; b < batchCount; b++) {
                     Batch batch = submissionOrder.get(group);
                     for (var command : commandGroups.get(group++)) {
                         final int infoIndex = command.baseInstance();
                         list.add(new RenderPass.Draw<>(0, batch.vertex, batch.index, batch.indexType,
                             command.firstIndex(), command.indexCount(), command.baseVertex(),
-                            (buffers, uploader) -> uploader.setUniform("ChunkSection", buffers[infoIndex])));
+                            workspace.sectionUniform(infoIndex)));
                     }
                 }
             }
             var terrain = gpu.writeTerrainTransform(matrix, atlasWidth, atlasHeight);
-            var sectionData = gpu.writeChunkSections(infos.toArray(DynamicGpuData.ChunkSectionInfo[]::new));
+            var sectionData = gpu.writeChunkSections(workspace.directSectionInfos());
             if (largestSequentialIndexCount > 0) RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS).requestIndexCount(largestSequentialIndexCount);
             AstFPSRuntime.terrainBatchFrames++;
             AstFPSRuntime.terrainDirectFrames++;

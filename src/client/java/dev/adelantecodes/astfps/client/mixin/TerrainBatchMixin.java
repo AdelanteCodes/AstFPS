@@ -43,8 +43,15 @@ public abstract class TerrainBatchMixin {
         try {
             if (astfpsWorkspace == null) astfpsWorkspace = new AstFPSTerrainBatcher.Workspace();
             var atlas = textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).getTextureView();
-            callback.setReturnValue(AstFPSTerrainBatcher.prepare(astfpsWorkspace, indirect, sectionRenderDispatcher, visibleSections, matrix,
-                orderedTransparency, optionsRenderState.chunkSectionFadeInTime, atlas.getWidth(0), atlas.getHeight(0)));
+            long allocatedBefore = astfpsWorkspace.uniformCallbacksAllocated();
+            long reusedBefore = astfpsWorkspace.uniformCallbacksReused();
+            try {
+                callback.setReturnValue(AstFPSTerrainBatcher.prepare(astfpsWorkspace, indirect, sectionRenderDispatcher, visibleSections, matrix,
+                    orderedTransparency, optionsRenderState.chunkSectionFadeInTime, atlas.getWidth(0), atlas.getHeight(0)));
+            } finally {
+                AstFPSRuntime.terrainUniformCallbacksAllocated += astfpsWorkspace.uniformCallbacksAllocated() - allocatedBefore;
+                AstFPSRuntime.terrainUniformCallbacksReused += astfpsWorkspace.uniformCallbacksReused() - reusedBefore;
+            }
         } catch (RuntimeException error) {
             astfpsWorkspace = null;
             AstFPSRuntime.terrainFailure(indirect ? "LevelRenderer.prepareChunkRendersIndirect" : "LevelRenderer.prepareChunkRenders", error);

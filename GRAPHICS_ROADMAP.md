@@ -1,5 +1,7 @@
 # Original renderer and the 5x target
 
+Local continuation: README.md and LOCAL-DEVELOPMENT.md describe 0.5.0-dev.1-local. Sections below retain the previous 0.4.0-dev.5 stage. Full renderer and shader integration remain pending.
+
 User direction: build original terrain-rendering code, do not depend on Sodium.
 The user will run before/after captures on their PC later. Minecraft execution
 and runtime tests remain off in this environment. The active goal is not achieved.

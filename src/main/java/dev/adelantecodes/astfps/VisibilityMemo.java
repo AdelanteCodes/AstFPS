@@ -9,22 +9,30 @@ public final class VisibilityMemo {
     private volatile boolean shared;
     private boolean valid;
     private long frame;
-    private double x0, y0, z0, x1, y1, z1;
+    private long x0, y0, z0, x1, y1, z1;
     private boolean visible;
 
     /** -1 means miss, 0 means a cached false, 1 means a cached true. */
     public int probe(long epoch, double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
         if (!exclusiveThread()) return -1;
-        if (valid && frame == epoch && x0 == minX && y0 == minY && z0 == minZ
-            && x1 == maxX && y1 == maxY && z1 == maxZ) return visible ? 1 : 0;
+        if (valid && frame == epoch && x0 == Double.doubleToRawLongBits(minX)
+            && y0 == Double.doubleToRawLongBits(minY) && z0 == Double.doubleToRawLongBits(minZ)
+            && x1 == Double.doubleToRawLongBits(maxX) && y1 == Double.doubleToRawLongBits(maxY)
+            && z1 == Double.doubleToRawLongBits(maxZ)) return visible ? 1 : 0;
         return -1;
     }
 
     public void store(long epoch, double minX, double minY, double minZ, double maxX, double maxY, double maxZ, boolean result) {
         if (!exclusiveThread()) return;
+        // Nonfinite bounds can have engine-specific sentinel handling; always delegate those queries.
+        if (!Double.isFinite(minX) || !Double.isFinite(minY) || !Double.isFinite(minZ)
+                || !Double.isFinite(maxX) || !Double.isFinite(maxY) || !Double.isFinite(maxZ)) {
+            valid = false;
+            return;
+        }
         frame = epoch;
-        x0 = minX; y0 = minY; z0 = minZ;
-        x1 = maxX; y1 = maxY; z1 = maxZ;
+        x0 = Double.doubleToRawLongBits(minX); y0 = Double.doubleToRawLongBits(minY); z0 = Double.doubleToRawLongBits(minZ);
+        x1 = Double.doubleToRawLongBits(maxX); y1 = Double.doubleToRawLongBits(maxY); z1 = Double.doubleToRawLongBits(maxZ);
         visible = result;
         valid = true;
     }

@@ -11,6 +11,34 @@ public final class AstFPSRuntime {
     public static final FeatureGate VISIBILITY_MEMO = new FeatureGate("visibility-memo");
     public static final FeatureGate TERRAIN_BATCHER = new FeatureGate("terrain-batcher");
     public static final FeatureGate SECTION_WORKER_CACHE = new FeatureGate("section-worker-cache");
+    public static final FeatureGate SECTION_STATE_CACHE = new FeatureGate("section-state-cache");
+    public static final FeatureGate SECTION_MESH_WORKSPACE = new FeatureGate("section-mesh-workspace");
+    public static final FeatureGate SECTION_QUAD_FORMAT = new FeatureGate("section-quad-format");
+    public static final FeatureGate SECTION_FABRIC_WORKSPACE = new FeatureGate("section-fabric-workspace");
+    public static final FeatureGate MODEL_ROTATION_SCRATCH = new FeatureGate("model-rotation-scratch");
+    public static final FeatureGate TAB_LIST_CACHE = new FeatureGate("tab-list-cache");
+    public static final LongAdder tabCacheHits = new LongAdder();
+    public static final LongAdder tabCacheMisses = new LongAdder();
+    public static final LongAdder tabCacheBypasses = new LongAdder();
+    public static final LongAdder tabCacheInvalidations = new LongAdder();
+    public static final LongAdder quadFormatBuildersCached = new LongAdder();
+    public static final LongAdder quadFormatElementLookupsAvoided = new LongAdder();
+    public static final LongAdder fabricWorkspaceJobs = new LongAdder();
+    public static final LongAdder fabricAoHelpersAllocated = new LongAdder();
+    public static final LongAdder fabricAoHelpersReused = new LongAdder();
+    public static final LongAdder fabricAoHelpersBypassed = new LongAdder();
+    public static final LongAdder modelRotationJobs = new LongAdder();
+    public static final LongAdder modelRotationMatricesReused = new LongAdder();
+    public static final LongAdder modelRotationVectorsReused = new LongAdder();
+    public static final LongAdder meshWorkspaceJobs = new LongAdder();
+    public static final LongAdder layerMapsReused = new LongAdder();
+    public static final LongAdder visibilityBitsetsReused = new LongAdder();
+    public static final LongAdder floodQueuesReused = new LongAdder();
+    public static final LongAdder sectionStateJobs = new LongAdder();
+    public static final LongAdder sectionStateHits = new LongAdder();
+    public static final LongAdder sectionStateMisses = new LongAdder();
+    public static final LongAdder sectionStateBypasses = new LongAdder();
+    public static final LongAdder sectionStateMismatches = new LongAdder();
     public static final LongAdder sectionCacheJobs = new LongAdder();
     public static final LongAdder sectionModelHelpersAllocated = new LongAdder();
     public static final LongAdder sectionModelHelpersReused = new LongAdder();
@@ -18,6 +46,15 @@ public final class AstFPSRuntime {
     public static final LongAdder sectionFluidHelpersReused = new LongAdder();
     private static final Logger LOGGER = LoggerFactory.getLogger("AstFPS");
     public static boolean safeMode() { return Boolean.getBoolean("astfps.safeMode"); }
+    public static boolean tabCacheHooksAvailable() {
+        return !safeMode() && Boolean.getBoolean("astfps.enableTabListCache")
+            && !FabricLoader.getInstance().isModLoaded("blindspot")
+            && !FabricLoader.getInstance().isModLoaded("badoptimizations");
+    }
+    public static void tabCacheFailure(String stage, Throwable error) {
+        TAB_LIST_CACHE.disableAfterFailure(stage, error);
+        LOGGER.error("ASTFPS-FEATURE-DISABLED tab-list-cache stage={} -- original failure preserved", stage, error);
+    }
     public static boolean memoHooksAvailable() { return !safeMode() && Boolean.getBoolean("astfps.enableVisibilityMemo"); }
     public static boolean terrainHooksAvailable() {
         return !safeMode() && Boolean.getBoolean("astfps.enableTerrainBatcher") && rendererConflict() == null;
@@ -25,12 +62,55 @@ public final class AstFPSRuntime {
     public static boolean sectionCacheHooksAvailable() {
         return !safeMode() && Boolean.getBoolean("astfps.enableSectionWorkerCache") && rendererConflict() == null;
     }
+    public static boolean sectionStateHooksAvailable() {
+        return !safeMode() && Boolean.getBoolean("astfps.enableSectionStateCache")
+            && rendererConflict() == null && !FabricLoader.getInstance().isModLoaded("noammaddons");
+    }
+    public static boolean sectionMeshHooksAvailable() {
+        return !safeMode() && Boolean.getBoolean("astfps.enableSectionMeshWorkspace") && rendererConflict() == null;
+    }
+    public static void sectionMeshFailure(String stage, RuntimeException error) {
+        SECTION_MESH_WORKSPACE.disableAfterFailure(stage, error);
+        LOGGER.error("ASTFPS-FEATURE-DISABLED section-mesh-workspace stage={} -- subsequent jobs use native scratch; original compile error preserved", stage, error);
+    }
+    public static boolean sectionQuadFormatHooksAvailable() {
+        return !safeMode() && Boolean.getBoolean("astfps.enableSectionQuadFormat") && rendererConflict() == null;
+    }
+    public static void sectionQuadFormatFailure(String stage, RuntimeException error) {
+        SECTION_QUAD_FORMAT.disableAfterFailure(stage, error);
+        LOGGER.error("ASTFPS-FEATURE-DISABLED section-quad-format stage={} -- original error preserved", stage, error);
+    }
+    public static boolean sectionFabricHooksAvailable() {
+        return !safeMode() && Boolean.getBoolean("astfps.enableSectionFabricWorkspace") && rendererConflict() == null
+            && exactModVersion("fabric-renderer-indigo", "9.1.23+b9d63e335d")
+            && exactModVersion("fabric-renderer-api-v1", "17.0.15+79385d0b5d");
+    }
+    private static boolean exactModVersion(String id, String version) {
+        return FabricLoader.getInstance().getModContainer(id)
+            .map(mod -> mod.getMetadata().getVersion().getFriendlyString().equals(version)).orElse(false);
+    }
+    public static void sectionFabricFailure(String stage, RuntimeException error) {
+        SECTION_FABRIC_WORKSPACE.disableAfterFailure(stage, error);
+        LOGGER.error("ASTFPS-FEATURE-DISABLED section-fabric-workspace stage={} -- original error preserved", stage, error);
+    }
+    public static boolean modelRotationHooksAvailable() {
+        return !safeMode() && Boolean.getBoolean("astfps.enableModelRotationScratch")
+            && !FabricLoader.getInstance().isModLoaded("lomka");
+    }
+    public static void modelRotationFailure(String stage, RuntimeException error) {
+        MODEL_ROTATION_SCRATCH.disableAfterFailure(stage, error);
+        LOGGER.error("ASTFPS-FEATURE-DISABLED model-rotation-scratch stage={} -- original error preserved", stage, error);
+    }
+    public static void sectionStateFailure(String stage, RuntimeException error) {
+        SECTION_STATE_CACHE.disableAfterFailure(stage, error);
+        LOGGER.error("ASTFPS-FEATURE-DISABLED section-state-cache stage={} -- subsequent queries delegate; original compile error preserved", stage, error);
+    }
     public static void sectionCacheFailure(String stage, RuntimeException error) {
         SECTION_WORKER_CACHE.disableAfterFailure(stage, error);
         LOGGER.error("ASTFPS-FEATURE-DISABLED section-worker-cache stage={} -- subsequent jobs use fresh helpers; original compile error preserved", stage, error);
     }
     public static String rendererConflict() {
-        for (String id : new String[]{"sodium", "iris", "nvidium", "vulkanmod", "vulkanflow", "meshelium"}) {
+        for (String id : new String[]{"sodium", "iris", "nvidium", "vulkanmod", "vulkanflow", "meshelium", "optifine", "optifabric"}) {
             if (FabricLoader.getInstance().isModLoaded(id)) return id;
         }
         return null;
@@ -45,6 +125,8 @@ public final class AstFPSRuntime {
     public static long terrainSectionDraws;
     public static long terrainGpuBatches;
     public static long terrainFallbacks;
+    public static long terrainUniformCallbacksAllocated;
+    public static long terrainUniformCallbacksReused;
     public static void terrainFailure(String stage, RuntimeException error) {
         TERRAIN_BATCHER.disableAfterFailure(stage, error);
         terrainFallbacks++;

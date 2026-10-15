@@ -16,10 +16,105 @@ public final class AstFPSMixinPlugin implements IMixinConfigPlugin {
     @Override public void onLoad(String mixinPackage) { LOGGER.info("ASTFPS-STARTUP package={} safeMode={}", mixinPackage, SAFE_MODE); }
     @Override public String getRefMapperConfig() { return null; }
     @Override public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        if (mixinClassName.endsWith("FboLookupKeyMixin") || mixinClassName.endsWith("FboLookupCacheMixin")) {
+            // Avoid loading the helper's native CacheKey field type before its mixin is prepared.
+            boolean enabled = !SAFE_MODE && Boolean.getBoolean("astfps.enableFboLookupProbe")
+                && AstFPSRuntime.rendererConflict() == null
+                && !net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("lomka");
+            HookAudit.record(mixinClassName, enabled ? "enabled: FBO lookup probe" : "disabled: FBO startup gate or overlap");
+            return enabled;
+        }
+        if (mixinClassName.endsWith("TextureSlotSuffixMixin")) {
+            boolean enabled = !SAFE_MODE && Boolean.getBoolean("astfps.enableTextureSlotSuffixLookup");
+            HookAudit.record(mixinClassName, enabled ? "enabled: texture reference suffix lookup" : "disabled: texture lookup startup gate");
+            return enabled;
+        }
+        if (mixinClassName.endsWith("ZipEntryMissCacheMixin")) {
+            boolean enabled = !SAFE_MODE && Boolean.getBoolean("astfps.enableZipEntryMissCache")
+                && !net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("packforge")
+                && !net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("quick-pack");
+            HookAudit.record(mixinClassName, enabled ? "enabled: bounded ZIP miss cache" : "disabled: ZIP startup gate or overlap");
+            return enabled;
+        }
+        if (mixinClassName.endsWith("MaximumBlockEntityDistanceMixin")) {
+            boolean enabled = !SAFE_MODE && Boolean.getBoolean("astfps.enableMaximumBlockEntityDistance")
+                && AstFPSRuntime.rendererConflict() == null
+                && !net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("entity-view-distance");
+            HookAudit.record(mixinClassName, enabled ? "enabled: Maximum-profile native container distance cap" : "disabled: distance startup gate or overlap");
+            return enabled;
+        }
+        if (mixinClassName.endsWith("PlayerTabSnapshotMixin")) {
+            boolean enabled = AstFPSRuntime.tabCacheHooksAvailable();
+            HookAudit.record(mixinClassName, enabled ? "enabled: bounded tab sorting cache" : "disabled: tab startup gate or overlap");
+            return enabled;
+        }
+        if (mixinClassName.endsWith("PackResourcePathMixin")) {
+            boolean enabled = !SAFE_MODE && Boolean.getBoolean("astfps.enablePackResourcePath")
+                && !net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("packforge")
+                && !net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("quick-pack");
+            HookAudit.record(mixinClassName, enabled ? "enabled: direct pack resource path construction" : "disabled: pack path startup gate or overlap");
+            return enabled;
+        }
+        if (mixinClassName.endsWith("RendererIdentityIndexMixin")) {
+            boolean enabled = dev.adelantecodes.astfps.client.render.RendererIdentityIndex.hooksAvailable();
+            HookAudit.record(mixinClassName, enabled ? "enabled: reload-time renderer identity index" : "disabled: renderer index startup gate or overlap");
+            return enabled;
+        }
+        if (mixinClassName.endsWith("VarIntSizeMixin")) {
+            boolean enabled = !SAFE_MODE && Boolean.getBoolean("astfps.enableVarIntSize")
+                && !net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("krypton");
+            HookAudit.record(mixinClassName, enabled ? "enabled: exact VarInt size experiment" : "disabled: VarInt startup gate or Krypton overlap");
+            return enabled;
+        }
+        if (mixinClassName.contains("CompactIdentifier")) {
+            boolean enabled = !SAFE_MODE && Boolean.getBoolean("astfps.enableCompactIdentifiers")
+                && !net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("resourcetrimmer");
+            HookAudit.record(mixinClassName, enabled ? "enabled: compact identifier experiment" : "disabled: identifier startup gate or overlap");
+            return enabled;
+        }
         boolean optimization = mixinClassName.endsWith("FrustumMemoMixin") || mixinClassName.endsWith("AabbZeroOffsetMixin")
             || mixinClassName.endsWith("WorldTargetCleanupMixin") || mixinClassName.endsWith("TerrainBatchMixin")
-            || mixinClassName.endsWith("SectionWorkerCacheMixin");
+            || mixinClassName.endsWith("SectionWorkerCacheMixin") || mixinClassName.endsWith("SectionStateCacheMixin")
+            || mixinClassName.endsWith("RegionStateCacheMixin") || mixinClassName.contains("SectionMeshWorkspace")
+            || mixinClassName.contains("SectionQuadFormat") || mixinClassName.contains("SectionFabric")
+            || mixinClassName.endsWith("ModelRotationScratchMixin") || mixinClassName.endsWith("SectionCompilationScopeMixin");
         boolean apply = !(SAFE_MODE && optimization);
+        if (mixinClassName.endsWith("SectionCompilationScopeMixin")) {
+            boolean compileHooks = AstFPSRuntime.sectionCacheHooksAvailable() || AstFPSRuntime.sectionStateHooksAvailable()
+                || AstFPSRuntime.sectionMeshHooksAvailable() || AstFPSRuntime.sectionQuadFormatHooksAvailable()
+                || AstFPSRuntime.sectionFabricHooksAvailable() || (!SAFE_MODE && Boolean.getBoolean("astfps.profileStages"));
+            if (!compileHooks) {
+                HookAudit.record(mixinClassName, "disabled: no compilation experiment or timing opted in");
+                return false;
+            }
+        }
+        if (mixinClassName.endsWith("TerrainTimingMixin")) {
+            if (SAFE_MODE || !Boolean.getBoolean("astfps.profileStages")) {
+                HookAudit.record(mixinClassName, "disabled: optional method timing requires astfps.profileStages=true and safe mode off");
+                return false;
+            }
+        }
+        if (mixinClassName.contains("SectionMeshWorkspace") && !AstFPSRuntime.sectionMeshHooksAvailable()) {
+            HookAudit.record(mixinClassName, "disabled: requires astfps.enableSectionMeshWorkspace=true, safe mode off, and no conflicting renderer");
+            return false;
+        }
+        if (mixinClassName.contains("SectionQuadFormat") && !AstFPSRuntime.sectionQuadFormatHooksAvailable()) {
+            HookAudit.record(mixinClassName, "disabled: native BLOCK format setup cache requires its startup opt-in and compatible renderer");
+            return false;
+        }
+        if (mixinClassName.contains("SectionFabric") && !AstFPSRuntime.sectionFabricHooksAvailable()) {
+            HookAudit.record(mixinClassName, "disabled: Indigo helper cache requires its startup opt-in, exact inspected Fabric versions and compatible renderer");
+            return false;
+        }
+        if (mixinClassName.endsWith("ModelRotationScratchMixin") && !AstFPSRuntime.modelRotationHooksAvailable()) {
+            HookAudit.record(mixinClassName, "disabled: model rotation scratch requires startup opt-in and no overlapping rotation helper mod");
+            return false;
+        }
+        if (mixinClassName.endsWith("RegionStateCacheMixin")
+                && !AstFPSRuntime.sectionStateHooksAvailable()) {
+            HookAudit.record(mixinClassName, "disabled: requires astfps.enableSectionStateCache=true, safe mode off, no conflicting renderer or known dynamic region-state hook");
+            return false;
+        }
         if (mixinClassName.endsWith("SectionWorkerCacheMixin") && !AstFPSRuntime.sectionCacheHooksAvailable()) {
             HookAudit.record(mixinClassName, "disabled: requires astfps.enableSectionWorkerCache=true, safe mode off, and no conflicting renderer");
             return false;

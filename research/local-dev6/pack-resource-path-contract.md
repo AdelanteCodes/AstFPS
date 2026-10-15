@@ -1,0 +1,9 @@
+# Native ZIP lookup path construction
+
+Implemented `PackResourcePathMixin` in the local AstFPS copy only. Parent owns startup plugin registration, safe-mode veto, default-off option and exclusions for actual mod IDs `packforge` and `quick-pack` (verified from downloaded fabric.mod.json).
+
+Native26.3 `FilePackResources.getPathFromLocation(PackType, Identifier)` disassembly is saved in `work/pack-resource-path-native-javap.txt`. It calls `String.format(Locale.ROOT, "%s/%s/%s", Object[3])`, populating the arguments by calling PackType.getDirectory, Identifier.getNamespace, Identifier.getPath in that order. The implementation uses the same typed getters in that order, separated by the same literal slashes. PackType is the native enum with fixed directory strings; Identifier exposes its native string namespace/path. Null arguments still fail at the same first getter; result text and normalization are unchanged. It does not modify pack-prefix application, enumeration order, archive handles, IoSupplier ownership, async publication, native invalid-path handling or resource lifecycle.
+
+This removes Formatter and varargs construction on each ZIP pack resource lookup. It is a loading/resource lookup CPU and allocation improvement; steady FPS or measured speedup is not established. There is no global or instance cache and no new target initialization dependency. It is an original narrow implementation based on native disassembly, not copied PackForge/QuickPack implementation. Those projects provided the resource-loading investigation context; their broader optimizations are not implicitly certified.
+
+No Minecraft execution or unit/runtime/performance tests were run. Parent performs central compile/package verification. Third-party mixins replacing the same private method remain an integration boundary and require the conservative startup exclusions.

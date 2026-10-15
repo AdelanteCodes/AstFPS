@@ -15,12 +15,9 @@ public final class SectionWorkerCache {
     private WeakReference<BlockColors> colors = new WeakReference<>(null);
     private boolean ao;
     private boolean cull;
-    private int depth;
-    public void enter() { depth++; }
-    public void leave() { depth--; }
     public void discard() { model.clear(); fluid.clear(); colors.clear(); }
     public ModelBlockRenderer model(boolean ambientOcclusion, boolean cull, BlockColors colors, Operation<ModelBlockRenderer> original) {
-        if (depth != 1) return original.call(ambientOcclusion, cull, colors);
+        if (!SectionCompilationContext.borrowing(SectionCompilationContext.WORKER)) return original.call(ambientOcclusion, cull, colors);
         var renderer = model.get();
         if (renderer != null && this.colors.get() == colors && ao == ambientOcclusion && this.cull == cull) {
             AstFPSRuntime.sectionModelHelpersReused.increment(); return renderer;
@@ -33,7 +30,7 @@ public final class SectionWorkerCache {
         AstFPSRuntime.sectionModelHelpersAllocated.increment(); return renderer;
     }
     public FluidRenderer fluid(FluidStateModelSet models, Operation<FluidRenderer> original) {
-        if (depth != 1) return original.call(models);
+        if (!SectionCompilationContext.borrowing(SectionCompilationContext.WORKER)) return original.call(models);
         var renderer = fluid.get();
         if (renderer != null && renderer.fluidModels == models) {
             AstFPSRuntime.sectionFluidHelpersReused.increment(); return renderer;

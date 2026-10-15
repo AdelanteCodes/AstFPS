@@ -1,40 +1,23 @@
-# AstFPS implementation plan
+# Current local plan
 
-## Product constraints
+See LOCAL-DEVELOPMENT.md for current completed stages and remaining work. README.md describes the runnable three profiles and experimental flags. The bundle uses six credited, unmodified modules; original renderer development continues separately. Publication authorized by the user on 2026-10-15. See OPTIMIZATION_PLAN.md for the next priorities.
 
-Implement original optimization code. Preserve vanilla visual output, native
-1440p resolution and the user's chosen 16–20 chunk render distance. Do not remove
-visible entities, particles, shadows or lighting, or alter simulation mechanics.
-No shader/resource packs, optimization-mod embedding or visual-cutback presets.
+## Accepted selection strategy, 2026-10-15
 
-## Implementation sequence
+User clarified: choose the best compatible option for each optimization category, not every mod. "Best" means a provisional fit supported by inspected implementation and native contracts; only matched benchmarks can establish performance winners. Do not accumulate overlapping engines just to increase the module count.
 
-1. Establish a reproducible Java 25 / Fabric 26.3 build and client smoke test.
-2. Validate frame-scoped, exact-input visibility memoization against vanilla
-   results. Keep it off by default until hooks and visual equivalence are tested.
-3. Record cache hit rate and frame times on fixed scenes. Remove or revise the
-   cache if its overhead outweighs saved work.
-4. Profile repeated calculations, allocations and rendering submission work.
-   Add one independent optimization at a time, behind a testable feature toggle.
-5. Investigate more efficient geometry construction, reuse and draw submission
-   only after profiling identifies a material bottleneck. Preserve sorting,
-   translucent surfaces and all visible geometry.
-6. Add more advanced controls for implementation parameters without changing
-   scene appearance. Publish only validated features.
+| Area | Selected foundation | Current status / limits |
+| --- | --- | --- |
+| Immediate rendering, HUD, text, maps | ImmediatelyFast | Bundled, pinned; avoid duplicating its batching/atlas hooks. |
+| Game logic and integrated-server CPU | Lithium | Bundled; client-only deployment does not accelerate a remote server. |
+| Block-state/model memory | FerriteCore | Bundled with existing compatibility override. |
+| Resource/model loading | ModernFix-mVUS plus narrow AstFPS pack/texture helpers | Module bundled; AstFPS additions opt-in and runtime unverified. |
+| Repeated enum allocation | Jasione | Bundled; do not duplicate values-array rewriting. |
+| Terrain and native GPU submission | Original AstFPS native-engine integration | Existing opt-in terrain scratch/submission/FBO work; not a completed Sodium replacement. No Sodium dependency under current user constraint. |
+| Hidden entities/block entities | EntityCulling design as the next conservative occlusion candidate | Not integrated. Prefer visual-only culling; resolve publication, stale-result and custom geometry boundaries first. Do not enable client tick suppression by default. |
+| Local world pregeneration | Chunky | Bundled utility; optional user operation, not an automatic stationary-FPS accelerator. |
+| Maximum-mode visual reductions | Native options plus narrow AstFPS container distance cap | Explicit tradeoffs; do not present as same-visual benchmark gains. |
 
-## Acceptance checks
+Keep alternate full renderers, overlapping simulation engines, broad codec rewrites, unproven async world reads, placeholder texture eviction and native worldgen changes out of the default build. Krypton/ScalableLux/upscaling remain category candidates, not approved bundled additions merely because they advertise optimizations. Shader integration remains a later separate phase.
 
-- Build and algorithm tests; actual client startup and world entry.
-- Matching visible output with each feature enabled/disabled.
-- Fast camera rotation, camera teleport, changed frusta, dimension/world reload,
-  transparent blocks, overlapping entities and chunk-boundary geometry.
-- Corrupt config recovery without destructive rewrites; bounded memory use.
-- Three repeated benchmark runs at both 16 and 20 chunks; average FPS, p99 frame
-  time and 1% low FPS. Include dense entities and travel through loaded chunks.
-- Compare native-resolution captures on the gaming PC. Hardware performance is
-  unverified until that machine is available.
-
-## Target machine
-
-Ryzen 5 5600X, RTX 5060 Ti 16GB, 32GB DDR4, 1440p 300Hz monitor.
-The CPU bottleneck remains a hypothesis, not a measured conclusion.
+Next engineering priority is conservative visibility work with exact lifecycle ownership, followed by matched runtime validation when authorized. Do not imply that planning or compiling it means it is implemented or faster.

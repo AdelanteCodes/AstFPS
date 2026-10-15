@@ -9,21 +9,23 @@ public final class FeatureGate {
     private final String id;
     private volatile boolean enabled;
     private volatile Failure failure;
+    private volatile boolean failed;
 
     public FeatureGate(String id) { this.id = id; }
     public String id() { return id; }
     public boolean enabled() { return enabled; }
     public Failure failure() { return failure; }
 
-    public boolean enable(boolean requested) {
-        if (requested && failure != null) return false;
+    public synchronized boolean enable(boolean requested) {
+        if (requested && failed) return false;
         enabled = requested;
         return true;
     }
 
-    public synchronized void disableAfterFailure(String stage, RuntimeException error) {
+    public synchronized void disableAfterFailure(String stage, Throwable error) {
         enabled = false;
-        if (failure != null) return;
+        if (failed) return;
+        failed = true;
         StringWriter trace = new StringWriter();
         error.printStackTrace(new PrintWriter(trace));
         failure = new Failure(id, stage, Instant.now().toString(), error.getClass().getName(), error.getMessage(), trace.toString());

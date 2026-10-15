@@ -26,12 +26,19 @@ def main():
             with zipfile.ZipFile(io.BytesIO(data)) as child:
                 assert child.testzip() is None
         assert 'META-INF/jars/AstFPS-0.1.0-alpha.1.jar' not in jar.namelist()
-        for name in ['AabbZeroOffsetMixin', 'WorldTargetCleanupMixin', 'AstFPSMixinPlugin', 'MinecraftFrameMixin']:
+        mixins = json.loads(jar.read('astfps.client.mixins.json'))
+        assert 'SectionCompilationScopeMixin' in mixins['client'] and 'RegionStateCacheMixin' in mixins['client']
+        for name in mixins['client'] + ['AstFPSMixinPlugin']:
             data = jar.read('dev/adelantecodes/astfps/client/mixin/' + name + '.class')
             assert int.from_bytes(data[6:8], 'big') == 69, 'Expected Java 25 classes'
+        for obsolete in ('EntityRendererLookupMixin', 'BlockEntityRendererLookupMixin'):
+            assert 'dev/adelantecodes/astfps/client/mixin/' + obsolete + '.class' not in jar.namelist(), 'Obsolete per-lookup experiment packaged'
+        assert 'PlayerTabSnapshotMixin' in mixins['client'] and 'PackResourcePathMixin' in mixins['client']
+        assert 'EntityRendererIdentityIndexMixin' in mixins['client'] and 'BlockEntityRendererIdentityIndexMixin' in mixins['client']
         assert meta['custom']['lithium:options']['mixin.world.temperature_cache'] is False
         assert 'useSmallThreadingDetector' in meta['custom']['ferritecore:disabled_options']
     out = ROOT / 'artifacts'
+    out.mkdir(exist_ok=True)
     paths = []
     for suffix in ['', '-sources']:
         path = ROOT / f'build/libs/AstFPS-{version}{suffix}.jar'
@@ -40,7 +47,9 @@ def main():
         shutil.copyfile(path, target); paths.append(target)
     report = {'version': version, 'core': 'Fresh Java 25 compilation of current source; no old alpha core nested',
               'modules': components, 'validation': ['Java compilation', 'archive integrity', 'pinned nested binaries', 'metadata module list', 'compatibility overrides', 'Java class version'],
-              'runtimeVerification': False, 'fpsImprovementMeasured': False,
+              'runtimeVerification': False, 'fpsImprovementMeasured': False, 'localOnly': True,
+              'profiles': ['quality', 'balanced', 'maximum'],
+              'shaderIntegrationComplete': False, 'independentRendererComplete': False,
               'buildEnvironment': 'Local Windows Java 25; build-only TCP selector workaround outside repository, not included in artifacts.'}
     (out / f'release-{version}.json').write_text(json.dumps(report, indent=2) + '\n')
     (out / f'SHA256SUMS-{version}.txt').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest() + '  ' + p.name + '\n' for p in paths))

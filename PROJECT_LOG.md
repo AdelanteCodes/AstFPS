@@ -163,3 +163,7 @@ chains and GPU references in finally. Added section-record allocated/reused coun
 to status, diagnostics and capture exports. See research/renderer-section-record-reuse.md
 for vanilla writer contracts and the bounded-retention tradeoff. The feature remains
 opt-in; no Minecraft execution, FPS gain or visual parity is claimed.
+
+## 2026-10-15 local continuation
+
+Independent 0.5.0-dev.1-local copy. Three native visual profiles, compile-local state cache, direct CPU array reuse, offset checks and diagnostics. Compilation/static archives passed; no runtime tests or measured gains. Original repository unchanged; shader/full-renderer work unfinished.

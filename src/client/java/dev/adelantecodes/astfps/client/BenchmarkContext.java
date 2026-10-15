@@ -15,6 +15,24 @@ public final class BenchmarkContext {
         var options = client.options;
         Map<String, Object> context = new LinkedHashMap<>();
         context.put("javaVersion", System.getProperty("java.version"));
+        context.put("astfpsProfile", AstFPSProfiles.current());
+        context.put("safeMode", AstFPSRuntime.safeMode());
+        context.put("startupRequests", Map.of(
+            "varIntSize", Boolean.getBoolean("astfps.enableVarIntSize"),
+            "compactIdentifiers", Boolean.getBoolean("astfps.enableCompactIdentifiers"),
+            "packResourcePath", Boolean.getBoolean("astfps.enablePackResourcePath"),
+            "rendererIdentityIndex", Boolean.getBoolean("astfps.enableRendererIdentityIndex"),
+            "fboLookupProbe", Boolean.getBoolean("astfps.enableFboLookupProbe"),
+            "zipEntryMissCache", Boolean.getBoolean("astfps.enableZipEntryMissCache"),
+            "textureSlotSuffixLookup", Boolean.getBoolean("astfps.enableTextureSlotSuffixLookup"),
+            "maximumBlockEntityDistance", Boolean.getBoolean("astfps.enableMaximumBlockEntityDistance")));
+        // Requests alone do not prove installation; receipts also show overlap/safe-mode vetoes.
+        context.put("hookReceipts", dev.adelantecodes.astfps.HookAudit.snapshot());
+        context.put("sectionStateCacheEnabled", AstFPSRuntime.SECTION_STATE_CACHE.enabled());
+        context.put("sectionWorkerCacheEnabled", AstFPSRuntime.SECTION_WORKER_CACHE.enabled());
+        context.put("sectionMeshWorkspaceEnabled", AstFPSRuntime.SECTION_MESH_WORKSPACE.enabled());
+        for (var experiment : AdditionalExperiments.ENTRIES) context.put(experiment.command(), experiment.gate().enabled());
+        context.put("terrainBatcherEnabled", AstFPSRuntime.TERRAIN_BATCHER.enabled());
         context.put("os", System.getProperty("os.name"));
         context.put("osArch", System.getProperty("os.arch"));
         context.put("availableProcessors", Runtime.getRuntime().availableProcessors());

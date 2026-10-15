@@ -3,6 +3,36 @@
   "package": "dev.adelantecodes.astfps.client.mixin",
   "plugin": "dev.adelantecodes.astfps.client.mixin.AstFPSMixinPlugin",
   "compatibilityLevel": "JAVA_25",
-  "client": ["MinecraftFrameMixin", "FrustumMemoMixin", "AabbZeroOffsetMixin", "WorldTargetCleanupMixin", "TerrainBatchMixin", "SectionWorkerCacheMixin"],
-  "injectors": {"defaultRequire": 1}
+  "client": [
+    "MinecraftFrameMixin",
+    "FrustumMemoMixin",
+    "AabbZeroOffsetMixin",
+    "WorldTargetCleanupMixin",
+    "TerrainBatchMixin",
+    "SectionWorkerCacheMixin",
+    "RegionStateCacheMixin",
+    "SectionMeshWorkspaceCompilerMixin",
+    "SectionMeshWorkspaceVisGraphMixin",
+    "TerrainTimingMixin",
+    "SectionQuadFormatBuilderMixin",
+    "SectionFabricAoFactoryMixin",
+    "SectionFabricAoAccessMixin",
+    "ModelRotationScratchMixin",
+    "SectionCompilationScopeMixin",
+    "VarIntSizeMixin",
+    "CompactIdentifierCodecMixin",
+    "CompactIdentifierBufferMixin",
+    "PlayerTabSnapshotMixin",
+    "PackResourcePathMixin",
+    "EntityRendererIdentityIndexMixin",
+    "BlockEntityRendererIdentityIndexMixin",
+    "FboLookupKeyMixin",
+    "FboLookupCacheMixin",
+    "ZipEntryMissCacheMixin",
+    "TextureSlotSuffixMixin",
+    "MaximumBlockEntityDistanceMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }
