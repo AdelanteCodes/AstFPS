@@ -110,6 +110,18 @@ public final class AstFPSConfig {
         write(json);
     }
 
+    public static AstFPSProfiles.Profile loadWorldProfile(String key) {
+        if (key == null) return null;
+        try { JsonObject json=read(); if(!json.has("worldProfiles"))return null;
+            String value=json.getAsJsonObject("worldProfiles").has(key)?json.getAsJsonObject("worldProfiles").get(key).getAsString():null;
+            return value==null?null:AstFPSProfiles.Profile.valueOf(value);
+        } catch(IOException|RuntimeException ignored){return null;}
+    }
+    public static void saveWorldProfile(String key,AstFPSProfiles.Profile profile)throws IOException{
+        if(key==null)return;JsonObject json=read();JsonObject worlds=json.has("worldProfiles")?json.getAsJsonObject("worldProfiles"):new JsonObject();
+        worlds.addProperty(key,profile.name());json.add("worldProfiles",worlds);json.addProperty("schemaVersion",5);write(json);
+    }
+
     public static FrameGenerationController.Mode loadFrameGenerationMode() {
         try {
             JsonObject config = read();
@@ -125,6 +137,38 @@ public final class AstFPSConfig {
         try { json = read(); } catch (RuntimeException e) { throw new IOException("Invalid configuration; original preserved", e); }
         json.addProperty("frameGeneration", mode.name());
         json.addProperty("schemaVersion", 4);
+        write(json);
+    }
+
+    public static void loadV1Features() {
+        JsonObject json;
+        try { json = read(); } catch (IOException | RuntimeException ignored) { return; }
+        try { if (json.has("lowRam")) V1Features.lowRam(V1Features.LowRamMode.valueOf(json.get("lowRam").getAsString())); } catch (RuntimeException ignored) { }
+        // Stable V1 deliberately disables the earlier experimental spatial scaler.
+        V1Features.upscaling(V1Features.UpscalingMode.OFF);
+        try { if (json.has("culling")) V1Features.culling(V1Features.Level.valueOf(json.get("culling").getAsString())); } catch (RuntimeException ignored) { }
+        try { if (json.has("chunkSmoothing")) V1Features.chunkSmoothing(V1Features.Level.valueOf(json.get("chunkSmoothing").getAsString())); } catch (RuntimeException ignored) { }
+        try { if (json.has("frameGenQuality")) V1Features.frameGenQuality(V1Features.FrameGenQuality.valueOf(json.get("frameGenQuality").getAsString())); } catch (RuntimeException ignored) { }
+        try { if (json.has("latency")) V1Features.latency(V1Features.LatencyMode.valueOf(json.get("latency").getAsString())); } catch (RuntimeException ignored) { }
+        try { if (json.has("fullBright")) V1Features.fullBright(json.get("fullBright").getAsBoolean()); } catch (RuntimeException ignored) { }
+        try { if (json.has("performanceOverlay")) V1Features.overlay(json.get("performanceOverlay").getAsBoolean()); } catch (RuntimeException ignored) { }
+        try { if (json.has("perWorldProfiles")) V1Features.perWorldProfiles(json.get("perWorldProfiles").getAsBoolean()); } catch (RuntimeException ignored) { }
+        try { if (json.has("compatibilityProtection")) V1Features.compatibilityProtection(json.get("compatibilityProtection").getAsBoolean()); } catch (RuntimeException ignored) { }
+    }
+
+    public static void saveV1Features() throws IOException {
+        JsonObject json;
+        try { json = read(); } catch (RuntimeException e) { throw new IOException("Invalid configuration; original preserved", e); }
+        json.addProperty("lowRam", V1Features.lowRam().name());
+        json.addProperty("culling", V1Features.culling().name());
+        json.addProperty("chunkSmoothing", V1Features.chunkSmoothing().name());
+        json.addProperty("frameGenQuality", V1Features.frameGenQuality().name());
+        json.addProperty("latency", V1Features.latency().name());
+        json.addProperty("fullBright", V1Features.fullBright());
+        json.addProperty("performanceOverlay", V1Features.overlay());
+        json.addProperty("perWorldProfiles", V1Features.perWorldProfiles());
+        json.addProperty("compatibilityProtection", V1Features.compatibilityProtection());
+        json.addProperty("schemaVersion", 5);
         write(json);
     }
 

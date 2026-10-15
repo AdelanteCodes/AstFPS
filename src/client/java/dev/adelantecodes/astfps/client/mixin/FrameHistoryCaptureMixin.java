@@ -11,6 +11,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.client.DeltaTracker;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,11 +23,12 @@ import dev.adelantecodes.astfps.framegen.PresentationSchedule;
 import dev.adelantecodes.astfps.client.render.FrameGenerationController;
 import dev.adelantecodes.astfps.client.render.FrameInterpolationRenderer;
 import dev.adelantecodes.astfps.client.AstFPSRuntime;
+import com.mojang.renderpearl.api.device.GpuDevice;
 
 /** Captures post-processed world color immediately before vanilla starts the GUI pass. */
 @Mixin(GameRenderer.class)
 public abstract class FrameHistoryCaptureMixin {
-    @Shadow @Final private RenderTarget mainRenderTarget;
+    @Shadow @Final @Mutable private RenderTarget mainRenderTarget;
     @Shadow @Final private GameRenderState gameRenderState;
     @Shadow @Final private Minecraft minecraft;
     @Unique private final FrameHistoryCapture astfpsFrameHistory = new FrameHistoryCapture();

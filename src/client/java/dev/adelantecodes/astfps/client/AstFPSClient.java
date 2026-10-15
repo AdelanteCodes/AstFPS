@@ -28,6 +28,9 @@ import dev.adelantecodes.astfps.client.render.RendererBackendSelector;
 import dev.adelantecodes.astfps.compat.CompatibilityPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.minecraft.resources.Identifier;
 
 public final class AstFPSClient implements ClientModInitializer {
     private static AstFPSClient instance;
@@ -41,6 +44,20 @@ public final class AstFPSClient implements ClientModInitializer {
 
     @Override public void onInitializeClient() {
         instance = this;
+        AstFPSConfig.loadV1Features();
+        ZoomController.initialize();
+        HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("astfps", "performance_overlay"), (graphics, delta) -> {
+            if (!V1Features.overlay() || Minecraft.getInstance().level == null) return;
+            int nativeFps = FrameGenerationController.measuredNativeFps();
+            int generated = FrameGenerationController.measuredGeneratedFps();
+            String line = "AstFPS  Native " + nativeFps + "  + Generated " + generated + "  = Displayed " + (nativeFps + generated);
+            graphics.fill(5, 5, 13 + Minecraft.getInstance().font.width(line), 20, 0xA010141A);
+            graphics.text(Minecraft.getInstance().font, line, 9, 8, generated > 0 ? 0xFF66E08A : 0xFFFFFFFF, true);
+        });
+        ClientPlayConnectionEvents.JOIN.register((handler,sender,client)->{
+            if(!V1Features.perWorldProfiles())return; var saved=AstFPSConfig.loadWorldProfile(worldKey(client));
+            if(saved!=null)LOGGER.info("{}",AstFPSProfiles.apply(client,saved));
+        });
         // Pipeline registration must precede ShaderManager's full resource reload.
         FrameInterpolationRenderer.register();
         AstFPSRuntime.VISIBILITY_MEMO.enable(AstFPSRuntime.memoHooksAvailable() && AstFPSConfig.loadMemo());
@@ -86,6 +103,8 @@ public final class AstFPSClient implements ClientModInitializer {
                 var backend = RendererBackendSelector.current();
                 reply(source, "Renderer backend tier: " + backend.tier() + "; " + backend.reason());
                 reply(source, FrameGenerationController.status());
+                reply(source, "V1: low RAM " + V1Features.lowRam()
+                    + "; full bright " + V1Features.fullBright() + "; culling " + V1Features.culling());
                 var adaptive = AdaptiveRuntime.snapshot();
                 reply(source, String.format(Locale.ROOT,
                     "Adaptive tier: %s; frame %.2f ms; GPU %.1f%%; chunk jobs/queue %d/%d; cache %d%%",
@@ -165,6 +184,11 @@ public final class AstFPSClient implements ClientModInitializer {
             dispatcher.register(root);
         });
         LOGGER.info("AstFPS initialized with automatic optimizations; profile defaults to Balanced Performance.");
+    }
+
+    public static String worldKey(Minecraft client){
+        try{if(client.getSingleplayerServer()!=null)return "singleplayer:"+client.getSingleplayerServer().getWorldData().getLevelName();}catch(RuntimeException ignored){}
+        var server=client.getCurrentServer();return server==null?null:"server:"+server.ip;
     }
 
     private int export(FabricClientCommandSource source) {

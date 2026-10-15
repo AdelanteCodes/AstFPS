@@ -15,6 +15,7 @@ import net.minecraft.resources.Identifier;
 import dev.adelantecodes.astfps.client.AdaptiveRuntime;
 import dev.adelantecodes.astfps.adaptive.AdaptivePolicy;
 import dev.adelantecodes.astfps.client.AstFPSRuntime;
+import dev.adelantecodes.astfps.client.V1Features;
 
 /** Fullscreen cross-vendor history compositor. Scheduling remains controlled separately. */
 public final class FrameInterpolationRenderer {
@@ -64,8 +65,12 @@ public final class FrameInterpolationRenderer {
                 || previous.getDepthTextureView() == null || current.getDepthTextureView() == null)
             throw new IllegalArgumentException("history and output targets are required");
         var adaptive = AdaptiveRuntime.snapshot();
-        boolean quality = adaptive.tier() == AdaptivePolicy.Tier.THROUGHPUT
-            && (!Double.isFinite(adaptive.gpuUtilization()) || adaptive.gpuUtilization() < 72.0);
+        boolean quality = switch (V1Features.frameGenQuality()) {
+            case FAST -> false;
+            case QUALITY -> true;
+            case AUTO -> adaptive.tier() == AdaptivePolicy.Tier.THROUGHPUT
+                && (!Double.isFinite(adaptive.gpuUtilization()) || adaptive.gpuUtilization() < 72.0);
+        };
         if (quality) AstFPSRuntime.interpolationQualityFrames++;
         else AstFPSRuntime.interpolationFastFrames++;
         RenderPipeline pipeline = switch (quarterStep) {

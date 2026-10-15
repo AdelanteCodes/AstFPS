@@ -5,6 +5,10 @@
   "compatibilityLevel": "JAVA_25",
   "client": [
     "MinecraftFrameMixin",
+    "FullBrightLightmapMixin",
+    "ParticleDistanceCullingMixin",
+    "ZoomCameraMixin",
+    "ZoomScrollMixin",
     "FrameHistoryCaptureMixin",
     "SyntheticExtractionSkipMixin",
     "FrustumMemoMixin",

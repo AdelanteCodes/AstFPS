@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0 — 2026-10-15
+
+- Added configurable hold-`C` zoom with scroll-wheel magnification.
+- Added Full Bright, Low RAM, culling, chunk-smoothing, latency and performance-overlay controls.
+- Added clear red-to-green state buttons and a compact advanced settings screen.
+- Added particle and block-entity distance controls for lower-end systems.
+- Preserved the three 6/10/16-chunk profiles while keeping render distance editable.
+- Kept frame generation optional and isolated from the stable optimization defaults.
+- Removed the corrupting experimental spatial upscaler; V1 does not claim FSR 1/2/3 or Vulkan support.
+- Passed a fresh Java 25 clean build, unit tests, core checks and release archive validation.
+
 ## 0.9.0-beta.1 — 2026-10-15
 
 - Added compact Maximum Performance, Balanced Performance and Best Visuals profiles with visible selection state and 6/10/16-chunk defaults.

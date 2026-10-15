@@ -2,6 +2,7 @@ package dev.adelantecodes.astfps.client.render;
 
 import dev.adelantecodes.astfps.client.AstFPSProfiles;
 import dev.adelantecodes.astfps.client.AdaptiveRuntime;
+import dev.adelantecodes.astfps.client.V1Features;
 import dev.adelantecodes.astfps.adaptive.ChunkPriority;
 import net.minecraft.core.SectionPos;
 
@@ -23,6 +24,9 @@ public final class ChunkUpdateAdmission {
             case "balanced" -> 100;
             default -> 130;
         };
+        profilePercent = profilePercent * switch (V1Features.chunkSmoothing()) {
+            case OFF -> 200; case CONSERVATIVE -> 130; case BALANCED -> 100; case AGGRESSIVE -> 70;
+        } / 100;
         int perFrame = Math.max(1, adaptive.chunkJobsPerFrame() * profilePercent / 100);
         int outstandingLimit = Math.max(2, adaptive.chunkQueueLimit() * profilePercent / 100);
         remaining = Math.min(perFrame, Math.max(0, outstandingLimit - Math.max(0, queuedJobs)));

@@ -26,6 +26,9 @@ public final class FrameGenerationController {
     private static volatile boolean environmentAllowed;
     private static volatile String compositorFailure;
     private static volatile PresentationSchedule.Presentation presentation = PresentationSchedule.Presentation.real();
+    private static long metricWindow = System.nanoTime();
+    private static int realInWindow, generatedInWindow;
+    private static volatile int measuredNativeFps, measuredGeneratedFps;
 
     private FrameGenerationController() { }
 
@@ -58,6 +61,8 @@ public final class FrameGenerationController {
             case X2 -> FrameGenerationPacer.Request.X2;
             case X4 -> FrameGenerationPacer.Request.X4;
         }, compositorSupported, gpuUtilizationFraction);
+        if (dev.adelantecodes.astfps.client.V1Features.latency() == dev.adelantecodes.astfps.client.V1Features.LatencyMode.LOW && decision.generatedFrames() > 1)
+            decision = new FrameGenerationPacer.Decision(1, decision.suspension(), decision.nativeFps());
     }
     public static PresentationSchedule.Presentation beginPresentation() {
         if (!active()) {
@@ -66,6 +71,8 @@ public final class FrameGenerationController {
         } else {
             presentation = SCHEDULE.begin();
         }
+        if (!presentation.renderRealWorld()) generatedInWindow++;
+        publishMetrics();
         return presentation;
     }
     public static boolean renderRealWorldThisPresentation() { return presentation.renderRealWorld(); }
@@ -76,6 +83,8 @@ public final class FrameGenerationController {
     /** Records real renderer cost only; real-to-real wall time also contains our synthetic frames. */
     public static void realFrameRendered(long renderNanos) {
         PACER.recordNativeFrame(renderNanos);
+        realInWindow++;
+        publishMetrics();
     }
     public static void compositorReady() {
         if (compositorFailure == null) compositorSupported = true;
@@ -101,5 +110,15 @@ public final class FrameGenerationController {
             : "Frame Generation " + requested.label() + " requested; history "
                 + (historyAvailable ? "ready" : "warming up") + "; suspended: "
                 + decision.suspension().name().toLowerCase().replace('_', ' ');
+    }
+    public static int measuredNativeFps() { return measuredNativeFps; }
+    public static int measuredGeneratedFps() { return measuredGeneratedFps; }
+    public static int measuredDisplayedFps() { return measuredNativeFps + measuredGeneratedFps; }
+    private static void publishMetrics() {
+        long now=System.nanoTime(); long elapsed=now-metricWindow;
+        if(elapsed<1_000_000_000L)return;
+        measuredNativeFps=(int)Math.round(realInWindow*1_000_000_000.0/elapsed);
+        measuredGeneratedFps=(int)Math.round(generatedInWindow*1_000_000_000.0/elapsed);
+        realInWindow=0;generatedInWindow=0;metricWindow=now;
     }
 }

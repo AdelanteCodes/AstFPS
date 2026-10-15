@@ -2,6 +2,7 @@ package dev.adelantecodes.astfps.client.mixin;
 
 import dev.adelantecodes.astfps.client.AstFPSProfiles;
 import dev.adelantecodes.astfps.client.AstFPSRuntime;
+import dev.adelantecodes.astfps.client.V1Features;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.world.entity.Entity;
@@ -22,14 +23,17 @@ public abstract class EntityDistanceCullingMixin {
     private <E extends Entity> void astfpsMaximumDistance(E entity, Frustum frustum,
             double cameraX, double cameraY, double cameraZ, float partialTick,
             CallbackInfoReturnable<Boolean> callback) {
-        if (!callback.getReturnValueZ() || !AstFPSProfiles.maximum()) return;
+        if (!callback.getReturnValueZ() || V1Features.culling() == V1Features.Level.OFF) return;
         // Never hide players, glowing/selected objects, named entities, vehicles, bosses represented
         // as players, or projectiles whose long-range motion is gameplay-relevant.
         if (entity instanceof Player || entity instanceof Projectile || entity.isCurrentlyGlowing()
                 || entity.hasCustomName() || entity.isPassenger() || entity.isVehicle()) return;
-        double limit = entity instanceof ExperienceOrb ? 24.0
+        double multiplier = switch (V1Features.culling()) {
+            case CONSERVATIVE -> 2.0; case BALANCED -> 1.5; case AGGRESSIVE -> 1.0; default -> 1000.0;
+        };
+        double limit = (entity instanceof ExperienceOrb ? 24.0
             : entity instanceof ItemEntity ? 32.0
-            : entity instanceof LivingEntity ? 64.0 : 48.0;
+            : entity instanceof LivingEntity ? 64.0 : 48.0) * multiplier;
         if (entity.distanceToSqr(cameraX, cameraY, cameraZ) > limit * limit) {
             AstFPSRuntime.entitiesDistanceCulled++;
             callback.setReturnValue(false);
