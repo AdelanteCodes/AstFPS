@@ -16,6 +16,7 @@ vendor/*
 !vendor/Chunky-Fabric-1.5.3.jar
 !vendor/ImmediatelyFast-Fabric-1.17.1+26.3.jar
 !vendor/lithium-fabric-0.26.2+mc26.3.jar
+!vendor/BadOptimizations-2.4.1-26.3-fabric.jar
 dist/
 *.zip
 !third-party/sources/immediatelyfast-v1.17.1-source.zip
