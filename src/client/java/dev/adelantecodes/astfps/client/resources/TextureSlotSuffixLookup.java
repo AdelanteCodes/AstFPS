@@ -16,7 +16,7 @@ public final class TextureSlotSuffixLookup {
     private TextureSlotSuffixLookup() { }
 
     public static boolean hooksAvailable() {
-        return !AstFPSRuntime.safeMode() && Boolean.getBoolean("astfps.enableTextureSlotSuffixLookup");
+        return !AstFPSRuntime.safeMode() && dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableTextureSlotSuffixLookup");
     }
 
     public static Material get(Map<String, Material> map, String reference) {

@@ -34,7 +34,7 @@ public final class FboLookupProbe {
     }
 
     public static boolean hooksAvailable() {
-        return !AstFPSRuntime.safeMode() && Boolean.getBoolean("astfps.enableFboLookupProbe")
+        return !AstFPSRuntime.safeMode() && dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableFboLookupProbe")
                 && AstFPSRuntime.rendererConflict() == null && !FabricLoader.getInstance().isModLoaded("lomka");
     }
 

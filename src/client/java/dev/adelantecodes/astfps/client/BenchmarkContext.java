@@ -18,14 +18,14 @@ public final class BenchmarkContext {
         context.put("astfpsProfile", AstFPSProfiles.current());
         context.put("safeMode", AstFPSRuntime.safeMode());
         context.put("startupRequests", Map.of(
-            "varIntSize", Boolean.getBoolean("astfps.enableVarIntSize"),
-            "compactIdentifiers", Boolean.getBoolean("astfps.enableCompactIdentifiers"),
-            "packResourcePath", Boolean.getBoolean("astfps.enablePackResourcePath"),
-            "rendererIdentityIndex", Boolean.getBoolean("astfps.enableRendererIdentityIndex"),
-            "fboLookupProbe", Boolean.getBoolean("astfps.enableFboLookupProbe"),
-            "zipEntryMissCache", Boolean.getBoolean("astfps.enableZipEntryMissCache"),
-            "textureSlotSuffixLookup", Boolean.getBoolean("astfps.enableTextureSlotSuffixLookup"),
-            "maximumBlockEntityDistance", Boolean.getBoolean("astfps.enableMaximumBlockEntityDistance")));
+            "varIntSize", dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableVarIntSize"),
+            "compactIdentifiers", dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableCompactIdentifiers"),
+            "packResourcePath", dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enablePackResourcePath"),
+            "rendererIdentityIndex", dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableRendererIdentityIndex"),
+            "fboLookupProbe", dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableFboLookupProbe"),
+            "zipEntryMissCache", dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableZipEntryMissCache"),
+            "textureSlotSuffixLookup", dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableTextureSlotSuffixLookup"),
+            "maximumBlockEntityDistance", dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableMaximumBlockEntityDistance")));
         // Requests alone do not prove installation; receipts also show overlap/safe-mode vetoes.
         context.put("hookReceipts", dev.adelantecodes.astfps.HookAudit.snapshot());
         context.put("sectionStateCacheEnabled", AstFPSRuntime.SECTION_STATE_CACHE.enabled());

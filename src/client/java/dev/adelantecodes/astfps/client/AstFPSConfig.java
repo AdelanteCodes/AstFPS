@@ -8,17 +8,124 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import net.fabricmc.loader.api.FabricLoader;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import dev.adelantecodes.astfps.client.render.FrameGenerationController;
 
 public final class AstFPSConfig {
     private static final Gson JSON = new GsonBuilder().setPrettyPrinting().create();
+    // Captured once before mixins are selected. Saving a preference cannot install a mixin mid-session.
+    private static final JsonObject STARTUP = readStartup();
+    private static final Set<String> DEFAULT_OPTIMIZATIONS = Set.of(
+        "astfps.enableVisibilityMemo", "astfps.enableZeroOffsetReuse", "astfps.enableWorldTargetCleanup",
+        "astfps.enableTerrainBatcher", "astfps.enableSectionWorkerCache", "astfps.enableSectionStateCache",
+        "astfps.enableSectionMeshWorkspace", "astfps.enableSectionQuadFormat", "astfps.enableSectionFabricWorkspace",
+        "astfps.enableModelRotationScratch", "astfps.enableTabListCache", "astfps.enablePackResourcePath",
+        "astfps.enableRendererIdentityIndex", "astfps.enableVarIntSize", "astfps.enableCompactIdentifiers",
+        "astfps.enableFboLookupProbe", "astfps.enableZipEntryMissCache", "astfps.enableTextureSlotSuffixLookup",
+        "astfps.enableMaximumBlockEntityDistance");
     private static Path path() { return FabricLoader.getInstance().getConfigDir().resolve("astfps.json"); }
+
+    private static JsonObject readStartup() {
+        try { return read(); } catch (IOException | RuntimeException ignored) { return new JsonObject(); }
+    }
+
+    private static JsonObject read() throws IOException {
+        if (!Files.exists(path())) return new JsonObject();
+        JsonObject result = JSON.fromJson(Files.readString(path()), JsonObject.class);
+        if (result == null) throw new IOException("Configuration is empty; original preserved");
+        return result;
+    }
+
+    public static boolean startupFlag(String property) {
+        String explicit = System.getProperty(property);
+        if (explicit != null) return Boolean.parseBoolean(explicit);
+        Boolean saved = savedFlag(STARTUP, property);
+        return saved != null ? saved : DEFAULT_OPTIMIZATIONS.contains(property);
+    }
+
+    private static Boolean savedFlag(JsonObject json, String property) {
+        try {
+            if (!json.has("optimizations") || !json.getAsJsonObject("optimizations").has(property)) return null;
+            return json.getAsJsonObject("optimizations").get(property).getAsBoolean();
+        } catch (RuntimeException ignored) { return null; }
+    }
+
+    public static Map<String, Boolean> preferences(Iterable<String> properties) {
+        JsonObject saved = readStartup();
+        Map<String, Boolean> result = new LinkedHashMap<>();
+        for (String property : properties) {
+            Boolean value = savedFlag(saved, property);
+            result.put(property, value != null ? value : DEFAULT_OPTIMIZATIONS.contains(property));
+        }
+        return result;
+    }
+
+    public static void savePreferences(Map<String, Boolean> values) throws IOException {
+        JsonObject json;
+        try { json = read(); } catch (RuntimeException e) { throw new IOException("Invalid configuration; original preserved", e); }
+        JsonObject options = json.has("optimizations") ? json.getAsJsonObject("optimizations") : new JsonObject();
+        values.forEach(options::addProperty);
+        json.add("optimizations", options);
+        json.addProperty("schemaVersion", 2);
+        write(json);
+    }
+
+    private static void write(JsonObject config) throws IOException {
+        Path file = path();
+        Files.createDirectories(file.getParent());
+        if (Files.exists(file)) Files.copy(file, file.resolveSibling("astfps.json.backup"), StandardCopyOption.REPLACE_EXISTING);
+        Path temporary = Files.createTempFile(file.getParent(), "astfps-", ".tmp");
+        try {
+            Files.writeString(temporary, JSON.toJson(config));
+            Files.move(temporary, file, StandardCopyOption.REPLACE_EXISTING);
+        } finally { Files.deleteIfExists(temporary); }
+    }
 
     public static boolean loadMemo() {
         try {
-            if (!Files.exists(path())) return false;
+            if (!Files.exists(path())) return startupFlag("astfps.enableVisibilityMemo");
             JsonObject config = JSON.fromJson(Files.readString(path()), JsonObject.class);
-            return config != null && config.has("visibilityMemo") && config.get("visibilityMemo").getAsBoolean();
-        } catch (IOException | RuntimeException ignored) { return false; }
+            return config == null || !config.has("visibilityMemo")
+                ? startupFlag("astfps.enableVisibilityMemo")
+                : config.get("visibilityMemo").getAsBoolean();
+        } catch (IOException | RuntimeException ignored) { return startupFlag("astfps.enableVisibilityMemo"); }
+    }
+
+    public static AstFPSProfiles.Profile loadProfile() {
+        try {
+            if (!Files.exists(path())) return AstFPSProfiles.Profile.BALANCED;
+            JsonObject config = read();
+            return AstFPSProfiles.Profile.valueOf(config.has("profile")
+                ? config.get("profile").getAsString() : "BALANCED");
+        } catch (IOException | RuntimeException ignored) { return AstFPSProfiles.Profile.BALANCED; }
+    }
+
+    public static void saveProfile(AstFPSProfiles.Profile profile) throws IOException {
+        JsonObject json;
+        try { json = read(); } catch (RuntimeException e) { throw new IOException("Invalid configuration; original preserved", e); }
+        json.addProperty("profile", profile.name());
+        json.addProperty("schemaVersion", 3);
+        write(json);
+    }
+
+    public static FrameGenerationController.Mode loadFrameGenerationMode() {
+        try {
+            JsonObject config = read();
+            return FrameGenerationController.Mode.valueOf(config.has("frameGeneration")
+                ? config.get("frameGeneration").getAsString() : "AUTO");
+        } catch (IOException | RuntimeException ignored) {
+            return FrameGenerationController.Mode.AUTO;
+        }
+    }
+
+    public static void saveFrameGenerationMode(FrameGenerationController.Mode mode) throws IOException {
+        JsonObject json;
+        try { json = read(); } catch (RuntimeException e) { throw new IOException("Invalid configuration; original preserved", e); }
+        json.addProperty("frameGeneration", mode.name());
+        json.addProperty("schemaVersion", 4);
+        write(json);
     }
 
     public static void saveMemo(boolean value) throws IOException {

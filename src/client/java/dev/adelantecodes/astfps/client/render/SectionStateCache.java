@@ -12,10 +12,9 @@ public final class SectionStateCache {
     private static final int EDGE = 20;
     private static final boolean VERIFY = Boolean.getBoolean("astfps.verifySectionStateCache");
     private final BlockState[] states = new BlockState[EDGE * EDGE * EDGE];
-    // Index range is 0..7999, so signed shorts preserve every index exactly while
-    // halving the worker-retained cleanup list (32,000 -> 16,000 payload bytes).
-    private final short[] touched = new short[states.length];
-    private int touchedCount;
+    // One bit per occupied slot: 125 longs / 1,000 payload bytes instead of
+    // 8,000 shorts / 16,000 bytes. Worker confined, cleared after every job.
+    private final long[] touched = new long[(states.length + 63) >>> 6];
     private int originX, originY, originZ;
     private RenderSectionRegion region;
     private boolean reading;
@@ -32,16 +31,22 @@ public final class SectionStateCache {
 
     void finish() {
         discard();
-        AstFPSRuntime.sectionStateHits.add(hits);
-        AstFPSRuntime.sectionStateMisses.add(misses);
-        AstFPSRuntime.sectionStateBypasses.add(bypasses);
-        AstFPSRuntime.sectionStateMismatches.add(mismatches);
+        if (hits != 0) AstFPSRuntime.sectionStateHits.add(hits);
+        if (misses != 0) AstFPSRuntime.sectionStateMisses.add(misses);
+        if (bypasses != 0) AstFPSRuntime.sectionStateBypasses.add(bypasses);
+        if (mismatches != 0) AstFPSRuntime.sectionStateMismatches.add(mismatches);
         hits = misses = bypasses = mismatches = 0;
     }
 
     public void discard() {
-        for (int i = 0; i < touchedCount; i++) states[touched[i]] = null;
-        touchedCount = 0;
+        for (int word = 0; word < touched.length; word++) {
+            long bits = touched[word];
+            while (bits != 0) {
+                states[(word << 6) + Long.numberOfTrailingZeros(bits)] = null;
+                bits &= bits - 1;
+            }
+            touched[word] = 0;
+        }
         region = null;
         reading = false;
     }
@@ -95,7 +100,7 @@ public final class SectionStateCache {
         }
         misses++;
         if (actual != null) {
-            touched[touchedCount++] = (short) index;
+            touched[index >>> 6] |= 1L << (index & 63);
             states[index] = actual;
         }
         return actual;

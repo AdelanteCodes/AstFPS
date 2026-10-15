@@ -34,7 +34,8 @@
     "chunky": ">=1.5.3",
     "immediatelyfast": "1.17.1+26.3",
     "lithium": "0.26.2+mc26.3",
-    "mixinextras": ">=0.5.5"
+    "mixinextras": ">=0.5.5",
+    "badoptimizations": "2.4.1"
   },
   "custom": {
     "lithium:options": {
@@ -42,6 +43,17 @@
     },
     "ferritecore:disabled_options": [
       "useSmallThreadingDetector"
+    ],
+    "badoptimizations:incompatibilities": [
+      "enable_lightmap_caching",
+      "enable_sky_color_caching",
+      "enable_particle_manager_optimization",
+      "enable_toast_optimizations",
+      "enable_sky_angle_caching_in_worldrenderer",
+      "enable_entity_renderer_caching",
+      "enable_block_entity_renderer_caching",
+      "enable_entity_flag_caching",
+      "enable_remove_tutorial_if_not_demo"
     ]
   }
 }

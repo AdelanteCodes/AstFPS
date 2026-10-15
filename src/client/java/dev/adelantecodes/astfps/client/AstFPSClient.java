@@ -1,6 +1,5 @@
 package dev.adelantecodes.astfps.client;
 
-import com.google.gson.GsonBuilder;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.adelantecodes.astfps.FrameRecorder;
@@ -23,24 +22,40 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import dev.adelantecodes.astfps.client.render.FrameGenerationController;
+import dev.adelantecodes.astfps.client.render.FrameInterpolationRenderer;
+import dev.adelantecodes.astfps.client.render.RendererBackendSelector;
+import dev.adelantecodes.astfps.compat.CompatibilityPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class AstFPSClient implements ClientModInitializer {
+    private static AstFPSClient instance;
     public static final FrameRecorder RECORDER = new FrameRecorder();
     private static final Logger LOGGER = LoggerFactory.getLogger("AstFPS");
     private String label = "unlabelled";
     private Map<String, Object> benchmarkStartContext;
     private Map<String, Object> benchmarkStartRuntime;
+    private Object benchmarkStartAdaptive;
     private long benchmarkTerrainFramesStart;
 
     @Override public void onInitializeClient() {
+        instance = this;
+        // Pipeline registration must precede ShaderManager's full resource reload.
+        FrameInterpolationRenderer.register();
         AstFPSRuntime.VISIBILITY_MEMO.enable(AstFPSRuntime.memoHooksAvailable() && AstFPSConfig.loadMemo());
         AstFPSRuntime.TERRAIN_BATCHER.enable(AstFPSRuntime.terrainHooksAvailable());
         AstFPSRuntime.SECTION_WORKER_CACHE.enable(AstFPSRuntime.sectionCacheHooksAvailable());
         AstFPSRuntime.SECTION_STATE_CACHE.enable(AstFPSRuntime.sectionStateHooksAvailable());
         AstFPSRuntime.SECTION_MESH_WORKSPACE.enable(AstFPSRuntime.sectionMeshHooksAvailable());
         AdditionalExperiments.initialize();
+        Minecraft minecraft = Minecraft.getInstance();
+        minecraft.execute(() -> {
+            RendererBackendSelector.detect();
+            FrameGenerationController.request(AstFPSConfig.loadFrameGenerationMode());
+            AstFPSProfiles.Profile profile = AstFPSConfig.loadProfile();
+            LOGGER.info("{}", AstFPSProfiles.apply(minecraft, profile));
+        });
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> {
             var root = ClientCommands.literal("astfps").requires(FabricClientCommandSource::attended)
                 .executes(c -> reply(c.getSource(), "AstFPS: /astfps profile quality|balanced|maximum|restore, status, diagnose, memo, terrain, state-cache, label, benchmark start|stop"));
@@ -68,17 +83,28 @@ public final class AstFPSClient implements ClientModInitializer {
             root.then(ClientCommands.literal("status").executes(c -> {
                 var source = c.getSource();
                 reply(source, "Profile: " + AstFPSProfiles.current() + "; shader integration remains under development.");
+                var backend = RendererBackendSelector.current();
+                reply(source, "Renderer backend tier: " + backend.tier() + "; " + backend.reason());
+                reply(source, FrameGenerationController.status());
+                var adaptive = AdaptiveRuntime.snapshot();
+                reply(source, String.format(Locale.ROOT,
+                    "Adaptive tier: %s; frame %.2f ms; GPU %.1f%%; chunk jobs/queue %d/%d; cache %d%%",
+                    adaptive.tier(), adaptive.frameMillis(), adaptive.gpuUtilization(),
+                    adaptive.chunkJobsPerFrame(), adaptive.chunkQueueLimit(), adaptive.cacheScalePercent()));
                 reply(source, "Experimental visibility memo: " + AstFPSRuntime.VISIBILITY_MEMO.enabled() + "; safe mode: " + AstFPSRuntime.safeMode());
                 reply(source, "Original terrain batcher: " + AstFPSRuntime.TERRAIN_BATCHER.enabled() + "; frames/draws/batches: " + AstFPSRuntime.terrainBatchFrames + "/" + AstFPSRuntime.terrainSectionDraws + "/" + AstFPSRuntime.terrainGpuBatches);
                 reply(source, "Terrain direct/indirect frames: " + AstFPSRuntime.terrainDirectFrames + "/" + AstFPSRuntime.terrainIndirectFrames + "; command records reused/allocated: " + AstFPSRuntime.terrainCommandRecordsReused + "/" + AstFPSRuntime.terrainCommandRecordsAllocated);
                 reply(source, "Terrain section records reused/allocated: " + AstFPSRuntime.terrainSectionInfosReused + "/" + AstFPSRuntime.terrainSectionInfosAllocated);
                 reply(source, "Terrain uniform callbacks reused/allocated: " + AstFPSRuntime.terrainUniformCallbacksReused + "/" + AstFPSRuntime.terrainUniformCallbacksAllocated);
+                reply(source, "Maximum renderer work avoided: entities culled/chunk sync compiles deferred: "
+                    + AstFPSRuntime.entitiesDistanceCulled + "/" + AstFPSRuntime.synchronousChunkCompilesDeferred);
+                reply(source, "Entity visibility clock reads avoided: " + AstFPSRuntime.entityVisibilityClockReadsAvoided);
                 reply(source, "Section worker cache: " + AstFPSRuntime.SECTION_WORKER_CACHE.enabled() + "; jobs: " + AstFPSRuntime.sectionCacheJobs.sum() + "; model/fluid helpers reused: " + AstFPSRuntime.sectionModelHelpersReused.sum() + "/" + AstFPSRuntime.sectionFluidHelpersReused.sum());
                 reply(source, "Section state cache: " + AstFPSRuntime.SECTION_STATE_CACHE.enabled() + "; hits/misses/bypasses: " + AstFPSRuntime.sectionStateHits.sum() + "/" + AstFPSRuntime.sectionStateMisses.sum() + "/" + AstFPSRuntime.sectionStateBypasses.sum());
                 reply(source, "Section mesh workspace: " + AstFPSRuntime.SECTION_MESH_WORKSPACE.enabled() + "; jobs/maps/bits/queues reused: " + AstFPSRuntime.meshWorkspaceJobs.sum() + "/" + AstFPSRuntime.layerMapsReused.sum() + "/" + AstFPSRuntime.visibilityBitsetsReused.sum() + "/" + AstFPSRuntime.floodQueuesReused.sum());
                 if (AstFPSRuntime.rendererConflict() != null) reply(source, "Terrain replacement bypassed for renderer: " + AstFPSRuntime.rendererConflict());
                 reply(source, "Safe mode controls AstFPS hooks only; bundled modules use their own configuration.");
-                for (String id : new String[]{"ferritecore", "modernfix", "jasione", "chunky", "immediatelyfast", "lithium", "sodium"}) {
+                for (String id : new String[]{"ferritecore", "modernfix", "jasione", "chunky", "immediatelyfast", "lithium", "badoptimizations", "sodium"}) {
                     var component = FabricLoader.getInstance().getModContainer(id);
                     reply(source, "Optimization component " + id + ": " + component.map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("not loaded"));
                 }
@@ -129,6 +155,7 @@ public final class AstFPSClient implements ClientModInitializer {
                     if (RECORDER.isRecording()) return reply(c.getSource(), "A benchmark is already recording; stop it first.");
                     benchmarkStartContext = BenchmarkContext.capture();
                     benchmarkStartRuntime = RuntimeMetrics.capture();
+                    benchmarkStartAdaptive = AdaptiveRuntime.snapshot();
                     benchmarkTerrainFramesStart = AstFPSRuntime.terrainBatchFrames;
                     StageTimings.start();
                     RECORDER.start();
@@ -137,7 +164,7 @@ public final class AstFPSClient implements ClientModInitializer {
                 .then(ClientCommands.literal("stop").executes(c -> export(c.getSource()))));
             dispatcher.register(root);
         });
-        LOGGER.info("AstFPS initialized. No existing settings changed at startup.");
+        LOGGER.info("AstFPS initialized with automatic optimizations; profile defaults to Balanced Performance.");
     }
 
     private int export(FabricClientCommandSource source) {
@@ -151,6 +178,10 @@ public final class AstFPSClient implements ClientModInitializer {
         var endRuntime = RuntimeMetrics.capture();
         metadata.put("runtimeStart", benchmarkStartRuntime);
         metadata.put("runtimeEnd", endRuntime);
+        metadata.put("adaptiveStart", benchmarkStartAdaptive);
+        metadata.put("adaptiveEnd", AdaptiveRuntime.snapshot());
+        metadata.put("frameGenerationRequested", FrameGenerationController.requested());
+        metadata.put("frameGenerationDecision", FrameGenerationController.decision());
         metadata.put("garbageCollectionDeltas", RuntimeMetrics.collectionDeltas(benchmarkStartRuntime, endRuntime));
         var endContext = BenchmarkContext.capture();
         metadata.put("startContext", benchmarkStartContext);
@@ -193,7 +224,7 @@ public final class AstFPSClient implements ClientModInitializer {
         CompletableFuture.runAsync(() -> {
             try {
                 Files.createDirectories(directory);
-                Files.writeString(destination, new GsonBuilder().setPrettyPrinting().create().toJson(metadata));
+                Files.writeString(destination, SafeJson.pretty().toJson(metadata));
                 LOGGER.info("Benchmark saved: {}", destination);
             } catch (IOException e) { LOGGER.error("Unable to save benchmark {}", destination, e); }
         });
@@ -239,8 +270,26 @@ public final class AstFPSClient implements ClientModInitializer {
     }
 
     private static int reply(FabricClientCommandSource source, String text) {
-        source.sendFeedback(Component.literal(text));
+        if (source != null) source.sendFeedback(Component.literal(text));
+        else LOGGER.info(text);
         return 1;
+    }
+
+    /** UI bridge uses the same recorder and exports as the commands; no network command is sent. */
+    public static String uiAction(String action) {
+        if (instance == null) return "AstFPS is still initializing.";
+        if (action.equals("diagnose")) return instance.diagnose(null) == 1 ? "Diagnostic saved locally; location in latest.log." : "Diagnostic save failed; see latest.log.";
+        if (action.equals("stop")) return instance.export(null) == 1 ? "Benchmark saved locally; see latest.log." : "No frame samples.";
+        if (!action.equals("start")) return "Unknown action.";
+        if (Minecraft.getInstance().level == null) return "Open a world before starting a benchmark.";
+        if (RECORDER.isRecording()) return "Already recording.";
+        instance.benchmarkStartContext = BenchmarkContext.capture();
+        instance.benchmarkStartRuntime = RuntimeMetrics.capture();
+        instance.benchmarkStartAdaptive = AdaptiveRuntime.snapshot();
+        instance.benchmarkTerrainFramesStart = AstFPSRuntime.terrainBatchFrames;
+        StageTimings.start(); RECORDER.start();
+        Minecraft.getInstance().gui.setScreen(null);
+        return "Recording. Reopen Diagnostics to stop; menu transitions are included.";
     }
 
     private int diagnose(FabricClientCommandSource source) {
@@ -252,6 +301,26 @@ public final class AstFPSClient implements ClientModInitializer {
         report.put("javaVersion", System.getProperty("java.version"));
         report.put("os", System.getProperty("os.name"));
         report.put("safeMode", AstFPSRuntime.safeMode());
+        report.put("rendererBackend", RendererBackendSelector.current());
+        report.put("frameGenerationRequested", FrameGenerationController.requested().name());
+        report.put("frameGenerationActive", FrameGenerationController.active());
+        report.put("frameGenerationDecision", FrameGenerationController.decision());
+        report.put("frameGenerationFailure", FrameGenerationController.failure());
+        report.put("nativeWorldFramesPresented", AstFPSRuntime.nativeWorldFramesPresented);
+        report.put("generatedWorldFramesPresented", AstFPSRuntime.generatedWorldFramesPresented);
+        report.put("interpolationFastFrames", AstFPSRuntime.interpolationFastFrames);
+        report.put("interpolationQualityFrames", AstFPSRuntime.interpolationQualityFrames);
+        report.put("syntheticWorldExtractionsSkipped", AstFPSRuntime.syntheticWorldExtractionsSkipped);
+        report.put("adaptivePolicy", AdaptiveRuntime.snapshot());
+        report.put("stutterClassification", AdaptiveRuntime.stutters());
+        var compatibility = new LinkedHashMap<String, Object>();
+        for (var subsystem : CompatibilityPolicy.Subsystem.values())
+            compatibility.put(subsystem.name(), AstFPSRuntime.subsystemConflict(subsystem));
+        report.put("subsystemCompatibility", compatibility);
+        report.put("frameHistoryCaptures", AstFPSRuntime.frameHistoryCaptures);
+        report.put("frameHistoryReallocations", AstFPSRuntime.frameHistoryReallocations);
+        report.put("chunkUpdatesAdmitted", AstFPSRuntime.chunkUpdatesAdmitted);
+        report.put("chunkUpdatesDeferredByBudget", AstFPSRuntime.chunkUpdatesDeferredByBudget);
         report.put("safeModeScope", "AstFPS original hooks only; does not disable bundled upstream modules");
         report.put("memoHooksAvailable", AstFPSRuntime.memoHooksAvailable());
         report.put("terrainHooksAvailable", AstFPSRuntime.terrainHooksAvailable());
@@ -270,6 +339,9 @@ public final class AstFPSClient implements ClientModInitializer {
         report.put("terrainSectionInfosAllocated", AstFPSRuntime.terrainSectionInfosAllocated);
         report.put("terrainUniformCallbacksReused", AstFPSRuntime.terrainUniformCallbacksReused);
         report.put("terrainUniformCallbacksAllocated", AstFPSRuntime.terrainUniformCallbacksAllocated);
+        report.put("entitiesDistanceCulled", AstFPSRuntime.entitiesDistanceCulled);
+        report.put("synchronousChunkCompilesDeferred", AstFPSRuntime.synchronousChunkCompilesDeferred);
+        report.put("entityVisibilityClockReadsAvoided", AstFPSRuntime.entityVisibilityClockReadsAvoided);
         report.put("additionalExperiments", AdditionalExperiments.snapshot());
         report.put("sectionWorkerCacheEnabled", AstFPSRuntime.SECTION_WORKER_CACHE.enabled());
         captureSectionStates(report);
@@ -293,11 +365,11 @@ public final class AstFPSClient implements ClientModInitializer {
             .resolve("diagnostic-" + Instant.now().toString().replace(':', '-') + ".json");
         try {
             Files.createDirectories(destination.getParent());
-            Files.writeString(destination, new GsonBuilder().setPrettyPrinting().create().toJson(report));
+            Files.writeString(destination, SafeJson.pretty().toJson(report));
             return reply(source, "Local diagnostic saved: " + destination + ". Startup failures: search latest.log for ASTFPS-HOOK-BEGIN / ASTFPS-HOOK-OK. Fallback launch: -Dastfps.safeMode=true");
         } catch (IOException error) {
             LOGGER.error("ASTFPS-DIAGNOSTIC-WRITE-FAILED {}", destination, error);
-            source.sendError(Component.literal("Diagnostic write failed: " + error.getMessage()));
+            if (source != null) source.sendError(Component.literal("Diagnostic write failed: " + error.getMessage()));
             return 0;
         }
     }

@@ -5,6 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import net.fabricmc.loader.api.FabricLoader;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.Set;
+import java.util.stream.Collectors;
+import dev.adelantecodes.astfps.compat.CompatibilityPolicy;
 
 public final class AstFPSRuntime {
     private AstFPSRuntime() { }
@@ -47,7 +50,7 @@ public final class AstFPSRuntime {
     private static final Logger LOGGER = LoggerFactory.getLogger("AstFPS");
     public static boolean safeMode() { return Boolean.getBoolean("astfps.safeMode"); }
     public static boolean tabCacheHooksAvailable() {
-        return !safeMode() && Boolean.getBoolean("astfps.enableTabListCache")
+        return !safeMode() && dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableTabListCache")
             && !FabricLoader.getInstance().isModLoaded("blindspot")
             && !FabricLoader.getInstance().isModLoaded("badoptimizations");
     }
@@ -55,33 +58,34 @@ public final class AstFPSRuntime {
         TAB_LIST_CACHE.disableAfterFailure(stage, error);
         LOGGER.error("ASTFPS-FEATURE-DISABLED tab-list-cache stage={} -- original failure preserved", stage, error);
     }
-    public static boolean memoHooksAvailable() { return !safeMode() && Boolean.getBoolean("astfps.enableVisibilityMemo"); }
+    public static boolean memoHooksAvailable() { return !safeMode() && dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableVisibilityMemo"); }
     public static boolean terrainHooksAvailable() {
-        return !safeMode() && Boolean.getBoolean("astfps.enableTerrainBatcher") && rendererConflict() == null;
+        return !safeMode() && dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableTerrainBatcher")
+            && subsystemConflict(CompatibilityPolicy.Subsystem.TERRAIN_SUBMISSION) == null;
     }
     public static boolean sectionCacheHooksAvailable() {
-        return !safeMode() && Boolean.getBoolean("astfps.enableSectionWorkerCache") && rendererConflict() == null;
+        return !safeMode() && dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableSectionWorkerCache") && rendererConflict() == null;
     }
     public static boolean sectionStateHooksAvailable() {
-        return !safeMode() && Boolean.getBoolean("astfps.enableSectionStateCache")
+        return !safeMode() && dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableSectionStateCache")
             && rendererConflict() == null && !FabricLoader.getInstance().isModLoaded("noammaddons");
     }
     public static boolean sectionMeshHooksAvailable() {
-        return !safeMode() && Boolean.getBoolean("astfps.enableSectionMeshWorkspace") && rendererConflict() == null;
+        return !safeMode() && dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableSectionMeshWorkspace") && rendererConflict() == null;
     }
     public static void sectionMeshFailure(String stage, RuntimeException error) {
         SECTION_MESH_WORKSPACE.disableAfterFailure(stage, error);
         LOGGER.error("ASTFPS-FEATURE-DISABLED section-mesh-workspace stage={} -- subsequent jobs use native scratch; original compile error preserved", stage, error);
     }
     public static boolean sectionQuadFormatHooksAvailable() {
-        return !safeMode() && Boolean.getBoolean("astfps.enableSectionQuadFormat") && rendererConflict() == null;
+        return !safeMode() && dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableSectionQuadFormat") && rendererConflict() == null;
     }
     public static void sectionQuadFormatFailure(String stage, RuntimeException error) {
         SECTION_QUAD_FORMAT.disableAfterFailure(stage, error);
         LOGGER.error("ASTFPS-FEATURE-DISABLED section-quad-format stage={} -- original error preserved", stage, error);
     }
     public static boolean sectionFabricHooksAvailable() {
-        return !safeMode() && Boolean.getBoolean("astfps.enableSectionFabricWorkspace") && rendererConflict() == null
+        return !safeMode() && dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableSectionFabricWorkspace") && rendererConflict() == null
             && exactModVersion("fabric-renderer-indigo", "9.1.23+b9d63e335d")
             && exactModVersion("fabric-renderer-api-v1", "17.0.15+79385d0b5d");
     }
@@ -94,7 +98,7 @@ public final class AstFPSRuntime {
         LOGGER.error("ASTFPS-FEATURE-DISABLED section-fabric-workspace stage={} -- original error preserved", stage, error);
     }
     public static boolean modelRotationHooksAvailable() {
-        return !safeMode() && Boolean.getBoolean("astfps.enableModelRotationScratch")
+        return !safeMode() && dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableModelRotationScratch")
             && !FabricLoader.getInstance().isModLoaded("lomka");
     }
     public static void modelRotationFailure(String stage, RuntimeException error) {
@@ -110,10 +114,12 @@ public final class AstFPSRuntime {
         LOGGER.error("ASTFPS-FEATURE-DISABLED section-worker-cache stage={} -- subsequent jobs use fresh helpers; original compile error preserved", stage, error);
     }
     public static String rendererConflict() {
-        for (String id : new String[]{"sodium", "iris", "nvidium", "vulkanmod", "vulkanflow", "meshelium", "optifine", "optifabric"}) {
-            if (FabricLoader.getInstance().isModLoaded(id)) return id;
-        }
-        return null;
+        return subsystemConflict(CompatibilityPolicy.Subsystem.TERRAIN_SUBMISSION);
+    }
+    public static String subsystemConflict(CompatibilityPolicy.Subsystem subsystem) {
+        Set<String> loaded = FabricLoader.getInstance().getAllMods().stream()
+            .map(mod -> mod.getMetadata().getId()).collect(Collectors.toUnmodifiableSet());
+        return CompatibilityPolicy.conflict(subsystem, loaded);
     }
     public static long terrainBatchFrames;
     public static long terrainDirectFrames;
@@ -127,6 +133,18 @@ public final class AstFPSRuntime {
     public static long terrainFallbacks;
     public static long terrainUniformCallbacksAllocated;
     public static long terrainUniformCallbacksReused;
+    public static long entitiesDistanceCulled;
+    public static long synchronousChunkCompilesDeferred;
+    public static long entityVisibilityClockReadsAvoided;
+    public static long frameHistoryCaptures;
+    public static long frameHistoryReallocations;
+    public static long nativeWorldFramesPresented;
+    public static long generatedWorldFramesPresented;
+    public static long interpolationFastFrames;
+    public static long interpolationQualityFrames;
+    public static long syntheticWorldExtractionsSkipped;
+    public static long chunkUpdatesAdmitted;
+    public static long chunkUpdatesDeferredByBudget;
     public static void terrainFailure(String stage, RuntimeException error) {
         TERRAIN_BATCHER.disableAfterFailure(stage, error);
         terrainFallbacks++;

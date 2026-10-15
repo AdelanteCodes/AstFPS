@@ -5,6 +5,8 @@
   "compatibilityLevel": "JAVA_25",
   "client": [
     "MinecraftFrameMixin",
+    "FrameHistoryCaptureMixin",
+    "SyntheticExtractionSkipMixin",
     "FrustumMemoMixin",
     "AabbZeroOffsetMixin",
     "WorldTargetCleanupMixin",
@@ -30,7 +32,13 @@
     "FboLookupCacheMixin",
     "ZipEntryMissCacheMixin",
     "TextureSlotSuffixMixin",
-    "MaximumBlockEntityDistanceMixin"
+    "MaximumBlockEntityDistanceMixin",
+    "EntityDistanceCullingMixin",
+    "EntityVisibilityExtractionMixin",
+    "EntityVisibilityClockMixin",
+    "ChunkCompileSchedulingMixin",
+    "ChunkUpdateAdmissionMixin",
+    "AstFPSOptionsScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

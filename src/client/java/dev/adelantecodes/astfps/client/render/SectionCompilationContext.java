@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.SectionBufferBuilderPack;
 import net.minecraft.client.renderer.chunk.RenderSectionRegion;
 import net.minecraft.client.renderer.chunk.SectionCompiler;
 import net.minecraft.core.SectionPos;
+import dev.adelantecodes.astfps.client.AdaptiveRuntime;
 
 /** One worker-local lifecycle for all independently gated native compilation optimizations. */
 public final class SectionCompilationContext {
@@ -98,6 +99,7 @@ public final class SectionCompilationContext {
     public static SectionCompiler.Results compile(SectionPos position, RenderSectionRegion region,
             VertexSorting sorting, SectionBufferBuilderPack builders, Operation<SectionCompiler.Results> original) {
         StageTimings.Sample sample = StageTimings.begin(StageTimings.Stage.SECTION_COMPILE);
+        long adaptiveStarted = System.nanoTime();
         SectionCompilationContext context = LOCAL.get();
         boolean outer = context == null || context.depth == 0;
         int mask = outer ? requested() : context.enrolled;
@@ -146,6 +148,7 @@ public final class SectionCompilationContext {
                 else if (cleanupFatal != null) suppress(cleanupFatal, timing);
                 else throw timing;
             }
+            AdaptiveRuntime.chunkCompile(System.nanoTime() - adaptiveStarted);
             if (cleanupFatal != null) throw cleanupFatal;
         }
     }

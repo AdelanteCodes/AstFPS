@@ -24,7 +24,7 @@ public final class RendererIdentityIndex {
     private RendererIdentityIndex() { }
 
     public static boolean hooksAvailable() {
-        return !AstFPSRuntime.safeMode() && Boolean.getBoolean("astfps.enableRendererIdentityIndex")
+        return !AstFPSRuntime.safeMode() && dev.adelantecodes.astfps.client.AstFPSConfig.startupFlag("astfps.enableRendererIdentityIndex")
                 && AstFPSRuntime.rendererConflict() == null
                 && !FabricLoader.getInstance().isModLoaded("badoptimizations")
                 && !FabricLoader.getInstance().isModLoaded("entity-view-distance");

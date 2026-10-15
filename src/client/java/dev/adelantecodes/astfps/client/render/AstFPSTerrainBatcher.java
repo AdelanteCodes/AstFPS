@@ -1,5 +1,7 @@
 package dev.adelantecodes.astfps.client.render;
 
+import dev.adelantecodes.astfps.client.AdaptiveRuntime;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
@@ -123,12 +125,15 @@ public final class AstFPSTerrainBatcher {
         private long infosReused;
         private boolean busy;
         public Workspace() { for (var layer : LAYERS) layers.put(layer, new LayerBatches()); }
+        private static int retainedCommandBudget() {
+            return Math.max(2_048, RETAINED_COMMAND_BUDGET * AdaptiveRuntime.snapshot().cacheScalePercent() / 100);
+        }
         public long uniformCallbacksAllocated() { return uniformCallbacksAllocated; }
         public long uniformCallbacksReused() { return uniformCallbacksReused; }
         private SectionUniform sectionUniform(int infoIndex) {
             if (infoIndex < 0) throw new IllegalArgumentException("Negative section info index");
             // Bound retained callbacks independently of transient render distance spikes.
-            if (infoIndex >= RETAINED_COMMAND_BUDGET) {
+            if (infoIndex >= retainedCommandBudget()) {
                 uniformCallbacksAllocated++;
                 return new SectionUniform(infoIndex);
             }
@@ -179,14 +184,15 @@ public final class AstFPSTerrainBatcher {
                 }
                 if (directSectionInfos == null) {
                     directSectionInfos = new DynamicGpuData.ChunkSectionInfo[count];
-                    if (count <= RETAINED_COMMAND_BUDGET) {
+                    int retainedBudget = retainedCommandBudget();
+                    if (count <= retainedBudget) {
                         // Round-robin eviction is bounded to four entries. Every candidate was
                         // cleared by finish() before another frame can borrow the workspace.
                         do {
                             var evicted = directInfoArrays[nextDirectArraySlot];
                             if (evicted != null) directArraySlots -= evicted.length;
                             directInfoArrays[nextDirectArraySlot] = null;
-                            if (directArraySlots + count <= RETAINED_COMMAND_BUDGET) break;
+                            if (directArraySlots + count <= retainedBudget) break;
                             nextDirectArraySlot = (nextDirectArraySlot + 1) % directInfoArrays.length;
                         } while (true);
                         directInfoArrays[nextDirectArraySlot] = directSectionInfos;
@@ -198,12 +204,22 @@ public final class AstFPSTerrainBatcher {
             return infos.toArray(directSectionInfos);
         }
         private void finish() {
+            int retainedBudget = retainedCommandBudget();
             if (directSectionInfos != null) {
                 Arrays.fill(directSectionInfos, null);
-                if (directSectionInfos.length > RETAINED_COMMAND_BUDGET) directSectionInfos = null;
+                if (directSectionInfos.length > retainedBudget) directSectionInfos = null;
             }
-            int remaining = RETAINED_COMMAND_BUDGET;
-            int retainInfos = Math.min(infoCursor, RETAINED_COMMAND_BUDGET);
+            if (directArraySlots > retainedBudget) {
+                Arrays.fill(directInfoArrays, null);
+                directArraySlots = 0;
+                nextDirectArraySlot = 0;
+            }
+            if (sectionUniforms.size() > retainedBudget) {
+                sectionUniforms.subList(retainedBudget, sectionUniforms.size()).clear();
+                sectionUniforms.trimToSize();
+            }
+            int remaining = retainedBudget;
+            int retainInfos = Math.min(infoCursor, retainedBudget);
             if (retainInfos < infos.size()) infos.subList(retainInfos, infos.size()).clear();
             if (infosCapacityExceeded) infos.trimToSize();
             infosCapacityExceeded = false;
@@ -218,7 +234,9 @@ public final class AstFPSTerrainBatcher {
                 if (largeOrderedList) state.ordered.trimToSize();
                 if (state.byVertex.size() > 128) state.byVertex = new IdentityHashMap<>();
                 else state.byVertex.clear();
-                int retain = Math.min(state.pool.size(), RETAINED_BATCHES_PER_LAYER);
+                int retainedBatches = Math.max(4, RETAINED_BATCHES_PER_LAYER
+                    * AdaptiveRuntime.snapshot().cacheScalePercent() / 100);
+                int retain = Math.min(state.pool.size(), retainedBatches);
                 for (int i = 0; i < state.pool.size(); i++) {
                     Batch batch = state.pool.get(i);
                     batch.vertex = null; batch.index = null; batch.indexType = null;

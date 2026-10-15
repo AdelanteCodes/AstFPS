@@ -3,6 +3,7 @@ package dev.adelantecodes.astfps.client.render;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import dev.adelantecodes.astfps.client.AstFPSRuntime;
+import dev.adelantecodes.astfps.client.AdaptiveRuntime;
 import it.unimi.dsi.fastutil.ints.IntArrayFIFOQueue;
 import java.util.BitSet;
 import java.util.EnumMap;
@@ -47,8 +48,15 @@ public final class SectionMeshWorkspace {
             visibility = null;
             queue = null;
         } else {
-            if (visibility != null && visibility.size() > 4096) visibility = null;
-            if (queue != null && queue.capacity() > MAX_RETAINED_QUEUE_CAPACITY) queue = null;
+            int scale = AdaptiveRuntime.snapshot().cacheScalePercent();
+            if (scale < 50) {
+                layers = null;
+                visibility = null;
+                queue = null;
+            } else {
+                if (visibility != null && visibility.size() > 4096L * scale / 100) visibility = null;
+                if (queue != null && queue.capacity() > MAX_RETAINED_QUEUE_CAPACITY * scale / 100) queue = null;
+            }
         }
         floodDepth = 0;
         queueClaimed = false;

@@ -21,6 +21,14 @@ public final class AstFPSProfiles {
 
     public static boolean maximum() { return "maximum".equals(selected); }
 
+    public static String displayName(Profile profile) {
+        return switch (profile) {
+            case MAXIMUM -> "Maximum Performance";
+            case BALANCED -> "Balanced Performance";
+            case QUALITY -> "Best Visuals";
+        };
+    }
+
     public static String apply(Minecraft minecraft, Profile profile) {
         if (minecraft == null || profile == null) {
             return "Cannot apply profile: client or profile unavailable.";
@@ -39,23 +47,26 @@ public final class AstFPSProfiles {
         options.particles().set(maximum ? ParticleStatus.MINIMAL : baseline.particles());
         options.entityShadows().set(quality || (!maximum && baseline.shadows()));
         options.entityDistanceScaling().set(maximum
-                ? Math.min(baseline.entityDistance(), 0.75) : baseline.entityDistance());
+                ? Math.min(baseline.entityDistance(), 0.50) : baseline.entityDistance());
         options.biomeBlendRadius().set(quality ? Math.max(baseline.biomeBlend(), 2)
                 : maximum ? 0 : baseline.biomeBlend());
         options.weatherRadius().set(maximum
                 ? Math.min(baseline.weatherRadius(), 3) : baseline.weatherRadius());
-        options.ambientOcclusion().set(quality || baseline.ambientOcclusion());
+        options.ambientOcclusion().set(quality || (!maximum && baseline.ambientOcclusion()));
         options.cutoutLeaves().set(quality || (!maximum && baseline.cutoutLeaves()));
         options.improvedTransparency().set(quality || (!maximum && baseline.improvedTransparency()));
         // Native option owns renderer invalidation and server distance notification.
         // Preserve lower distances; never change simulation distance or resolution.
-        options.renderDistance().set(maximum
-                ? Math.min(baseline.renderDistance(), 8) : baseline.renderDistance());
+        options.renderDistance().set(switch (profile) {
+            case QUALITY -> 16;
+            case BALANCED -> 10;
+            case MAXIMUM -> 6;
+        });
         selected = profile.name().toLowerCase(Locale.ROOT);
         return switch (profile) {
-            case QUALITY -> "Quality: high-fidelity native lighting, leaves, transparency and shadows; shader integration pending. Session settings only.";
-            case BALANCED -> "Balanced: original visual settings restored. Session settings only.";
-            case MAXIMUM -> "Maximum: clouds and entity shadows off; faster leaves/transparency, minimal particles, no biome blending, reduced weather/entity distance and terrain distance capped at 8 chunks. Compatible native chest/shulker rendering is capped at 32 blocks when its hook is available. Session settings only.";
+            case QUALITY -> "Best Visuals enabled at 16 chunks. You can still adjust render distance normally.";
+            case BALANCED -> "Balanced Performance enabled at 10 chunks. You can still adjust render distance normally.";
+            case MAXIMUM -> "Maximum Performance enabled at 6 chunks with reduced effects. You can still adjust render distance normally.";
         };
     }
 

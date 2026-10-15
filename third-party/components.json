@@ -68,5 +68,17 @@
     "sha512": "4d7fee66132eedc71feab9390b92c95d7058edbdad0fecfac1d836a2950b97a7ca463afbede61c7ef361ce65e1f927ab9e89dde5bf2e0e0ce486afb5c5dbee40",
     "minecraftConstraint": "~26.3",
     "state": "Included in compiled 0.3.0-rc.1; static archive review; runtime unverified"
+  },
+  {
+    "slug": "badoptimizations",
+    "id": "badoptimizations",
+    "version": "2.4.1",
+    "file": "vendor/BadOptimizations-2.4.1-26.3-fabric.jar",
+    "license": "MIT",
+    "source": "https://github.com/imthosea/BadOptimizations/tree/5fa3416f6148eaa4045399cf7fa24a5427cc2991",
+    "page": "https://modrinth.com/mod/badoptimizations/version/Sp0ctspw",
+    "sha512": "048a0979807afb96bae7801b7445746c985081bb55fab9b80b286036234a9869cc84f83c40ab77a2600b7e06ad44178ee17935b706b751c9b38f87ebc6e180f8",
+    "minecraftConstraint": ">=26.3",
+    "state": "0.8 local: native debug-empty-list and zero-FOV-effects paths; other optimization groups vetoed through upstream metadata"
   }
 ]

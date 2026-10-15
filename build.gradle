@@ -61,6 +61,7 @@ processResources {
 }
 jar {
     from('LICENSE')
+    from('third-party/notices') { into 'META-INF/astfps-notices' }
     new groovy.json.JsonSlurper().parse(file('third-party/components.json')).each { component ->
         from(component.file) { into 'META-INF/jars' }
     }

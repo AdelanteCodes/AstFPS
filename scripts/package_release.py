@@ -26,6 +26,14 @@ def main():
             with zipfile.ZipFile(io.BytesIO(data)) as child:
                 assert child.testzip() is None
         assert 'META-INF/jars/AstFPS-0.1.0-alpha.1.jar' not in jar.namelist()
+        assert 'assets/astfps/shaders/core/frame_interpolate.fsh' in jar.namelist()
+        assert 'assets/astfps/shaders/frame_interpolate.fsh' not in jar.namelist()
+        shader = jar.read('assets/astfps/shaders/core/frame_interpolate.fsh')
+        for uniform in (b'PreviousSampler', b'CurrentSampler', b'PreviousDepthSampler', b'CurrentDepthSampler'):
+            assert uniform in shader, f'Missing interpolation uniform: {uniform.decode()}'
+        renderer = jar.read('dev/adelantecodes/astfps/client/render/FrameInterpolationRenderer.class')
+        assert b'core/frame_interpolate' in renderer, 'Pipeline identifier does not map to packaged shader'
+        assert b'register' in renderer, 'Interpolation pipelines are not registered for shader reload'
         mixins = json.loads(jar.read('astfps.client.mixins.json'))
         assert 'SectionCompilationScopeMixin' in mixins['client'] and 'RegionStateCacheMixin' in mixins['client']
         for name in mixins['client'] + ['AstFPSMixinPlugin']:
@@ -46,10 +54,16 @@ def main():
         target = out / path.name
         shutil.copyfile(path, target); paths.append(target)
     report = {'version': version, 'core': 'Fresh Java 25 compilation of current source; no old alpha core nested',
-              'modules': components, 'validation': ['Java compilation', 'archive integrity', 'pinned nested binaries', 'metadata module list', 'compatibility overrides', 'Java class version'],
+              'modules': components, 'validation': ['Java compilation', 'unit tests', 'core checks', 'archive integrity', 'pinned nested binaries', 'metadata module list', 'compatibility overrides', 'Java class version', 'frame interpolation shader path and uniforms'],
               'runtimeVerification': False, 'fpsImprovementMeasured': False, 'localOnly': True,
               'profiles': ['quality', 'balanced', 'maximum'],
-              'shaderIntegrationComplete': False, 'independentRendererComplete': False,
+              'frameGenerationModes': ['off', 'auto', '2x', '4x'],
+              'frameGenerationDefault': 'auto',
+              'adaptiveTiers': ['conservative', 'balanced', 'throughput'],
+              'adaptiveSignals': ['frame pacing', 'GPU utilization', 'heap pressure', 'CPU count', 'chunk backlog', 'measured section compile cost'],
+              'compatibilityIsolation': 'terrain, chunk compilation, frame generation, visibility, and entity distance are gated independently',
+              'terrainBackendSelection': 'capability-based compatibility, multi-draw, or persistent-indirect tier',
+              'shaderIntegrationComplete': True, 'independentRendererComplete': False,
               'buildEnvironment': 'Local Windows Java 25; build-only TCP selector workaround outside repository, not included in artifacts.'}
     (out / f'release-{version}.json').write_text(json.dumps(report, indent=2) + '\n')
     (out / f'SHA256SUMS-{version}.txt').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest() + '  ' + p.name + '\n' for p in paths))
