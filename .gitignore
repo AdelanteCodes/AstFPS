@@ -21,4 +21,4 @@ dist/
 !third-party/sources/immediatelyfast-v1.17.1-source.zip
 !third-party/sources/lithium-mc26.3-0.26.2-source.zip
 __pycache__/
-xe-benchmarks/
+astfps-benchmarks/

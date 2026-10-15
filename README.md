@@ -1,5 +1,7 @@
 # AstFPS 1.0
 
+[Download the latest AstFPS release](https://github.com/AdelanteCodes/AstFPS/releases/latest)
+
 AstFPS is a Fabric client optimization bundle for Minecraft Java 26.3. It combines automatic CPU/render optimizations, three compact visual profiles, diagnostics, zoom and optional experimental cross-vendor frame generation.
 
 ## Requirements

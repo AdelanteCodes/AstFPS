@@ -25,7 +25,6 @@ def main():
             assert data == (ROOT / c['file']).read_bytes()
             with zipfile.ZipFile(io.BytesIO(data)) as child:
                 assert child.testzip() is None
-        assert 'META-INF/jars/AstFPS-0.1.0-alpha.1.jar' not in jar.namelist()
         assert 'assets/astfps/shaders/core/frame_interpolate.fsh' in jar.namelist()
         assert 'assets/astfps/shaders/frame_interpolate.fsh' not in jar.namelist()
         shader = jar.read('assets/astfps/shaders/core/frame_interpolate.fsh')
@@ -45,8 +44,8 @@ def main():
         assert 'EntityRendererIdentityIndexMixin' in mixins['client'] and 'BlockEntityRendererIdentityIndexMixin' in mixins['client']
         assert meta['custom']['lithium:options']['mixin.world.temperature_cache'] is False
         assert 'useSmallThreadingDetector' in meta['custom']['ferritecore:disabled_options']
-    out = ROOT / 'artifacts'
-    out.mkdir(exist_ok=True)
+    out = ROOT / 'build' / 'release'
+    out.mkdir(parents=True, exist_ok=True)
     paths = []
     for suffix in ['', '-sources']:
         path = ROOT / f'build/libs/AstFPS-{version}{suffix}.jar'

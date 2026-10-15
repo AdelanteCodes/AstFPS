@@ -1,4 +1,4 @@
-name: Publish AstFPS prerelease
+name: Publish AstFPS release
 on:
   workflow_dispatch:
 permissions:
@@ -12,13 +12,18 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - name: Verify the committed artifacts
+      - uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: '25'
+      - name: Build and verify release artifacts
         shell: bash
         run: |
           version=$(sed -n 's/^version=//p' gradle.properties | tr -d '\r')
           echo "VERSION=$version" >> "$GITHUB_ENV"
-          cd artifacts
-          sha256sum --check "SHA256SUMS-$version.txt"
+          ./gradlew clean test coreChecks build --no-daemon
+          python scripts/package_release.py
+          test -f "build/release/AstFPS-$version.jar"
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -29,7 +34,6 @@ jobs:
             echo 'Release already published; preserving its assets.'
             exit 0
           fi
-          gh release create "v$VERSION" "artifacts/AstFPS-$VERSION.jar" \
-            "artifacts/AstFPS-$VERSION-sources.jar" "artifacts/SHA256SUMS-$VERSION.txt" \
+          gh release create "v$VERSION" "build/release/AstFPS-$VERSION.jar" \
             --target "$GITHUB_SHA" --title "AstFPS $VERSION" \
-            --notes-file README.md --prerelease
+            --notes-file CHANGELOG.md --latest

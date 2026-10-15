@@ -12,7 +12,7 @@ for mode in ('baseline', 'default', 'memo'):
         assert (run['width'], run['height'], run['renderDistance'], run['simulationDistance'], run['vsync']) == (2560, 1440, 16, 8, False)
         assert run['samples'] >= 60
         assert run['mode'] == mode
-        assert run['loadedMods'].get('astfps', '0.1.0-alpha.1') == '0.1.0-alpha.1'
+        assert run['loadedMods'].get('astfps', '1.0.0') == '1.0.0'
 
 summary = {}
 for mode, measurements in runs.items():

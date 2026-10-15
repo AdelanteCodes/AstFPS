@@ -1,2 +1,0 @@
-091789f3ae043393d2ae49dfd118955c9a13a1a2d5ad0ca6313a1dc4d94a289b  AstFPS-0.5.0-dev.6-local.jar
-70eecf4b0483dd93d574644bbdcff1e5157014c65c3503301494cc791d2718fe  AstFPS-0.5.0-dev.6-local-sources.jar

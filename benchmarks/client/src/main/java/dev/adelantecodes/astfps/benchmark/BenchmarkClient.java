@@ -148,7 +148,7 @@ public final class BenchmarkClient implements ClientModInitializer {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("mode", MODE);
         result.put("minecraft", "26.3");
-        result.put("modArtifact", "AstFPS-0.1.0-alpha.1.jar");
+        result.put("modArtifact", "AstFPS-1.0.0.jar");
         result.put("renderDistance", client.options.renderDistance().get());
         result.put("simulationDistance", client.options.simulationDistance().get());
         result.put("width", client.getWindow().getScreenWidth());
